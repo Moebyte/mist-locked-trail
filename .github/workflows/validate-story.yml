@@ -22,6 +22,9 @@ jobs:
       - name: Check story module contract
         run: node scripts/check-story-modules.mjs
 
+      - name: Check save compatibility
+        run: node scripts/check-save-compat.mjs
+
       - name: Validate story graph
         run: node scripts/validate-story.mjs
 

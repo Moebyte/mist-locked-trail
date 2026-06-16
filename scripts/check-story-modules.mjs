@@ -49,6 +49,7 @@ for (const rel of discoveredModules) {
 }
 
 const requiredModules = [
+  'src/story-modules/runtime-contract.js',
   'src/story-modules/consistency.js',
   'src/story-modules/evidence.js',
   'src/story-modules/evidence-polish.js',

@@ -18,11 +18,14 @@ Phase 6 之后，稳定模块已经迁入：
 src/story-modules/
 ```
 
+Phase 7 之后，运行时契约与存档兼容也作为正式模块纳入清单。
+
 ---
 
 ## 当前模块清单
 
 ```text
+src/story-modules/runtime-contract.js
 src/story-modules/consistency.js
 src/story-modules/evidence.js
 src/story-modules/evidence-polish.js
@@ -34,6 +37,7 @@ src/story-modules/ui-responsive.js
 
 | 模块 | 职责 |
 |---|---|
+| `runtime-contract.js` | 存档版本号、旧存档迁移、状态结构校验、安全读写 |
 | `consistency.js` | 修复主线叙事一致性，例如傅启元对峙是否出现老孙支援 |
 | `evidence.js` | 关键举证交互，例如沈玉芳、傅启元举证 |
 | `evidence-polish.js` | 举证体验润色，例如老孙行动举证、周明远情感举证 |
@@ -53,7 +57,7 @@ src/story-modules/ui-responsive.js
 - 结局分流和压力系统可能互相影响；
 - 回归测试定位会变难。
 
-因此 Phase 4 先把模块从“补丁语义”升级为“正式模块语义”。Phase 6 再把稳定模块迁入正式目录，形成清晰边界。
+因此 Phase 4 先把模块从“补丁语义”升级为“正式模块语义”。Phase 6 再把稳定模块迁入正式目录，形成清晰边界。Phase 7 继续把运行时契约纳入模块体系。
 
 ---
 
@@ -80,6 +84,7 @@ Node 测试侧通过 `scripts/story-module-loader.mjs` 读取同一份 `story-mo
 
 如果要继续新增内容，优先放入对应稳定模块：
 
+- 运行时契约 / 存档兼容 → `src/story-modules/runtime-contract.js`
 - 一致性修复 → `src/story-modules/consistency.js`
 - 举证交互 → `src/story-modules/evidence.js`
 - 举证润色 → `src/story-modules/evidence-polish.js`
