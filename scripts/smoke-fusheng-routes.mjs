@@ -40,6 +40,19 @@ function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
 
+function strongHiddenFlags(overrides = {}) {
+  return {
+    rescued_yufang: true,
+    deduced_fusheng: true,
+    fu_waybill_exposed: true,
+    fu_clearance_exposed: true,
+    v07_witnesses_protected: true,
+    v07_lu_confronted: true,
+    zhou_understands_wanting: true,
+    ...overrides,
+  };
+}
+
 test('未举证时，苏州河入口不能直接等老孙带人', () => {
   const rt = runtime();
   rt.renderNode('ch4_suzhou_creek');
@@ -121,19 +134,41 @@ test('完整搜查路线能救出苏晚亭，有限搜查只得到转移痕迹',
   assert(tight.E.routeDockDeepByPressure() === 'ch4_dock_deep_trace', '晚到暗室应只找到苏晚亭转移痕迹');
 });
 
-test('隐藏结局只有救出苏晚亭时才出现苏晚亭来信', () => {
-  const rescued = runtime({ flags: { rescued_su: true, rescued_yufang: true } });
+test('隐藏结局按是否救出苏晚亭拆成两个结局', () => {
+  const rescued = runtime({ flags: strongHiddenFlags({ rescued_su: true }) });
+  assert(rescued.E.v07ResolveEnding() === 'end_conspiracy_detail', '救出苏晚亭应进入雨夜灯火');
+  assert(rescued.nodes.end_conspiracy_detail.title === '结局 · 雨夜灯火', '救出苏晚亭隐藏结局标题应为雨夜灯火');
   const rescuedText = rescued.nodes.end_conspiracy_detail.text();
-  assert(rescuedText.includes('周怀安替苏晚亭送来一封信'), '救出苏晚亭时应由周怀安转交苏晚亭来信');
+  assert(rescuedText.includes('结局九 · 雨夜灯火'), '救出苏晚亭应显示结局九');
   assert(rescuedText.includes('谢谢你先找人，而不是先找凶手。——苏晚亭'), '救出苏晚亭时应保留亲笔感谢句');
 
-  const traced = runtime({ flags: { su_moved_from_dock: true, rescued_yufang: true } });
-  const tracedText = traced.nodes.end_conspiracy_detail.text();
-  assert(tracedText.includes('她没有见过你'), '未救出苏晚亭时应说明她没有见过主角');
+  const traced = runtime({ flags: strongHiddenFlags({ su_moved_from_dock: true }) });
+  assert(traced.E.v07ResolveEnding() === 'end_conspiracy_trace', '未救出苏晚亭但找到转移痕迹应进入雾后回声');
+  assert(traced.nodes.end_conspiracy_trace.title === '结局 · 雾后回声', '转移痕迹隐藏结局标题应为雾后回声');
+  const tracedText = traced.nodes.end_conspiracy_trace.text();
+  assert(tracedText.includes('结局十 · 雾后回声'), '转移痕迹隐藏结局应显示结局十');
   assert(tracedText.includes('暂时不能露面，也不能写信'), '未救出苏晚亭时不应出现她给男主写信');
-  assert(tracedText.includes('等她真正安全那天，再让她自己说吧'), '未救出苏晚亭时感谢应停留在周怀安转述层面');
   assert(!tracedText.includes('——苏晚亭'), '未救出苏晚亭时不应出现苏晚亭署名来信');
-  assert(!tracedText.includes('请替我谢谢那位沈先生'), '未救出苏晚亭时不应出现苏晚亭直接转述感谢');
+});
+
+test('所有结局标题均为四字', () => {
+  const rt = runtime();
+  const expected = {
+    end_refuse: '结局 · 雨声不停',
+    end_archive: '结局 · 无声归档',
+    end_too_late: '结局 · 迟到一步',
+    end_boss_lu: '结局 · 面具之下',
+    end_boss_zhao: '结局 · 提线木偶',
+    end_boss_wu: '结局 · 师者无声',
+    end_conspiracy: '结局 · 迷雾未尽',
+    end_rescue: '结局 · 黎明灯火',
+    end_conspiracy_detail: '结局 · 雨夜灯火',
+    end_conspiracy_trace: '结局 · 雾后回声',
+  };
+  for (const [nodeId, title] of Object.entries(expected)) {
+    assert(rt.nodes[nodeId], `缺少结局节点：${nodeId}`);
+    assert(rt.nodes[nodeId].title === title, `${nodeId} 标题预期 ${title}，实际 ${rt.nodes[nodeId].title}`);
+  }
 });
 
 console.log('Fusheng route smoke reports:');
