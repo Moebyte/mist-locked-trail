@@ -34,7 +34,7 @@
     function earlyRouteChoices() {
       const opts = [];
       if (!E.isUniversityComplete()) opts.push({ text: '📚 去圣约翰大学调查', goto: 'ch2_university' });
-      opts.push({ text: '🏛️ 去法租界 · 薛华立路 22 号', goto: 'ch2_frenchtown' });
+      if (E.hasClue('法租界地图') || E.getFlag('got_wang_note')) opts.push({ text: '🏛️ 去法租界 · 薛华立路 22 号', goto: 'ch2_frenchtown' });
       if (!E.getFlag('got_case_file')) opts.push({ text: '📋 去巡捕房查卷宗', goto: 'ch2_police' });
       if (!E.isHomeComplete()) opts.push({ text: '🏠 去苏家看她母亲', goto: 'ch2_home' });
       return opts;
