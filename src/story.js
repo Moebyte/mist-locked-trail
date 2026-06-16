@@ -270,7 +270,7 @@ ${extra}`;
     choices: (s) => {
       const opts = [];
       if (!E.hasClue('法租界地图')) opts.push({ text: '🔙 回圣约翰大学继续调查', goto: 'ch2_university' });
-      opts.push({ text: '🏛️ 去法租界 · 薛华立路 22 号', goto: 'ch2_frenchtown' });
+      opts.push({ text: '🏛️ 去薛华立路 22 号（地址浮出水面）', goto: 'ch2_frenchtown' });
       opts.push({ text: '📋 去巡捕房查卷宗', goto: 'ch2_police_alt' });
       opts.push({ text: '🏠 去苏家看她母亲', goto: 'ch2_home' });
       return opts;
@@ -326,7 +326,7 @@ ${extra}`;
     effect: (s) => { E.addClue('光华小学事件', '男教师跳楼自杀；备注提到与苏案可能有关'); E.addItem('卷宗摘抄', '苏晚亭失踪案卷宗边缘有铅笔批注：此案与光华小学事件有关联？'); E.addContact('王巡官（已调离）'); E.setFlag('got_case_file', true); },
     choices: [
       { text: '📎 追问王巡官调离前留下了什么', goto: 'ch2_police_wang' },
-      { text: '🏛️ 去薛华立路 22 号——就在同一条街上', goto: 'ch2_frenchtown' },
+      { text: '🏛️ 去薛华立路 22 号——老孙说王巡官查过这里', goto: 'ch2_frenchtown' },
       { text: '🏠 去苏家看她母亲', goto: 'ch2_home' },
     ],
   },
@@ -337,7 +337,7 @@ ${extra}`;
     effect: (s) => { E.addContact('孙国栋探长'); E.addClue('光华小学事件', '男教师跳楼自杀；备注提到与苏案可能有关'); E.addItem('卷宗摘抄', '苏晚亭失踪案卷宗边缘有铅笔批注：此案与光华小学事件有关联？'); E.setFlag('got_case_file', true); },
     choices: [
       { text: '📎 追问王巡官调离前留下了什么', goto: 'ch2_police_wang' },
-      { text: '🏛️ 去薛华立路 22 号', goto: 'ch2_frenchtown' },
+      { text: '🏛️ 去薛华立路 22 号——王巡官的线索指向这里', goto: 'ch2_frenchtown' },
       { text: '🏠 去苏家', goto: 'ch2_home' },
     ],
   },
@@ -376,7 +376,7 @@ ${extra}`;
 老孙把烟盒纸重新推给你。<span class="sys">"拿走吧。我没见过这东西。"</span>`,
     effect: (s) => { E.addClue('王巡官遗留纸条', '光华夜值；福生仓，三日清；别信公董局来的电话'); E.addItem('半张烟盒纸', '王巡官调离前留下的纸条：光华夜值；福生仓，三日清；别信公董局来的电话。'); E.setFlag('got_wang_note', true); },
     choices: [
-      { text: '🏛️ 去薛华立路 22 号', goto: 'ch2_frenchtown' },
+      { text: '🏛️ 去薛华立路 22 号——王巡官的线索指向这里', goto: 'ch2_frenchtown' },
       { text: '🏠 去苏家', goto: 'ch2_home' },
       { text: '📚 去光华小学', goto: 'ch3_school' },
     ],
