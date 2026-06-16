@@ -1,5 +1,5 @@
-// ===== 响应式 UI 与分页线索簿 =====
-// 目标：桌面端常驻右侧信息栏，手机端底部抽屉分页，避免线索簿内容堆叠。
+// ===== 响应式 UI、分页阅读与分页线索簿 =====
+// 目标：桌面端常驻右侧信息栏，手机端底部抽屉分页；场景正文按页阅读，减少上下滑动。
 
 function applyResponsiveStoryUI() {
   if (typeof E === 'undefined' || typeof document === 'undefined') return;
@@ -14,6 +14,8 @@ function applyResponsiveStoryUI() {
   if (!hasRuntimeUI) return;
 
   E.panelTab = E.panelTab || 'overview';
+  E.scenePage = 0;
+  E.scenePages = [];
 
   E.setPanelTab = function (tab) {
     this.panelTab = tab || 'overview';
@@ -38,6 +40,102 @@ function applyResponsiveStoryUI() {
     return state.sceneLog.slice(-12).map(id => nodes[id] ? nodes[id].title : id).filter(Boolean);
   }
 
+  function plainLength(html) {
+    const div = document.createElement('div');
+    div.innerHTML = html;
+    return (div.textContent || div.innerText || '').replace(/\s+/g, '').length;
+  }
+
+  function splitSceneHtml(html) {
+    const isPhone = window.matchMedia && window.matchMedia('(max-width: 640px)').matches;
+    const limit = isPhone ? 190 : 340;
+    const blocks = html
+      .replace(/<br\s*\/?>\s*<br\s*\/?>/gi, '<!--PAGE_BREAK-->')
+      .split('<!--PAGE_BREAK-->')
+      .map(s => s.trim())
+      .filter(Boolean);
+
+    if (blocks.length <= 1 && plainLength(html) <= limit) return [html];
+
+    const pages = [];
+    let current = [];
+    let size = 0;
+
+    for (const block of blocks.length ? blocks : [html]) {
+      const blockSize = Math.max(plainLength(block), 20);
+      if (current.length && size + blockSize > limit) {
+        pages.push(current.join('<br><br>'));
+        current = [block];
+        size = blockSize;
+      } else {
+        current.push(block);
+        size += blockSize;
+      }
+    }
+
+    if (current.length) pages.push(current.join('<br><br>'));
+    return pages.length ? pages : [html];
+  }
+
+  E.renderScenePage = function () {
+    if (!this.scenePages || this.scenePages.length === 0) return;
+    const total = this.scenePages.length;
+    this.scenePage = Math.max(0, Math.min(this.scenePage || 0, total - 1));
+    const isLast = this.scenePage >= total - 1;
+
+    this.textEl.innerHTML = this.scenePages[this.scenePage];
+    this.choicesEl.classList.toggle('choices-hidden', total > 1 && !isLast);
+
+    let pager = document.getElementById('scene-pager');
+    if (!pager) {
+      pager = document.createElement('div');
+      pager.id = 'scene-pager';
+      this.textEl.insertAdjacentElement('afterend', pager);
+    }
+
+    if (total <= 1) {
+      pager.innerHTML = '';
+      pager.style.display = 'none';
+      this.choicesEl.classList.remove('choices-hidden');
+      return;
+    }
+
+    pager.style.display = 'flex';
+    pager.innerHTML = `
+      <button class="scene-page-btn" ${this.scenePage === 0 ? 'disabled' : ''} onclick="E.prevScenePage()">上一页</button>
+      <button class="scene-page-btn primary" onclick="E.nextScenePage()">${isLast ? '查看选择' : '下一页'}</button>
+      <span class="scene-page-indicator">${this.scenePage + 1} / ${total}</span>
+    `;
+  };
+
+  E.nextScenePage = function () {
+    if (!this.scenePages || this.scenePages.length <= 1) return;
+    if (this.scenePage < this.scenePages.length - 1) {
+      this.scenePage += 1;
+      this.renderScenePage();
+      this.sceneEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
+    this.choicesEl.classList.remove('choices-hidden');
+  };
+
+  E.prevScenePage = function () {
+    if (!this.scenePages || this.scenePages.length <= 1) return;
+    if (this.scenePage > 0) {
+      this.scenePage -= 1;
+      this.renderScenePage();
+      this.sceneEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+  E.setupScenePager = function () {
+    if (!this.textEl || !this.choicesEl) return;
+    const html = this.textEl.innerHTML || '';
+    this.scenePages = splitSceneHtml(html);
+    this.scenePage = 0;
+    this.renderScenePage();
+  };
+
   const oldStart = E.start.bind(E);
   E.start = function () {
     document.body.classList.add('game-active');
@@ -57,7 +155,10 @@ function applyResponsiveStoryUI() {
   const oldRenderScene = E.renderScene.bind(E);
   E.renderScene = function (node, nodeId) {
     oldRenderScene(node, nodeId);
-    if (document.body.classList.contains('game-active')) this.renderPanel();
+    if (document.body.classList.contains('game-active')) {
+      this.setupScenePager();
+      this.renderPanel();
+    }
   };
 
   E.renderPanel = function () {
