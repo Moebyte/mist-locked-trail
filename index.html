@@ -71,6 +71,23 @@ body{background:radial-gradient(circle at 50% 0,#17172a 0,#0c0c15 42%,#07070d 10
 .empty{color:#666;font-style:italic;font-size:13px;line-height:1.8}
 .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:40;background:#18182c;border:1px solid #3a4168;color:#d8defa;border-radius:999px;padding:9px 14px;font-size:13px;box-shadow:0 10px 30px rgba(0,0,0,.35);opacity:0;pointer-events:none;transition:.2s}
 .toast.show{opacity:1;bottom:30px}
+/* 推理弹窗 */
+.deduc-btn{background:#1a1a30;border:1px solid #44446a;color:#c0c0d8;padding:12px 16px;border-radius:8px;font-size:14px;cursor:pointer;font-family:inherit;text-align:left;transition:.15s}
+.deduc-btn:hover{background:#282848;border-color:#7777aa;color:#fff;transform:translateX(4px)}
+/* 关系图 */
+.graph-btn-link{background:none;border:none;color:#7d8db8;cursor:pointer;font-family:inherit;font-size:13px;padding:2px 4px;border-bottom:1px dashed #3a4878}
+.graph-btn-link:hover{color:#b0c0e8;border-color:#6a7aa8}
+/* 雨滴动画 */
+@keyframes rainDrop{0%{transform:translateY(-10vh) translateX(0);opacity:0}10%{opacity:.3}100%{transform:translateY(110vh) translateX(-30px);opacity:0}}
+body.w0::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:9998;background-image:radial-gradient(1px 1px at 10% 0%,rgba(200,220,240,.15) 50%,transparent 50%),radial-gradient(1px 1px at 30% 0%,rgba(200,220,240,.12) 50%,transparent 50%),radial-gradient(1px 1px at 50% 0%,rgba(200,220,240,.1) 50%,transparent 50%),radial-gradient(1px 1px at 70% 0%,rgba(200,220,240,.14) 50%,transparent 50%),radial-gradient(1px 1px at 90% 0%,rgba(200,220,240,.11) 50%,transparent 50%);background-size:100% 100%;background-repeat:no-repeat;animation:rainDrop 1.2s linear infinite}
+body.w1::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9998;background:radial-gradient(ellipse at 30% 50%,rgba(160,180,200,.03) 0%,transparent 60%)}
+/* 年代滤镜 */
+body.vintage::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9998;background:radial-gradient(ellipse at 50% 50%,transparent 50%,rgba(140,100,50,.08) 100%);mix-blend-mode:multiply}
+/* 亮度过渡 */
+body{transition:background 1.2s}
+/* 场景卡片入场动画 */
+#scene-card{animation:cardIn .35s ease-out}
+@keyframes cardIn{from{opacity:.3;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 @media(max-width:520px){
   #app{padding:12px 12px 92px}
   #scene-card{padding:16px}
@@ -91,9 +108,11 @@ body{background:radial-gradient(circle at 50% 0,#17172a 0,#0c0c15 42%,#07070d 10
   </div>
   <div id="top-actions">
     <button class="tool-btn primary" id="btn-panel">线索簿</button>
+    <button class="tool-btn" id="btn-graph">人物图</button>
     <button class="tool-btn" id="btn-save">存档</button>
     <button class="tool-btn" id="btn-load">读档</button>
     <button class="tool-btn" id="btn-restart">重开</button>
+    <button class="tool-btn" id="btn-atmo">🎨 氛围</button>
   </div>
   <div id="log"></div>
   <div id="scene-card">
@@ -108,6 +127,7 @@ body{background:radial-gradient(circle at 50% 0,#17172a 0,#0c0c15 42%,#07070d 10
     <span class="stat"><span class="l">🎒</span><span class="v" id="s-items">0</span></span>
     <span class="stat"><span class="l">📇</span><span class="v" id="s-contacts">—</span></span>
     <span class="stat"><span class="l">⏳</span><span class="v" id="s-chapter">—</span></span>
+    <span class="stat"><span class="l">🌤</span><span class="v" id="s-atmo"></span></span>
   </div>
 </div>
 <div id="side-panel" aria-hidden="true">
@@ -121,10 +141,32 @@ body{background:radial-gradient(circle at 50% 0,#17172a 0,#0c0c15 42%,#07070d 10
   </div>
 </div>
 <div class="toast" id="toast"></div>
+
+<!-- 推理弹窗 -->
+<div id="deduction-modal" style="display:none;position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.7);align-items:center;justify-content:center;padding:20px">
+  <div style="background:#0f0f1e;border:1px solid #3a3a58;border-radius:12px;max-width:500px;width:100%;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,.5)">
+    <h3 id="deduc-title" style="color:#c8a87c;font-size:17px;margin-bottom:16px;letter-spacing:2px">推理</h3>
+    <div class="deduc-question" style="color:#d0d0da;font-size:15px;line-height:1.8;margin-bottom:16px"></div>
+    <div class="deduc-options" style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px"></div>
+    <button id="close-deduction" class="tool-btn" style="margin-top:8px">暂不推理</button>
+  </div>
+</div>
+
+<!-- 关系图弹窗 -->
+<div id="graph-panel" style="display:none;position:fixed;inset:0;z-index:45;background:rgba(0,0,0,.6);align-items:center;justify-content:center;padding:20px">
+  <div style="background:#0d0d1a;border:1px solid #303052;border-radius:12px;max-width:480px;width:100%;padding:20px;box-shadow:0 20px 60px rgba(0,0,0,.5)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <h3 style="color:#c8a87c;font-size:17px;letter-spacing:2px;font-weight:normal">人物关系图</h3>
+      <button id="close-graph" class="tool-btn">关闭</button>
+    </div>
+    <svg class="graph-svg" viewBox="0 0 400 300" style="width:100%;height:auto;background:#0a0a14;border-radius:8px"></svg>
+    <div id="graph-mask" style="display:none"></div>
+  </div>
+</div>
 <script>
 // ===== 引擎 =====
 const E = {
-  saveKey: 'wusuo_mizong_save_v2',
+  saveKey: 'wusuo_mizong_save_v3',
   state: null,
   logEl: null,
   sceneEl: null,
@@ -132,6 +174,21 @@ const E = {
   textEl: null,
   choicesEl: null,
   toastEl: null,
+  deducEl: null,
+  graphEl: null,
+
+  // 氛围系统
+  weathers: ['秋雨绵绵','阴云低垂','薄雾笼街','雨后初晴','暮色昏黄','冷月清辉'],
+  periods: ['清晨','上午','正午','午后','傍晚','入夜','深夜'],
+
+  // 关系图
+  relationData: {
+    nodes: [],
+    edges: []
+  },
+
+  // 推理题目
+  deductions: [],
 
   freshState() {
     return {
@@ -143,7 +200,10 @@ const E = {
       sceneLog: [],
       currentScene: null,
       visitedNodes: {},
-      endings: []
+      endings: [],
+      inGameTime: { day:1, hour:14, minute:0 },
+      weatherIdx: 0,
+      atmosphere: '秋雨绵绵的午后',
     };
   },
 
@@ -168,6 +228,16 @@ const E = {
     document.getElementById('btn-restart').onclick = () => {
       if (confirm('确定重新开始本轮调查？已解锁结局会保留在存档里。')) this.start();
     };
+    document.getElementById('btn-atmo').onclick = () => {
+      document.body.classList.toggle('vintage');
+      this.toast(document.body.classList.contains('vintage') ? '年代滤镜已开启' : '年代滤镜已关闭');
+    };
+    this.deducEl = document.getElementById('deduction-modal');
+    this.graphEl = document.getElementById('graph-panel');
+    document.getElementById('btn-graph').onclick = () => this.openGraph();
+    document.getElementById('close-graph').onclick = () => this.closeGraph();
+    document.getElementById('graph-mask').onclick = () => this.closeGraph();
+    document.getElementById('close-deduction').onclick = () => this.closeDeduction();
     if (localStorage.getItem(this.saveKey)) document.getElementById('continue-btn').style.display = 'inline-block';
     this.updateStatus();
   },
@@ -176,12 +246,45 @@ const E = {
     const oldEndings = this.readSavedEndings();
     this.state = this.freshState();
     this.state.endings = oldEndings;
+    this.relationData = {nodes:[], edges:[]};
+    this.deductions = [];
+    this.registerAll();
     this.logEl.innerHTML = '';
     this.logEl.style.display = 'block';
     this.sceneEl.style.display = 'block';
     document.getElementById('top-actions').style.display = 'flex';
     document.getElementById('status-bar').style.display = 'flex';
     this.go('ch1_open');
+  },
+
+  registerAll() {
+    // ── 注册关系 ──
+    this.registerRelation('苏晚亭',['圣约翰大学学生','失踪者'],[]);
+    this.registerRelation('周明远',['商务印书馆编辑','委托者'],['苏晚亭']);
+    this.registerRelation('孙国栋',['法租界巡捕房探长'],['苏晚亭']);
+    this.registerRelation('苏母',['苏晚亭母亲'],['苏晚亭']);
+    this.registerRelation('陈明远',['光华小学教师','已故'],['苏晚亭','苏晚亭']);
+    this.registerRelation('沈玉芳',['光华小学教师','失踪者'],['陈明远','苏晚亭']);
+    this.registerRelation('沈玉兰',['沈玉芳姐姐'],['沈玉芳','陈明远']);
+    this.registerRelation('陆小姐',['薛华立路203室','知情人'],['陈明远','苏晚亭']);
+    this.registerRelation('吴校长',['光华小学校长'],['陈明远','沈玉芳']);
+    this.registerRelation('黑衣男人',['身份不明','戴玉扳指'],['陆小姐','沈玉兰']);
+
+    // ── 注册推理题 ──
+    this.registerDeduction(
+      'deduce_chen',
+      '陈明远的真正死因最有可能是？',
+      [
+        'A. 因愧对学生而自杀',
+        'B. 被陆小姐灭口——他发现了她的真实身份',
+        'C. 被吴校长灭口——他发现学校有非法交易',
+        'D. 因情感纠葛被蘇晚亭牵连'
+      ],
+      1,
+      'deduc_success',
+      'deduc_fail',
+      ['陈明远坠楼案','恐吓信','陆小姐的笔记','陈明远的信']
+    );
   },
 
   logNarration(text) {
@@ -200,9 +303,28 @@ const E = {
 
   chapterBreak(title, subtitle) {
     const d = document.createElement('div'); d.className = 'entry';
-    d.innerHTML = `<div class="chapter-title">${title}<small>${subtitle||''}</small></div>`;
+    let sub = subtitle || '';
+    if (this.state.atmosphere) sub += (sub ? ' · ' : '') + `<span style="color:#6f8a9a">${this.state.atmosphere}</span>`;
+    d.innerHTML = `<div class="chapter-title">${title}<small>${sub}</small></div>`;
     this.logEl.appendChild(d);
     this.scroll();
+  },
+
+  ambientLine() {
+    const a = this.state.atmosphere;
+    const lines = {
+      '秋雨绵绵': '檐水滴滴答答地敲着青石板。',
+      '阴云低垂': '云压得很低，像一床灰棉被罩在上海头顶。',
+      '薄雾笼街': '雾从苏州河那边漫过来，路灯变成一圈模糊的光晕。',
+      '雨后初晴': '雨刚停，路面还泛着水光，空气里有一种干净的凉意。',
+      '暮色昏黄': '太阳收走了最后一丝光，法租界的霓虹灯次第亮起。',
+      '冷月清辉': '月亮悬在屋顶上方，清冷的光把影子拉得很长。',
+      '深夜': '街上没什么人了，偶尔一辆黄包车碾过水洼，声音传得很远。'
+    };
+    const hint = lines[a] || '';
+    if (hint) {
+      this.logNarration(`<span style="color:#6a7a8a;font-size:13px">${hint}</span>`);
+    }
   },
 
   scroll() {
@@ -218,7 +340,16 @@ const E = {
       this.state.visitedNodes[nodeId] = (this.state.visitedNodes[nodeId] || 0) + 1;
     }
     if (node.effect) node.effect(this.state);
-    this.titleEl.textContent = node.title || '';
+    if (node.time) { this.setTime(node.time.d, node.time.h, node.time.m); }
+    if (node.weather !== undefined) {
+      const oldWeather = this.state.weatherIdx;
+      this.setWeather(node.weather);
+      this.applyWeatherClass();
+      if (nodeId && nodeId !== 'ch1_open' && this.state.visitedNodes[nodeId] <= 1) {
+        this.ambientLine();
+      }
+    }
+    this.titleEl.textContent = node.title ? node.title + '  ' + this.atmosphereTag() : '';
     this.textEl.innerHTML = this.resolveText(node);
     this.choicesEl.innerHTML = '';
     if (node.type === 'end') {
@@ -386,6 +517,168 @@ const E = {
     }
   },
 
+  // ── 氛围系统 ──
+  setTime(day, hour, minute) {
+    this.state.inGameTime = { day:day||1, hour:hour||14, minute:minute||0 };
+  },
+
+  advanceTime(hours, minutes) {
+    const t = this.state.inGameTime;
+    t.minute += minutes || 0;
+    t.hour += hours || 0;
+    while (t.minute >= 60) { t.minute -= 60; t.hour++; }
+    if (t.hour >= 24) { t.hour -= 24; t.day++; }
+  },
+
+  setWeather(idx) {
+    this.state.weatherIdx = idx;
+    this.state.atmosphere = this.renderAtmosphere();
+  },
+
+  renderAtmosphere() {
+    const t = this.state.inGameTime;
+    const periodIdx = t.hour < 6 ? 6 : t.hour < 8 ? 0 : t.hour < 11 ? 1 : t.hour < 13 ? 2 : t.hour < 16 ? 3 : t.hour < 18 ? 4 : t.hour < 21 ? 5 : 6;
+    const period = this.periods[periodIdx];
+    const weather = this.weathers[this.state.weatherIdx];
+    return `${period}，${weather}`;
+  },
+
+  atmosphereTag() {
+    const a = this.state.atmosphere;
+    return `<span style="color:#6f8a9a;font-size:13px">【 ${a} 】</span>`;
+  },
+
+  applyWeatherClass() {
+    const w = this.state.weatherIdx;
+    document.body.className = 'w' + w;
+  },
+
+  // ── 推理拼图 ──
+  registerDeduction(id, question, options, correctIdx, successNode, failNode, requiredClues) {
+    this.deductions.push({id, question, options, correctIdx, successNode, failNode, requiredClues, solved:false});
+  },
+
+  canDeduce(id) {
+    const d = this.deductions.find(d => d.id === id);
+    if (!d || d.solved) return false;
+    return d.requiredClues.every(c => this.hasClue(c));
+  },
+
+  openDeduction(id) {
+    const d = this.deductions.find(d => d.id === id);
+    if (!d) return;
+    if (d.solved) return this.toast('你已经推理过这一环了。');
+    const missing = d.requiredClues.filter(c => !this.hasClue(c));
+    if (missing.length > 0) {
+      this.toast('你还没有掌握足够的线索来推理这一环。');
+      return;
+    }
+    // Render deduction UI
+    this.deducEl.querySelector('.deduc-question').textContent = d.question;
+    const optContainer = this.deducEl.querySelector('.deduc-options');
+    optContainer.innerHTML = '';
+    d.options.forEach((opt, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'deduc-btn';
+      btn.textContent = opt;
+      btn.onclick = () => this.submitDeduction(d.id, i);
+      optContainer.appendChild(btn);
+    });
+    document.getElementById('deduc-title').textContent = '推理 —— ' + d.question.replace(/[？?]$/,'');
+    this.deducEl.style.display = 'flex';
+  },
+
+  submitDeduction(id, chosenIdx) {
+    const d = this.deductions.find(d => d.id === id);
+    if (!d) return;
+    this.deducEl.style.display = 'none';
+    if (chosenIdx === d.correctIdx) {
+      d.solved = true;
+      this.toast('✅ 推理正确！拼图又完整了一块。');
+      this.go(d.successNode);
+    } else {
+      this.toast('❌ 推理有误——证据不足以支持这个判断。故事继续，但这条路可能错过了什么。');
+      this.go(d.failNode);
+    }
+  },
+
+  closeDeduction() {
+    this.deducEl.style.display = 'none';
+  },
+
+  // ── 关系图 ──
+  registerRelation(person, labels, connectsTo) {
+    if (!this.relationData.nodes.find(n => n.id === person)) {
+      this.relationData.nodes.push({id:person, labels:labels||[], discovered:false});
+    }
+    if (connectsTo) {
+      connectsTo.forEach(target => {
+        if (!this.relationData.edges.find(e => (e.from === person && e.to === target) || (e.from === target && e.to === person))) {
+          this.relationData.edges.push({from:person, to:target, revealed:false});
+        }
+      });
+    }
+  },
+
+  discoverRelation(person) {
+    const n = this.relationData.nodes.find(n => n.id === person);
+    if (n) n.discovered = true;
+    this.relationData.edges.forEach(e => {
+      const fromDisc = this.relationData.nodes.find(n => n.id === e.from)?.discovered;
+      const toDisc = this.relationData.nodes.find(n => n.id === e.to)?.discovered;
+      if (fromDisc && toDisc) e.revealed = true;
+    });
+  },
+
+  openGraph() {
+    this.renderGraph();
+    this.graphEl.style.display = 'flex';
+  },
+
+  closeGraph() {
+    this.graphEl.style.display = 'none';
+  },
+
+  renderGraph() {
+    const svg = this.graphEl.querySelector('.graph-svg');
+    if (!svg) return;
+    const nodes = this.relationData.nodes.filter(n => n.discovered);
+    const edges = this.relationData.edges.filter(e => e.revealed);
+    if (nodes.length === 0) {
+      svg.innerHTML = '<text x="200" y="160" fill="#666" font-size="14" text-anchor="middle">还没有建立人物关系。</text>';
+      return;
+    }
+    const cx = 200, cy = 150, r = Math.min(110, 60 + nodes.length * 20);
+    const angleStep = nodes.length > 1 ? 2 * Math.PI / nodes.length : 0;
+    const positions = {};
+    nodes.forEach((n, i) => {
+      const angle = angleStep * i - Math.PI / 2;
+      const x = cx + r * Math.cos(angle);
+      const y = cy + r * Math.sin(angle);
+      positions[n.id] = {x, y};
+    });
+    let svgContent = '';
+    // Edges
+    edges.forEach(e => {
+      const from = positions[e.from];
+      const to = positions[e.to];
+      if (from && to) {
+        svgContent += `<line x1="${from.x}" y1="${from.y}" x2="${to.x}" y2="${to.y}" stroke="#334" stroke-width="1.5" opacity="0.5"/>`;
+      }
+    });
+    // Nodes
+    nodes.forEach(n => {
+      const p = positions[n.id];
+      if (!p) return;
+      const label = `${n.id}\n${n.labels.join(' · ')}`;
+      svgContent += `<g>"`;
+      svgContent += `<circle cx="${p.x}" cy="${p.y}" r="22" fill="#1a1a2e" stroke="#c8a87c" stroke-width="1.5" opacity="0.9"/>`;
+      svgContent += `<text x="${p.x}" y="${p.y + 4}" fill="#d0d0da" font-size="10" text-anchor="middle" dominant-baseline="middle">${n.id.slice(0,3)}</text>`;
+      svgContent += `</g>`;
+    });
+    svg.innerHTML = svgContent;
+  },
+
   caseStrength() {
     const n = this.state.clues.length;
     if (n >= 13) return {name:'证据成链', desc:'关键人物、地点与动机已经能互相印证。'};
@@ -412,11 +705,12 @@ const E = {
     const contacts = this.state.contacts.map(c => `<div class="clue-card">${c}</div>`).join('') || '<div class="empty">还没有可追踪的人物。</div>';
     const route = this.state.sceneLog.slice(-10).map(id => nodes[id] ? nodes[id].title : id).join(' → ') || '尚未开始';
     const endings = this.state.endings.map(e => `<div class="clue-card"><b>${e.title}</b><br>${new Date(e.at).toLocaleString('zh-CN')}</div>`).join('') || '<div class="empty">还没有解锁结局。</div>';
+    const graphCount = this.relationData.nodes.filter(n => n.discovered).length;
     document.getElementById('panel-content').innerHTML = `
       <div class="panel-section"><h3>案情判断</h3><div class="clue-card"><b>${strength.name}</b><br>${strength.desc}</div></div>
       <div class="panel-section"><h3>关键线索（${this.state.clues.length}）</h3>${clues}</div>
       <div class="panel-section"><h3>随身物品（${this.state.items.length}）</h3>${items}</div>
-      <div class="panel-section"><h3>人物关系（${this.state.contacts.length}）</h3>${contacts}</div>
+      <div class="panel-section"><h3>人物关系（${this.state.contacts.length}） <button class="tool-btn" onclick="E.openGraph()" style="float:right;font-size:11px;padding:3px 8px">查看关系图</button></h3>${contacts}<p style="color:#556;font-size:12px;margin-top:4px">已发现 ${graphCount}/${this.relationData.nodes.length} 位人物</p></div>
       <div class="panel-section"><h3>最近足迹</h3><div class="clue-card">${route}</div></div>
       <div class="panel-section"><h3>结局记录（${this.state.endings.length}/6）</h3>${endings}</div>
     `;
@@ -437,6 +731,8 @@ const E = {
     document.getElementById('s-contacts').textContent = this.state.contacts.length || '—';
     const chNames = ['','序幕·委托','第一章·现场','第二章·走访','第三章·卷宗','终章·真相'];
     document.getElementById('s-chapter').textContent = chNames[this.state.chapter] || '—';
+    const atm = this.state.atmosphere || '';
+    document.getElementById('s-atmo').textContent = atm;
   }
 };
 
@@ -445,6 +741,8 @@ const nodes = {
   // —— 序幕 ——
   ch1_open: {
     title: '民国三十七年 · 暮秋 · 上海',
+    time: {d:1, h:14, m:30},
+    weather: 0,
     text: () => `秋雨连绵的午后，你坐在霞飞路一家叫"听雨"的茶馆里。
 
 茶凉了第三泡的时候，一个穿灰色长衫的中年人推门进来。他环顾一圈，径直走向你的桌子，在你对面坐下。
@@ -494,6 +792,13 @@ const nodes = {
 
   ch1_take: {
     title: '接案',
+    weather: 0,
+    effect: (s) => {
+      E.registerRelation('苏晚亭',['圣约翰大学学生','失踪者'],[]);
+      E.discoverRelation('苏晚亭');
+      E.registerRelation('周明远',['商务印书馆编辑','委托者'],['苏晚亭']);
+      E.discoverRelation('周明远');
+    },
     text: () => `你把银元收好，将照片揣进大衣内袋。
 
 <span class="sys">"我会找到她的。"</span>
@@ -515,6 +820,8 @@ const nodes = {
   // —— 第一章 · 现场 ——
   ch2_university: {
     title: '圣约翰大学',
+    time: {d:1, h:15, m:0},
+    weather: 0,
     text: (s) => {
       let extra = '';
       if (E.hasClue('黑衣男人')) extra += '\n\n你记起周明远说的黑衣男人——你要找门房聊聊。';
@@ -609,6 +916,8 @@ ${extra}`;
   // —— 巡捕房 ——
   ch2_police: {
     title: '上海法租界巡捕房',
+    time: {d:1, h:16, m:0},
+    weather: 1,
     text: () => `巡捕房坐落在薛华立路上，灰扑扑的建筑，门口挂着青天白日旗。
 
 你认识这里的一个探长——<b>老孙</b>，孙国栋，跟你打过几次交道。他正坐在办公桌前抽烟，看到你来了也不意外。
@@ -620,7 +929,7 @@ ${extra}`;
 <span class="sys">"苏晚亭的案子。说实话，没什么东西。女学生失踪，十有八九是自己跑了——但周明远不死心，我也不能拦着他花钱。"</span>
 
 你翻开卷宗。`,
-    effect: (s) => { E.addContact('孙国栋探长'); E.setFlag('met_police', true); },
+    effect: (s) => { E.addContact('孙国栋探长'); E.discoverRelation('孙国栋'); E.setFlag('met_police', true); },
     choices: [
       { text: '📖 仔细翻看卷宗', goto: 'ch2_police_file' },
     ],
@@ -698,6 +1007,8 @@ ${extra}`;
   // —— 苏家 ——
   ch2_home: {
     title: '苏家',
+    time: {d:1, h:17, m:30},
+    weather: 0,
     text: () => `苏晚亭的家在闸北一条狭窄的弄堂里。青石板路面湿漉漉的，墙根长着青苔。
 
 你敲开门。苏母是个五十多岁的妇人，坐在轮椅上，腿上盖着一条薄毯。她脸色苍白，但眼神清亮。
@@ -707,7 +1018,7 @@ ${extra}`;
 屋里很小，但收拾得干净。墙上挂着一张全家福——苏晚亭大约十五六岁的时候，站在一个中年男人身边，笑得很灿烂。那大概是她父亲，已经过世了。
 
 苏母给你倒了一杯茶。`,
-    effect: (s) => { E.addContact('苏母'); },
+    effect: (s) => { E.addContact('苏母'); E.discoverRelation('苏母'); },
     choices: [
       { text: '💬 问苏晚亭最近的情况', goto: 'ch2_home_talk' },
       { text: '🖼️ 注意墙上的照片', goto: 'ch2_home_photo' },
@@ -784,6 +1095,8 @@ ${extra}`;
   // —— 法租界 · 薛华立路 22 号 ——
   ch2_frenchtown: {
     title: '薛华立路 22 号',
+    time: {d:1, h:19, m:0},
+    weather: 4,
     text: () => `薛华立路是法租界的主干道，两旁是高大的法国梧桐。
 
 22 号是一栋灰色的三层小楼，底楼是一家挂着"永兴贸易商行"招牌的店铺，看起来半死不活的。二楼三楼看起来像是民宅。
@@ -871,7 +1184,7 @@ ${extra}`;
 <span class="sys">"我妹妹。她失踪了。两个月前，不见了。"</span>
 
 你心里一震。`,
-    effect: (s) => { E.addContact('沈玉兰'); E.addClue('沈玉兰的妹妹', '也失踪了，两个月前；她雇了赵姓男子调查'); E.setFlag('talked_to_woman', true); },
+    effect: (s) => { E.addContact('沈玉兰'); E.discoverRelation('沈玉兰'); E.addClue('沈玉兰的妹妹', '也失踪了，两个月前；她雇了赵姓男子调查'); E.setFlag('talked_to_woman', true); },
     choices: [
       { text: '💬 详细问她妹妹的事', goto: 'ch2_woman_detail' },
       { text: '🏛️ 留个联系方式，先回去搜 22 号', goto: 'ch2_building_enter' },
@@ -973,7 +1286,7 @@ ${extra}`;
 <span class="sys">"光华——不可说——陈——对不起"</span>
 
 你的心跳加速了。光华—陈—对不起。光华小学的陈老师。`,
-    effect: (s) => { E.addClue('陆小姐的笔记', '"光华——不可说——陈——对不起"'); E.setFlag('searched_203', true); E.addContact('陆小姐（在逃）'); },
+    effect: (s) => { E.addClue('陆小姐的笔记', '"光华——不可说——陈——对不起"'); E.setFlag('searched_203', true); E.addContact('陆小姐（在逃）'); E.discoverRelation('陆小姐'); },
     choices: [
       { text: '📖 仔细搜查房间', goto: 'ch2_203_search' },
       { text: '📚 去光华小学——必须查陈老师的事', goto: 'ch3_school' },
@@ -1006,6 +1319,8 @@ ${extra}`;
   // —— 第二章 · 光华小学 ——
   ch3_school: {
     title: '光华小学',
+    time: {d:2, h:9, m:0},
+    weather: 2,
     text: (s) => {
       let extra = '';
       if (E.getFlag('talked_to_woman')) extra += '\n\n沈玉芳也在这里教书——她的失踪跟这一切有没有关系？';
@@ -1019,7 +1334,7 @@ ${extra}`;
 
 <span class="sys">"陈老师的事……已经结案了。自杀，巡捕房认定的。"</span>${extra}`;
     },
-    effect: (s) => { E.addContact('吴校长'); s.chapter = 3; },
+    effect: (s) => { E.addContact('吴校长'); E.discoverRelation('吴校长'); s.chapter = 3; },
     choices: [
       { text: '💬 问陈老师的事', goto: 'ch3_school_teacher' },
       { text: '💬 问沈玉芳的事', when: (s) => E.getFlag('sister_case'), hint: '你还不知道沈玉芳这条线。先去茶楼接触沈玉兰。', goto: 'ch3_school_yufang' },
@@ -1074,7 +1389,7 @@ ${extra}`;
 <span class="sys">"校长，你觉得他是自杀吗？"</span>
 
 吴校长摘下眼镜擦了擦。<span class="sys">"巡捕房说是。但我跟陈老师共事五年——他不是那种人。他出事前一周，我还跟他谈过话，说下学期让他当年级组长。他很高兴。一个准备升职的人，为什么要自杀？"</span>`,
-    effect: (s) => { E.addClue('陈明远坠楼案', '遗书称"做了不可原谅的事"；校长不信是自杀'); E.setFlag('asked_about_chen', true); },
+    effect: (s) => { E.addClue('陈明远坠楼案', '遗书称"做了不可原谅的事"；校长不信是自杀'); E.discoverRelation('陈明远'); E.setFlag('asked_about_chen', true); },
     choices: [
       { text: '💬 问陈老师跟苏晚亭的关系', goto: 'ch3_school_chen_su' },
       { text: '💬 问学校有没有其他异常', goto: 'ch3_school_weird' },
@@ -1179,6 +1494,8 @@ ${extra}`;
 
   ch3_wrapup: {
     title: '线索整理',
+    time: {d:2, h:11, m:30},
+    weather: 3,
     text: (s) => {
       const clues = s.clues.map(c => `• ${c.name}：${c.desc}`).join('\n');
       return `你在办公室里坐了一会儿，把所有线索串起来。
@@ -1194,6 +1511,9 @@ ${clues || '暂时还没有关键线索。'}
     choices: (s) => {
       const opts = [];
       if (E.getFlag('got_case_file') && !E.getFlag('got_wang_note')) opts.push({ text: '📎 回巡捕房追查王巡官的批注', goto: 'ch2_police_wang' });
+      if (E.canDeduce('deduce_chen') && !E.getFlag('deduced_chen') && !E.getFlag('deduced_wrong')) {
+        opts.push({ text: '🧩 拼合线索——推理陈明远之死', effect: (s) => { E.openDeduction('deduce_chen'); } });
+      }
       opts.push({ text: '🏛️ 去当铺——查当票上的翡翠镯', goto: 'ch4_pawnshop' });
       opts.push({ text: '🔙 回顾所有证据，做出推断', goto: 'ch4_conclusion' });
       return opts;
@@ -1228,6 +1548,8 @@ ${clues || '暂时还没有关键线索。'}
 
   ch4_conclusion: {
     title: '真相的边缘',
+    time: {d:2, h:19, m:0},
+    weather: 5,
     text: (s) => {
       const strength = E.caseStrength();
       return `你回到自己的事务所，把所有材料铺在桌上。
@@ -1281,6 +1603,50 @@ ${strength.desc}
 
 <div style="color:#666;font-style:italic;margin-top:20px">—— 结局零 · 无声归档 ——</div>`,
     type: 'end',
+  },
+
+  deduc_success: {
+    title: '推理 · 拼图合拢',
+    weather: 0,
+    effect: (s) => { E.setFlag('deduced_chen', true); E.addClue('推理结论：陈明远被灭口', '他发现了陆念薇潜伏在法租界的真实身份，选择了沉默——但沉默没有换来安全。'); },
+    text: () => `你把所有线索摊在桌上。
+
+恐吓信、当票、薛华立路203室的笔记本、苏晚亭的眼泪、陈明远不敢寄出的信……
+
+它们指向同一个方向。
+
+<b>陈明远发现了陆念薇的真实身份。</b>那个住在薛华立路、自称法文翻译的女人，是一个在逃的通缉犯——五年前在杭州犯下诈骗案，改名换姓逃到上海，在法租界的灰色地带重操旧业。
+
+陈明远没有报警。他给了她一条生路。
+
+但他的善良没有换来同样的善意。陆念薇用一封恐吓信让他闭嘴——永久地。
+
+而苏晚亭，因为陈明远在出事前把所有真相都告诉了她，成了下一个目标。
+
+窗外的雨不知什么时候停了。夜雾从法租界的街道上缓缓升起，像一层薄薄的纱。
+
+你点燃一支烟，看着烟雾在灯下飘散。
+
+你已经触摸到了真相的形状。现在剩下的，是决定怎么收场。`,
+    choices: [
+      { text: '🔙 带着这个判断继续调查', goto: 'ch3_wrapup' },
+    ],
+  },
+
+  deduc_fail: {
+    title: '推理 · 岔路',
+    weather: 0,
+    effect: (s) => { E.setFlag('deduced_wrong', true); },
+    text: () => `你盯着桌上的证据看了很久。
+
+这些碎片缺了一块最重要的——你还不能确定陈明远为什么必须死。是陆小姐？还是另有其人？
+
+你的直觉说这件事背后还有更多你没有看到的东西。也许回到巡捕房查一查福生仓那条线，或者再去一趟薛华立路，会有新的发现。
+
+你收起桌上的证据。调查还没有结束。`,
+    choices: [
+      { text: '🔙 继续调查', goto: 'ch3_wrapup' },
+    ],
   },
 
   end_boss_lu: {
