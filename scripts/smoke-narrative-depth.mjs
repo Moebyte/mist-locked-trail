@@ -121,15 +121,25 @@ function choicesOf(id) {
   return Array.isArray(choices) ? choices : [];
 }
 
-function goByTarget(target) {
-  const current = E.state.currentScene;
-  const choice = choicesOf(current).find(c => c.goto === target || (typeof c.goto === 'function' && c.goto(E.state) === target));
-  if (!choice) throw new Error(`在 ${current} 找不到通往 ${target} 的选项`);
-  if (choice.when && !choice.when(E.state)) throw new Error(`通往 ${target} 的选项条件未满足`);
+function runChoice(choice, expectedText = '选项') {
+  if (!choice) throw new Error(`找不到${expectedText}`);
+  if (choice.when && !choice.when(E.state)) throw new Error(`${expectedText} 条件未满足`);
   if (typeof choice.effect === 'function') choice.effect(E.state);
   const next = typeof choice.goto === 'function' ? choice.goto(E.state) : choice.goto;
   renderNode(next);
   return next;
+}
+
+function goByTarget(target) {
+  const current = E.state.currentScene;
+  const choice = choicesOf(current).find(c => c.goto === target || (typeof c.goto === 'function' && c.goto(E.state) === target));
+  return runChoice(choice, `通往 ${target} 的选项`);
+}
+
+function goByText(textFragment) {
+  const current = E.state.currentScene;
+  const choice = choicesOf(current).find(c => c.text && c.text.includes(textFragment));
+  return runChoice(choice, `包含「${textFragment}」的选项`);
 }
 
 function assertFlag(flag, value = true) {
@@ -171,7 +181,7 @@ function testHighQualityNaturalEnding() {
   assertFlag('v07_lu_confronted');
   goByTarget('ch4_fu_private_offer');
   assertFlag('v07_lu_statement');
-  goByTarget('ch4_conclusion');
+  goByText('拒绝交易');
   assertFlag('v07_rejected_fu_deal');
   const quality = E.v07InvestigationQuality();
   if (quality.score < 10) throw new Error(`高质量路线分数过低：${quality.score}`);
