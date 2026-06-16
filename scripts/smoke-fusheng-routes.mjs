@@ -106,6 +106,7 @@ test('调齐人手路线会耗时、封控，并留下码头记录', () => {
   rt.renderNode('ch4_dock_escape');
   const texts = choiceTexts(rt, 'ch4_dock_escape');
   assert(texts.some(text => text.includes('封住码头')), '调齐人手后应出现封住码头选项');
+  assert(!texts.some(text => text.includes('亮明身份')), '调齐人手后不应再出现弱一级的亮明身份选项');
   rt.goByText('封住码头');
   assert(rt.E.getFlag('dock_blockade_record'), '傅启元对峙后没有留下码头封锁记录');
 });
