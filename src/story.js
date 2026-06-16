@@ -269,6 +269,7 @@ ${extra}`;
       return `你把线索整理了一下。${summary}\n\n${transition}你心里的图还缺太多拼图块。\n\n去哪？`;
     },
     choices: [
+      { text: '🔙 回圣约翰大学继续调查', when: (s) => !E.hasClue('法租界地图'), goto: 'ch2_university' },
       { text: '🏛️ 去法租界 · 薛华立路 22 号', goto: 'ch2_frenchtown' },
       { text: '📋 去巡捕房查卷宗', effect: (s) => {}, goto: 'ch2_police_alt' },
       { text: '🏠 去苏家看她母亲', effect: (s) => {}, goto: 'ch2_home' },
