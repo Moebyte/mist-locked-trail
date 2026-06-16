@@ -12,7 +12,8 @@
     'src/story-modules/causal-echo.js',
     'src/story-modules/ui-responsive.js',
     'src/story-modules/region-gates.js',
-    'src/story-modules/fusheng-choice-polish.js'
+    'src/story-modules/fusheng-choice-polish.js',
+    'src/story-modules/status-polish.js'
   ];
 
   window.MLT_STORY_MODULES = modules.slice();
