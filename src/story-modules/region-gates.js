@@ -101,8 +101,80 @@
       return appendHubChoice(schoolChoices(), '🔙 回到校长办公室继续调查', 'ch3_school');
     }
 
+    function currentHeat() {
+      return E.state.pressure?.heat || 0;
+    }
+
+    function heatPenalty() {
+      const heat = currentHeat();
+      if (heat >= 6) return 2;
+      if (heat >= 4) return 1;
+      return 0;
+    }
+
     function sunSupportPresentAtDock() {
       return E.getFlag('sun_fast_support') || E.getFlag('sun_wait_support') || E.getFlag('sun_support_in_action');
+    }
+
+    function adjustedDockPhase(basePhase) {
+      const phases = ['safe', 'tight', 'critical', 'expired'];
+      const start = Math.max(0, phases.indexOf(basePhase));
+      const supportRelief = sunSupportPresentAtDock() ? 1 : 0;
+      const penalty = Math.max(0, heatPenalty() - supportRelief);
+      return phases[Math.min(phases.length - 1, start + penalty)];
+    }
+
+    E.heatPenalty = heatPenalty;
+    E.adjustedDockPhase = function () {
+      return adjustedDockPhase(this.deadlinePhase());
+    };
+
+    E.routeDockByPressure = function () {
+      const phase = adjustedDockPhase(this.deadlinePhase());
+      if (phase === 'expired') {
+        this.setFlag('missed_deadline', true);
+        return 'ch4_dock_cleared';
+      }
+      if (phase === 'critical') return 'ch4_dock_rescue_only';
+      if (phase === 'tight') return 'ch4_dock_limited_search';
+      return 'ch4_dock_full_search';
+    };
+
+    E.routeDockDeepByPressure = function () {
+      const phase = adjustedDockPhase(this.deadlinePhase());
+      if (phase === 'expired') {
+        this.setFlag('missed_deadline', true);
+        return 'ch4_dock_cleared';
+      }
+      if (phase === 'critical') return 'ch4_dock_deep_rescue_only';
+      if (phase === 'tight') return 'ch4_dock_deep_trace';
+      return 'ch4_dock_deep_dual';
+    };
+
+    if (!E.__heatPressureLabelPatched) {
+      const oldPressureLabel = E.pressureLabel.bind(E);
+      E.pressureLabel = function () {
+        const base = oldPressureLabel();
+        const heat = currentHeat();
+        if (heat >= 6) return `${base} · 暴露严重`;
+        if (heat >= 4) return `${base} · 搜查窗口缩短`;
+        return base;
+      };
+      E.__heatPressureLabelPatched = true;
+    }
+
+    if (!E.__heatCaseStrengthPatched) {
+      const oldCaseStrength = E.caseStrength.bind(E);
+      E.caseStrength = function () {
+        const result = oldCaseStrength();
+        const heat = currentHeat();
+        let suffix = '';
+        if (this.getFlag('messy_escape')) suffix = ' 但撤离时动静太大，对方很可能已经开始统一口径，公开指控的阻力会上升。';
+        else if (heat >= 6) suffix = ' 但行动暴露严重，对方已有警觉，证据链的实际施压效果会被削弱。';
+        else if (heat >= 4) suffix = ' 但现场压力偏高，后续行动窗口正在收窄。';
+        return suffix ? { name: result.name, desc: result.desc + suffix } : result;
+      };
+      E.__heatCaseStrengthPatched = true;
     }
 
     if (nodes.ch2_university && !nodes.ch2_university.__regionGateHubPatched) {
@@ -181,14 +253,50 @@
     if (nodes.ch4_dock_escape && !nodes.ch4_dock_escape.__dockSupportChoicesPatched) {
       const oldChoices = nodes.ch4_dock_escape.choices;
       nodes.ch4_dock_escape.choices = function (s) {
-        return choicesOf(oldChoices, s).filter(choice => {
-          if (choice.goto === 'ch4_fu_confront' && choice.text && choice.text.includes('老孙的人')) {
-            return sunSupportPresentAtDock();
-          }
+        const support = sunSupportPresentAtDock();
+        const heat = currentHeat();
+        let opts = choicesOf(oldChoices, s).filter(choice => {
+          if (choice.goto === 'ch4_fu_confront' && choice.text && choice.text.includes('老孙的人')) return support;
+          if (choice.goto === 'ch4_fu_confront' && choice.text && choice.text.includes('当场质问傅启元')) return support || heat < 4;
           return true;
         });
+        if (!support && heat >= 6) {
+          opts = opts.filter(choice => !(choice.text && choice.text.includes('借雾')));
+          opts.push({
+            text: '⚠️ 动静太大，只能冒险强行撤离',
+            effect: () => {
+              E.setFlag('messy_escape', true);
+              E.addHeat(1, '现场已经被惊动，你只能带人强行撤离。');
+            },
+            goto: 'ch4_dock_escape_finish'
+          });
+        }
+        return opts;
       };
       nodes.ch4_dock_escape.__dockSupportChoicesPatched = true;
+    }
+
+    if (nodes.ch4_fu_confront && !nodes.ch4_fu_confront.__supportAwareTextPatched) {
+      nodes.ch4_fu_confront.text = () => {
+        if (sunSupportPresentAtDock()) {
+          return `你把清场指令、光华货运单和蓝封纸角一件件摆出来。<br><br>傅启元的表情没有变，但你看到他握公文夹的手指收紧了。<br><br>老孙的人从雾里走出来，枪没有拔，却把路堵住了。<br><br><span class="sys">"傅秘书，今晚这两个人，得先跟我们走。"</span><br><br>傅启元看了你很久，最后让开半步。<br><br>这不是胜利，只是他暂时不愿在码头上开枪。`;
+        }
+        return `你把清场指令、光华货运单和蓝封纸角一件件摆出来。<br><br>傅启元看着你，像是在判断你背后到底有没有人。你没有老孙的人撑场，只能把声音压稳，赌他不敢在码头上把事情闹大。<br><br>他没有让路，只是冷冷地说：<span class="sys">"沈先生，你今天带走的人，明天未必还能替你说话。"</span><br><br>这不是压住了他，只是抢出了一条缝。你不能再多停。`;
+      };
+      nodes.ch4_fu_confront.choices = [{ text: '🚕 立刻送她们离开码头', goto: 'ch4_dock_escape_finish' }];
+      nodes.ch4_fu_confront.__supportAwareTextPatched = true;
+    }
+
+    if (nodes.ch4_dock_escape_finish && !nodes.ch4_dock_escape_finish.__heatTextPatched) {
+      const oldText = nodes.ch4_dock_escape_finish.text;
+      nodes.ch4_dock_escape_finish.text = function (s) {
+        const base = typeof oldText === 'function' ? oldText(s) : oldText;
+        if (E.getFlag('messy_escape')) {
+          return `${base}<br><br>只是这次撤离太响了。码头上的守卫、车灯和枪套声都记住了你的脸。你救出了人，也把自己推到了更明处。`;
+        }
+        return base;
+      };
+      nodes.ch4_dock_escape_finish.__heatTextPatched = true;
     }
   }
 
