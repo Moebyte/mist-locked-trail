@@ -4,11 +4,11 @@
 
 (function loadStoryModules() {
   const modules = [
-    'src/story-consistency.js',
-    'src/story-evidence.js',
-    'src/story-evidence-polish.js',
-    'src/story-narrative-depth.js',
-    'src/story-ui-responsive.js'
+    'src/story-modules/consistency.js',
+    'src/story-modules/evidence.js',
+    'src/story-modules/evidence-polish.js',
+    'src/story-modules/narrative-depth.js',
+    'src/story-modules/ui-responsive.js'
   ];
 
   window.MLT_STORY_MODULES = modules.slice();
