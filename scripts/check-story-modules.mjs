@@ -49,10 +49,11 @@ for (const rel of discoveredModules) {
 }
 
 const requiredModules = [
-  'src/story-consistency.js',
-  'src/story-evidence.js',
-  'src/story-evidence-polish.js',
-  'src/story-narrative-depth.js',
+  'src/story-modules/consistency.js',
+  'src/story-modules/evidence.js',
+  'src/story-modules/evidence-polish.js',
+  'src/story-modules/narrative-depth.js',
+  'src/story-modules/ui-responsive.js',
 ];
 for (const rel of requiredModules) {
   assert(discoveredModules.includes(rel), `story-modules.js 缺少必需模块：${rel}`);

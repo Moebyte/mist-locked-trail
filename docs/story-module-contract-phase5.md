@@ -58,10 +58,9 @@ scripts/check-story-modules.mjs
 - `index.html` 必须加载 `src/story-modules.js`；
 - `index.html` 不得加载 `src/patches.js`；
 - `src/patches.js` 不得再次出现；
-- `src/v*.js` 版本补丁不得再次出现；
 - `story-modules.js` 清单必须与 loader 读取结果一致；
 - 清单中的每个模块文件必须存在；
-- 关键模块函数与节点必须加载成功。
+- 必需故事模块必须登记在清单中。
 
 ---
 
@@ -98,7 +97,17 @@ node scripts/check-story-modules.mjs
 
 ---
 
-## 后续规则
+## Phase 6 后的模块归属
+
+Phase 6 已将稳定故事模块迁入正式目录：
+
+```text
+src/story-modules/consistency.js
+src/story-modules/evidence.js
+src/story-modules/evidence-polish.js
+src/story-modules/narrative-depth.js
+src/story-modules/ui-responsive.js
+```
 
 后续新增内容不应再使用版本补丁命名。
 
@@ -114,20 +123,10 @@ scripts/*patch*.mjs
 
 | 类型 | 归属 |
 |---|---|
-| 一致性修复 | `src/story-consistency.js` |
-| 举证交互 | `src/story-evidence.js` |
-| 举证润色 | `src/story-evidence-polish.js` |
-| 剧情密度 / 结局分流 | `src/story-narrative-depth.js` |
-| UI 与阅读体验 | `src/story-ui-responsive.js` |
+| 一致性修复 | `src/story-modules/consistency.js` |
+| 举证交互 | `src/story-modules/evidence.js` |
+| 举证润色 | `src/story-modules/evidence-polish.js` |
+| 剧情密度 / 结局分流 | `src/story-modules/narrative-depth.js` |
+| UI 与阅读体验 | `src/story-modules/ui-responsive.js` |
 
-如模块继续膨胀，再拆成目录：
-
-```text
-src/story-modules/consistency.js
-src/story-modules/evidence.js
-src/story-modules/evidence-polish.js
-src/story-modules/narrative-depth.js
-src/story-modules/ui-responsive.js
-```
-
-但目录化属于下一阶段，不在本次收口中强行移动。
+如单个模块继续膨胀，再按领域继续拆分子模块，但仍应登记到 `src/story-modules.js`。
