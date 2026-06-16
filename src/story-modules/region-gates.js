@@ -214,6 +214,19 @@
       nodes.end_conspiracy_detail.__rainyNightTitlePatched = true;
     }
 
+    if (nodes.ch4_conclusion && !nodes.ch4_conclusion.__v07ResolveChoicesPatched && typeof E.v07ResolveEnding === 'function') {
+      const oldChoices = nodes.ch4_conclusion.choices;
+      nodes.ch4_conclusion.choices = function (s) {
+        return choicesOf(oldChoices, s).map(choice => {
+          if (choice.text && choice.text.includes('按证据链自然收束')) {
+            return { ...choice, goto: () => E.v07ResolveEnding() };
+          }
+          return choice;
+        });
+      };
+      nodes.ch4_conclusion.__v07ResolveChoicesPatched = true;
+    }
+
     if (nodes.ch2_university && !nodes.ch2_university.__regionGateHubPatched) {
       nodes.ch2_university.choices = universityChoices;
       nodes.ch2_university.__regionGateHubPatched = true;
