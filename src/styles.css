@@ -31,13 +31,20 @@ body.game-active #app{padding-bottom:110px}
 .entry .choice-log{color:#779;font-size:13px;margin-top:4px}
 /* 当前场景 */
 #scene-card{display:none;background:rgba(17,17,34,.96);border:1px solid #222244;border-radius:8px;padding:20px;margin:12px 0;box-shadow:0 12px 40px rgba(0,0,0,.22);animation:cardIn .35s ease-out}
-#scene-title{color:#c8a87c;font-size:18px;margin-bottom:12px;letter-spacing:2px}
-#scene-text{line-height:1.9;font-size:15px;margin-bottom:16px;white-space:pre-wrap}
+#scene-title{color:#c8a87c;font-size:18px;margin-bottom:12px;letter-spacing:2px;flex:0 0 auto}
+#scene-text{line-height:1.9;font-size:15px;margin-bottom:12px;white-space:pre-wrap;flex:1 1 auto;overflow:hidden}
 #scene-text strong{color:#d4b88c}
 #scene-text .sys{color:#8899aa;font-style:italic}
 #scene-text .hl{color:#b8a070}
 #scene-text .danger{color:#d08070}
-#choices{display:flex;flex-direction:column;gap:8px}
+#scene-pager{align-items:center;gap:8px;margin:2px 0 12px;flex:0 0 auto}
+.scene-page-btn{background:#151528;border:1px solid #303052;color:#c9c9de;padding:8px 12px;border-radius:999px;font-size:13px;cursor:pointer;font-family:inherit;line-height:1}
+.scene-page-btn.primary{border-color:#9a7b52;color:#e9d1a2;background:#211b24}
+.scene-page-btn:hover:not(:disabled){border-color:#6f86c8;color:#fff}
+.scene-page-btn:disabled{opacity:.35;cursor:not-allowed}
+.scene-page-indicator{margin-left:auto;color:#68708e;font-size:12px}
+#choices{display:flex;flex-direction:column;gap:8px;flex:0 0 auto}
+#choices.choices-hidden{display:none!important}
 .choice-btn{background:#1a1a30;border:1px solid #333355;color:#c0c0d8;padding:12px 16px;border-radius:6px;font-size:14px;cursor:pointer;font-family:inherit;text-align:left;transition:.15s}
 .choice-btn:hover{background:#252545;border-color:#5566aa;color:#fff}
 .choice-btn:disabled{opacity:.3;cursor:not-allowed}
@@ -95,8 +102,8 @@ body.vintage{filter:sepia(.15) saturate(.88) brightness(.95);transition:filter .
 @media(min-width:1080px){
   body.game-active #app{max-width:min(760px,calc(100vw - 460px));margin-left:max(24px,calc((100vw - 1180px)/2));margin-right:420px;padding-bottom:24px}
   body.game-active #top-actions{border:1px solid #202038;border-radius:0 0 10px 10px;margin:-16px 0 12px;padding:10px;background:rgba(10,10,18,.86)}
-  body.game-active #log{max-height:22vh;overflow:auto;padding-right:4px;border-bottom:1px solid #17172a}
-  body.game-active #scene-card{max-height:calc(100vh - 230px);overflow:auto}
+  body.game-active #log{max-height:16vh;overflow:auto;padding-right:4px;border-bottom:1px solid #17172a}
+  body.game-active #scene-card{height:calc(100vh - 210px);overflow:hidden;display:flex!important;flex-direction:column}
   body.game-active #side-panel{display:block;inset:auto max(24px,calc((100vw - 1180px)/2)) 18px auto;top:18px;width:380px;z-index:12;pointer-events:auto}
   body.game-active #panel-mask{display:none}
   body.game-active #panel-body{position:static;width:100%;height:calc(100vh - 36px);border:1px solid #303052;border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,.35);background:rgba(16,16,29,.94);backdrop-filter:blur(10px)}
@@ -114,9 +121,12 @@ body.vintage{filter:sepia(.15) saturate(.88) brightness(.95);transition:filter .
   #title-screen h1{font-size:24px;letter-spacing:5px}
   body.game-active #top-actions{position:fixed;left:0;right:0;top:auto;bottom:0;margin:0;padding:8px;background:rgba(9,9,17,.96);border-top:1px solid #252540;border-bottom:none;z-index:28;display:grid!important;grid-template-columns:repeat(3,1fr);gap:6px}
   body.game-active #top-actions .tool-btn{font-size:12px;padding:10px 6px;text-align:center;min-width:0}
-  #scene-card{padding:16px;margin:10px 0 12px}
+  body.game-active #log{display:none!important}
+  body.game-active #scene-card{height:calc(100svh - 168px);min-height:430px;display:flex!important;flex-direction:column;padding:16px;margin:10px 0 12px;overflow:hidden}
   #scene-title{font-size:17px;line-height:1.5}
   #scene-text{font-size:14px;line-height:1.85}
+  #scene-pager{margin-top:auto}
+  .scene-page-btn{padding:9px 11px;font-size:12px}
   .choice-btn{padding:12px 13px;font-size:13px}
   #status-bar{position:sticky;top:0;z-index:9;background:rgba(10,10,18,.9);backdrop-filter:blur(8px);margin:0 -12px 8px;padding:8px 12px;border-top:0;border-bottom:1px solid #202038;gap:8px;font-size:12px}
   #status-bar .stat:nth-child(1),#status-bar .stat:nth-child(7){display:none}
