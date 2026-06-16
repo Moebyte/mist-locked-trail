@@ -43,17 +43,28 @@
       return opts;
     }
 
+    function searched203Evidence() {
+      return E.hasClue('三人合影') || E.hasItem('三人合影') || E.hasClue('恐吓信') || E.hasItem('恐吓信');
+    }
+
     function buildingChoices() {
       const opts = [];
       if (!E.getFlag('saw_man')) opts.push({ text: '🔍 先在周围观察一下', goto: 'ch2_building_stakeout' });
       if (!E.getFlag('asked_landlord')) opts.push({ text: '🔍 问看门老头更多关于陆姓女子的事', goto: 'ch2_ask_landlord' });
-      if (!E.getFlag('searched_203')) opts.push({ text: '⬆️ 上二楼，敲 203 的门', goto: 'ch2_203_door' });
-      if (E.getFlag('searched_203')) opts.push({ text: '📚 去光华小学——那里是这一切的中心', goto: 'ch3_school' });
+      if (!searched203Evidence()) opts.push({ text: '⬆️ 上二楼，敲 203 的门', goto: 'ch2_203_door' });
+      if (searched203Evidence()) opts.push({ text: '📚 去光华小学——那里是这一切的中心', goto: 'ch3_school' });
       return opts;
     }
 
     function buildingFollowupChoices() {
       return appendHubChoice(buildingChoices(), '🔙 回到薛华立路 22 号门口', 'ch2_frenchtown');
+    }
+
+    function room203Choices() {
+      const opts = [];
+      if (!searched203Evidence()) opts.push({ text: '📖 仔细搜查房间', goto: 'ch2_203_search' });
+      if (searched203Evidence()) opts.push({ text: '📚 去光华小学——那里是这一切的中心', goto: 'ch3_school' });
+      return appendHubChoice(opts, '🔙 回到薛华立路 22 号门口', 'ch2_frenchtown');
     }
 
     E.isSchoolComplete = function () {
@@ -106,7 +117,7 @@
     if (nodes.ch2_building_enter) nodes.ch2_building_enter.choices = buildingFollowupChoices;
     if (nodes.ch2_ask_landlord) nodes.ch2_ask_landlord.choices = buildingFollowupChoices;
     if (nodes.ch2_landlord_map) nodes.ch2_landlord_map.choices = buildingFollowupChoices;
-    if (nodes.ch2_203_door) nodes.ch2_203_door.choices = buildingFollowupChoices;
+    if (nodes.ch2_203_door) nodes.ch2_203_door.choices = room203Choices;
 
     if (nodes.ch3_school && !nodes.ch3_school.__regionGatePatched) {
       nodes.ch3_school.choices = schoolChoices;
