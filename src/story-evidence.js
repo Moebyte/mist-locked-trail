@@ -1,5 +1,5 @@
-// ===== v0.6.2 关键举证补全 =====
-// 本补丁只补 onPresent 举证交互，不改主线推进结构。
+// ===== 故事举证模块 =====
+// 从 v0.6.2-evidence.js 稳定迁出，负责关键人物举证交互。
 
 function applyEvidenceImprovements() {
   if (typeof E === 'undefined' || typeof nodes === 'undefined') return;
