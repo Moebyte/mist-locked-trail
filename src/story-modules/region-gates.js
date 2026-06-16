@@ -10,6 +10,14 @@
     return opts;
   }
 
+  function chainEffect(node, effect) {
+    const oldEffect = node.effect;
+    node.effect = function (state) {
+      if (typeof oldEffect === 'function') oldEffect(state);
+      effect(state);
+    };
+  }
+
   function applyRegionGates() {
     if (typeof E === 'undefined' || typeof nodes === 'undefined') return;
 
@@ -93,6 +101,10 @@
       return appendHubChoice(schoolChoices(), '🔙 回到校长办公室继续调查', 'ch3_school');
     }
 
+    function sunSupportPresentAtDock() {
+      return E.getFlag('sun_fast_support') || E.getFlag('sun_wait_support') || E.getFlag('sun_support_in_action');
+    }
+
     if (nodes.ch2_university && !nodes.ch2_university.__regionGateHubPatched) {
       nodes.ch2_university.choices = universityChoices;
       nodes.ch2_university.__regionGateHubPatched = true;
@@ -147,6 +159,35 @@
         return choicesOf(oldChoices, s);
       };
       nodes.ch3_wrapup.__regionGatePatched = true;
+    }
+
+    if (nodes.ch4_dock_wait && !nodes.ch4_dock_wait.__dockSupportPatched) {
+      chainEffect(nodes.ch4_dock_wait, () => {
+        E.setFlag('sun_wait_support', true);
+        E.setFlag('sun_support_in_action', true);
+      });
+      nodes.ch4_dock_wait.__dockSupportPatched = true;
+    }
+
+    if (nodes.ch4_dock_sun_fast_support && !nodes.ch4_dock_sun_fast_support.__dockSupportPatched) {
+      chainEffect(nodes.ch4_dock_sun_fast_support, () => {
+        E.setFlag('sun_fast_support', true);
+        E.setFlag('sun_support_in_action', true);
+      });
+      nodes.ch4_dock_sun_fast_support.__dockSupportPatched = true;
+    }
+
+    if (nodes.ch4_dock_escape && !nodes.ch4_dock_escape.__dockSupportChoicesPatched) {
+      const oldChoices = nodes.ch4_dock_escape.choices;
+      nodes.ch4_dock_escape.choices = function (s) {
+        return choicesOf(oldChoices, s).filter(choice => {
+          if (choice.goto === 'ch4_fu_confront' && choice.text && choice.text.includes('老孙的人')) {
+            return sunSupportPresentAtDock();
+          }
+          return true;
+        });
+      };
+      nodes.ch4_dock_escape.__dockSupportChoicesPatched = true;
     }
   }
 
