@@ -1,5 +1,5 @@
-// ===== v0.6.3 举证体验润色 =====
-// 继续补关键人物的举证反馈：老孙负责行动决策，周明远负责情感锚点。
+// ===== 故事举证润色模块 =====
+// 从 v0.6.3-evidence-polish.js 稳定迁出，负责老孙行动举证与周明远情感举证。
 
 function applyEvidencePolish() {
   if (typeof E === 'undefined' || typeof nodes === 'undefined') return;
