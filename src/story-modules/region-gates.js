@@ -27,6 +27,19 @@
       return this.hasClue('舍监证词') && this.getFlag(askedDoorFlag) && this.hasClue('法租界地图');
     };
 
+    E.isHomeComplete = function () {
+      return this.hasClue('母亲证词') && this.getFlag('asked_photo');
+    };
+
+    function earlyRouteChoices() {
+      const opts = [];
+      if (!E.isUniversityComplete()) opts.push({ text: '📚 去圣约翰大学调查', goto: 'ch2_university' });
+      opts.push({ text: '🏛️ 去法租界 · 薛华立路 22 号', goto: 'ch2_frenchtown' });
+      if (!E.getFlag('got_case_file')) opts.push({ text: '📋 去巡捕房查卷宗', goto: 'ch2_police' });
+      if (!E.isHomeComplete()) opts.push({ text: '🏠 去苏家看她母亲', goto: 'ch2_home' });
+      return opts;
+    }
+
     function universityChoices() {
       const opts = [];
       if (!E.hasClue('舍监证词')) opts.push({ text: '👩 问舍监——失踪那天的情况', goto: 'ch2_univ_matron' });
@@ -45,7 +58,7 @@
       if (!E.getFlag('got_wang_note')) opts.push({ text: '📎 追问王巡官调离前留下了什么', goto: 'ch2_police_wang' });
       if (E.getFlag('got_wang_note')) {
         opts.push({ text: '🏛️ 去薛华立路 22 号——王巡官的线索指向这里', goto: 'ch2_frenchtown' });
-        opts.push({ text: '🏠 去苏家', goto: 'ch2_home' });
+        if (!E.isHomeComplete()) opts.push({ text: '🏠 去苏家', goto: 'ch2_home' });
         opts.push({ text: '📚 去光华小学', goto: 'ch3_school' });
       }
       return opts;
@@ -236,16 +249,21 @@
     if (nodes.ch2_univ_paper) nodes.ch2_univ_paper.choices = [{ text: '🔙 回到宿舍继续调查', goto: 'ch2_university' }];
 
     if (nodes.ch2_leave_univ && !nodes.ch2_leave_univ.__regionGatePatched) {
-      const oldChoices = nodes.ch2_leave_univ.choices;
-      nodes.ch2_leave_univ.choices = function (s) {
+      nodes.ch2_leave_univ.choices = function () {
         if (!E.isUniversityComplete()) return [{ text: '🔙 回圣约翰大学继续调查', goto: 'ch2_university' }];
-        return choicesOf(oldChoices, s);
+        return earlyRouteChoices();
       };
       nodes.ch2_leave_univ.__regionGatePatched = true;
     }
 
+    if (nodes.ch2_leave_home && !nodes.ch2_leave_home.__regionGatePatched) {
+      nodes.ch2_leave_home.choices = earlyRouteChoices;
+      nodes.ch2_leave_home.__regionGatePatched = true;
+    }
+
     if (nodes.ch2_police_file) nodes.ch2_police_file.choices = policeChoices;
     if (nodes.ch2_police_alt) nodes.ch2_police_alt.choices = policeChoices;
+    if (nodes.ch2_police_wang) nodes.ch2_police_wang.choices = policeChoices;
 
     if (nodes.ch2_frenchtown) nodes.ch2_frenchtown.choices = buildingChoices;
     if (nodes.ch2_building_enter) nodes.ch2_building_enter.choices = buildingFollowupChoices;
