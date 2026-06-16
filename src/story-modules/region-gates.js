@@ -260,6 +260,9 @@
           if (choice.goto === 'ch4_fu_confront' && choice.text && choice.text.includes('当场质问傅启元')) return support || heat < 4;
           return true;
         });
+        if (support && !opts.some(choice => choice.goto === 'ch4_fu_confront' && choice.text && choice.text.includes('老孙的人'))) {
+          opts.unshift({ text: '🚓 让老孙的人亮明身份，正面压住傅启元', goto: 'ch4_fu_confront' });
+        }
         if (!support && heat >= 6) {
           opts = opts.filter(choice => !(choice.text && choice.text.includes('借雾')));
           opts.push({
