@@ -121,7 +121,7 @@ test('完整搜查路线能救出苏晚亭，有限搜查只得到转移痕迹',
   assert(tight.E.routeDockDeepByPressure() === 'ch4_dock_deep_trace', '晚到暗室应只找到苏晚亭转移痕迹');
 });
 
-test('隐藏结局信件按苏晚亭是否获救切换来源', () => {
+test('隐藏结局只有救出苏晚亭时才出现苏晚亭来信', () => {
   const rescued = runtime({ flags: { rescued_su: true, rescued_yufang: true } });
   const rescuedText = rescued.nodes.end_conspiracy_detail.text();
   assert(rescuedText.includes('周怀安替苏晚亭送来一封信'), '救出苏晚亭时应由周怀安转交苏晚亭来信');
@@ -130,8 +130,10 @@ test('隐藏结局信件按苏晚亭是否获救切换来源', () => {
   const traced = runtime({ flags: { su_moved_from_dock: true, rescued_yufang: true } });
   const tracedText = traced.nodes.end_conspiracy_detail.text();
   assert(tracedText.includes('她没有见过你'), '未救出苏晚亭时应说明她没有见过主角');
-  assert(tracedText.includes('请替我谢谢那位沈先生'), '未救出苏晚亭时应通过周怀安转述感谢');
-  assert(!tracedText.includes('你收到一封信。信上只有一行字'), '未救出苏晚亭时不应使用固定直接来信文案');
+  assert(tracedText.includes('暂时不能露面，也不能写信'), '未救出苏晚亭时不应出现她给男主写信');
+  assert(tracedText.includes('等她真正安全那天，再让她自己说吧'), '未救出苏晚亭时感谢应停留在周怀安转述层面');
+  assert(!tracedText.includes('——苏晚亭'), '未救出苏晚亭时不应出现苏晚亭署名来信');
+  assert(!tracedText.includes('请替我谢谢那位沈先生'), '未救出苏晚亭时不应出现苏晚亭直接转述感谢');
 });
 
 console.log('Fusheng route smoke reports:');
