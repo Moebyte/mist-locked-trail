@@ -19,8 +19,8 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Check patch loading consistency
-        run: node scripts/check-patch-loading.mjs
+      - name: Check story module contract
+        run: node scripts/check-story-modules.mjs
 
       - name: Validate story graph
         run: node scripts/validate-story.mjs
