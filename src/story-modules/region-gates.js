@@ -129,6 +129,38 @@
       return E.getFlag('sun_fast_support') || E.getFlag('sun_wait_support') || E.getFlag('sun_support_in_action');
     }
 
+    function sunSupportApproved() {
+      return E.getFlag('sun_support_available')
+        || E.getFlag('sun_full_support')
+        || E.getFlag('sun_wait_support')
+        || E.getFlag('sun_fast_support')
+        || E.getFlag('sun_support_in_action');
+    }
+
+    function dockEntryChoices() {
+      const opts = [
+        { text: '🕵️ 先绕到后门观察换班', goto: 'ch4_dock_watch' },
+        { text: '⚠️ 趁雾直接潜入仓库', effect: () => E.addHeat(1, '你选择冒险潜入，码头上的风险升高。'), goto: 'ch4_dock_inside' }
+      ];
+      if (sunSupportApproved()) {
+        opts.push({ text: '🚓 等老孙带人来再行动', goto: 'ch4_dock_wait' });
+      } else {
+        opts.push({ text: '🚓 带着福生仓线索回巡捕房找老孙', goto: 'ch4_sun_support' });
+      }
+      opts.push({ text: '🔙 先回去整理线索', goto: 'ch3_wrapup' });
+      return opts;
+    }
+
+    function dockWatchChoices() {
+      const opts = [{ text: '🔦 从东侧窗户潜入', goto: 'ch4_dock_inside' }];
+      if (sunSupportApproved()) {
+        opts.push({ text: '🚓 等老孙带人来再行动', goto: 'ch4_dock_wait' });
+      } else {
+        opts.push({ text: '🚓 带着观察到的情况回巡捕房找老孙', goto: 'ch4_sun_support' });
+      }
+      return opts;
+    }
+
     function hardDockEvidenceReady() {
       return E.hasItem('清场指令')
         || E.hasItem('光华货运单')
@@ -301,6 +333,16 @@
       nodes.ch3_wrapup.__regionGatePatched = true;
     }
 
+    if (nodes.ch4_suzhou_creek && !nodes.ch4_suzhou_creek.__sunProofGatePatched) {
+      nodes.ch4_suzhou_creek.choices = dockEntryChoices;
+      nodes.ch4_suzhou_creek.__sunProofGatePatched = true;
+    }
+
+    if (nodes.ch4_dock_watch && !nodes.ch4_dock_watch.__sunProofGatePatched) {
+      nodes.ch4_dock_watch.choices = dockWatchChoices;
+      nodes.ch4_dock_watch.__sunProofGatePatched = true;
+    }
+
     if (nodes.ch4_sun_present_fusheng && !nodes.ch4_sun_present_fusheng.__supportBalancePatched) {
       nodes.ch4_sun_present_fusheng.title = '举证 · 王巡官留下的福生仓线索';
       nodes.ch4_sun_present_fusheng.text = () => `老孙看完纸条上的<span class="sys">"福生仓，三日清"</span>，脸色沉了下去。<br><br><span class="sys">"这是老王的字。他不会随便把一个仓库名留在卷宗里。"</span><br><br>他把纸条压在烟灰缸下，沉默很久。<br><br><span class="sys">"我不能走明面。能帮你的，只有私下这一步。立刻走，人少，快；调齐人手，稳，但慢，也更容易惊动他们。"</span>`;
@@ -323,10 +365,30 @@
     }
 
     if (nodes.ch4_dock_wait && !nodes.ch4_dock_wait.__fullSupportTextPatched) {
-      nodes.ch4_dock_wait.text = () => E.deadlinePhase() === 'expired'
-        ? `你带人赶回时，福生仓已经清空。老孙低声说：<span class="sys">"他们比我们快一步。"</span>`
-        : `你带着老孙调来的几名便衣和巡捕赶回码头。人手齐了，车道也能暗暗封住，但这一路耽误的时间足够让码头上的风声传出去。<br><br><span class="sys">${E.deadlinePhaseLabel()}。</span>`;
+      nodes.ch4_dock_wait.text = () => {
+        if (!sunSupportApproved()) {
+          return `你已经摸到福生仓的门口，但还没有说服老孙。<br><br>福生仓不能走明面；没有王巡官纸条或福生仓地址压在桌上，老孙不可能直接带人来。`;
+        }
+        return E.deadlinePhase() === 'expired'
+          ? `你带人赶回时，福生仓已经清空。老孙低声说：<span class="sys">"他们比我们快一步。"</span>`
+          : `你带着老孙调来的几名便衣和巡捕赶回码头。人手齐了，车道也能暗暗封住，但这一路耽误的时间足够让码头上的风声传出去。<br><br><span class="sys">${E.deadlinePhaseLabel()}。</span>`;
+      };
       nodes.ch4_dock_wait.__fullSupportTextPatched = true;
+    }
+
+    if (nodes.ch4_dock_wait && !nodes.ch4_dock_wait.__sunProofChoicesPatched) {
+      const oldChoices = nodes.ch4_dock_wait.choices;
+      nodes.ch4_dock_wait.choices = function (s) {
+        if (!sunSupportApproved()) {
+          return [
+            { text: '🚓 回巡捕房找老孙，并出示福生仓线索', goto: 'ch4_sun_support' },
+            { text: '⚠️ 不等了，趁雾直接潜入仓库', effect: () => E.addHeat(1, '你放弃等待支援，选择冒险潜入。'), goto: () => E.routeDockByPressure() },
+            { text: '🔙 先回去整理线索', goto: 'ch3_wrapup' }
+          ];
+        }
+        return choicesOf(oldChoices, s);
+      };
+      nodes.ch4_dock_wait.__sunProofChoicesPatched = true;
     }
 
     if (nodes.ch4_dock_sun_fast_support && !nodes.ch4_dock_sun_fast_support.__dockSupportPatched) {
