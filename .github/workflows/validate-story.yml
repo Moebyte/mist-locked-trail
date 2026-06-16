@@ -19,6 +19,9 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Check patch loading consistency
+        run: node scripts/check-patch-loading.mjs
+
       - name: Validate story graph
         run: node scripts/validate-story.mjs
 
@@ -30,3 +33,6 @@ jobs:
 
       - name: Smoke test evidence polish interactions
         run: node scripts/smoke-evidence-polish.mjs
+
+      - name: Smoke test narrative depth routes
+        run: node scripts/smoke-narrative-depth.mjs
