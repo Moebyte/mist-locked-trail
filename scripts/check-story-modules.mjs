@@ -56,6 +56,7 @@ const requiredModules = [
   'src/story-modules/narrative-depth.js',
   'src/story-modules/causal-echo.js',
   'src/story-modules/ui-responsive.js',
+  'src/story-modules/region-gates.js',
 ];
 for (const rel of requiredModules) {
   assert(discoveredModules.includes(rel), `story-modules.js 缺少必需模块：${rel}`);
