@@ -2,7 +2,16 @@
 // 目标：桌面端常驻右侧信息栏，手机端底部抽屉分页，避免线索簿内容堆叠。
 
 function applyResponsiveStoryUI() {
-  if (typeof E === 'undefined') return;
+  if (typeof E === 'undefined' || typeof document === 'undefined') return;
+
+  const hasRuntimeUI = typeof E.start === 'function'
+    && typeof E.loadGame === 'function'
+    && typeof E.renderScene === 'function'
+    && typeof E.caseStrength === 'function'
+    && typeof E.pressureLabel === 'function'
+    && typeof E.renderClueWall === 'function';
+
+  if (!hasRuntimeUI) return;
 
   E.panelTab = E.panelTab || 'overview';
 
