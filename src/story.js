@@ -59,7 +59,7 @@ const nodes = {
 
 雨还在下。
 
-<div style="color:#666;font-style:italic;margin-top:20px">—— 结局零 · 雨不停（隐藏结局）——</div>`,
+<div style="color:#666;font-style:italic;margin-top:20px">—— 结局一 · 雨不停 ——</div>`,
     type: 'end',
   },
 
@@ -1156,7 +1156,7 @@ ${strength.desc}
 
 只是这一次，你晚了一步。
 
-<div style="color:#666;font-style:italic;margin-top:20px">—— 结局六 · 迟到一步 ——</div>`,
+<div style="color:#666;font-style:italic;margin-top:20px">—— 结局三 · 迟到一步 ——</div>`,
     type: 'end',
   },
 
@@ -1180,7 +1180,7 @@ ${strength.desc}
 
 有些案子不是破不了，是被人轻轻合上了。
 
-<div style="color:#666;font-style:italic;margin-top:20px">—— 结局零 · 无声归档 ——</div>`,
+<div style="color:#666;font-style:italic;margin-top:20px">—— 结局二 · 无声归档 ——</div>`,
     type: 'end',
   },
 
@@ -1430,7 +1430,7 @@ ${strength.desc}
 
 <span class="sys">"对不起。"</span>
 
-<div style="color:#666;font-style:italic;margin-top:20px">—— 结局一 · 面具之下 ——</div>`,
+<div style="color:#666;font-style:italic;margin-top:20px">—— 结局四 · 面具之下 ——</div>`,
     type: 'end',
   },
 
@@ -1460,7 +1460,7 @@ ${strength.desc}
 
 你把那张照片——苏晚亭在光启公园的那张——放进了抽屉的最深处。
 
-<div style="color:#666;font-style:italic;margin-top:20px">—— 结局二 · 提线木偶 ——</div>`,
+<div style="color:#666;font-style:italic;margin-top:20px">—— 结局五 · 提线木偶 ——</div>`,
     type: 'end',
   },
 
@@ -1490,12 +1490,12 @@ ${strength.desc}
 
 案子结了——以另一种方式。
 
-<div style="color:#666;font-style:italic;margin-top:20px">—— 结局三 · 师者 ——</div>`,
+<div style="color:#666;font-style:italic;margin-top:20px">—— 结局六 · 师者 ——</div>`,
     type: 'end',
   },
 
   end_rescue: {
-    title: '结局 · 雨夜灯火',
+    title: '结局 · 黎明灯火',
     text: () => `
 你没有急着写报告。
 
@@ -1529,16 +1529,16 @@ ${strength.desc}
 
 案子没有真正结束。但那一夜，至少有两盏灯没有灭。
 
-<div style="color:#666;font-style:italic;margin-top:20px">—— 结局五 · 雨夜灯火 ——</div>`,
+<div style="color:#666;font-style:italic;margin-top:20px">—— 结局八 · 黎明灯火 ——</div>`,
     type: 'end',
   },
 
   end_conspiracy_detail: {
-    title: '结局 · 雨夜灯火',
+    title: '结局 · 黎明灯火',
     time: {d:2, h:23, m:0},
     weather: 0,
     effect: (s) => { },
-    text: () => `所有的碎片都拼上了。<br><br>陈明远发现光华小学的走私勾当——被灭口。<br>沈玉芳从他那里知道了一部分真相——被关在福生仓。<br>陆念薇是中间人——她不是主谋，她上面还有人。<br>黑衣男人是巡捕房的暗线——有人想查这条线，但查不动。<br><br>而福生仓里的货，和公董局的公文纸——它们指向同一个方向。<br><br>你没有去找巡捕房。<br>你写了一封信——不是报案信，是一封私人信件。收信人是《申报》的副总编辑，你认识他。你把所有证据的副本随信附上。<br><br>三天后，《申报》头版刊登了一篇报道：《法租界光华小学教具箱暗藏走私通道，两教师一死一失踪》。<br><br>报道没有点名公董局的人，但所有的描述都足够让人对号入座。<br><br>又过了三天，福生仓被查封。公董局那位副秘书长以"健康原因"辞职。<br><br>一个月后，你收到了一封信，没有署名。<br><br><span class="sys">"沈先生：晚亭已平安。她让我代她向你说一声谢谢。另外，那条线上的人，不止一个。但你能做到的，已经比大多数人多了。——孙"</span><br><br>你把信折好，放进口袋。<br><br>窗外又下雨了。你泡了一壶新茶。<br><br>民国三十七年的冬天，比往年来得都晚一些。但终究是来了。<br><br><div style="color:#666;font-style:italic;margin-top:20px">—— 结局七 · 雨夜灯火（隐藏结局）——</div>`,
+    text: () => `所有的碎片都拼上了。<br><br>陈明远发现光华小学的走私勾当——被灭口。<br>沈玉芳从他那里知道了一部分真相——被关在福生仓。<br>陆念薇是中间人——她不是主谋，她上面还有人。<br>黑衣男人是巡捕房的暗线——有人想查这条线，但查不动。<br><br>而福生仓里的货，和公董局的公文纸——它们指向同一个方向。<br><br>你没有去找巡捕房。<br>你写了一封信——不是报案信，是一封私人信件。收信人是《申报》的副总编辑，你认识他。你把所有证据的副本随信附上。<br><br>三天后，《申报》头版刊登了一篇报道：《法租界光华小学教具箱暗藏走私通道，两教师一死一失踪》。<br><br>报道没有点名公董局的人，但所有的描述都足够让人对号入座。<br><br>又过了三天，福生仓被查封。公董局那位副秘书长以"健康原因"辞职。<br><br>一个月后，你收到了一封信，没有署名。<br><br><span class="sys">"沈先生：晚亭已平安。她让我代她向你说一声谢谢。另外，那条线上的人，不止一个。但你能做到的，已经比大多数人多了。——孙"</span><br><br>你把信折好，放进口袋。<br><br>窗外又下雨了。你泡了一壶新茶。<br><br>民国三十七年的冬天，比往年来得都晚一些。但终究是来了。<br><br><div style="color:#666;font-style:italic;margin-top:20px">—— 结局九 · 雨夜灯火（隐藏结局）——</div>`,
     type: 'end',
   },
 
@@ -1580,7 +1580,7 @@ ${strength.desc}
 
 跟那张学生装的照片放在了一起。
 
-<div style="color:#666;font-style:italic;margin-top:20px">—— 结局四 · 迷雾未尽 ——</div>`;
+<div style="color:#666;font-style:italic;margin-top:20px">—— 结局七 · 迷雾未尽 ——</div>`;
     },
     type: 'end',
   },
