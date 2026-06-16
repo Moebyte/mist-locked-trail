@@ -68,6 +68,23 @@ expectTarget(university, leaveUniversity, true, () => {
   clue('法租界地图');
 }, '圣约翰大学：三条调查线完成后应开放离开大学');
 
+expectTarget(matron, paper, false, () => {
+  clue('法租界地图');
+}, '圣约翰大学子场景：论文已查后，舍监证词页不应再次显示论文入口');
+
+expectTarget(matron, door, false, () => {
+  flag(askedDoor);
+}, '圣约翰大学子场景：门房已问后，舍监证词页不应再次显示门房入口');
+
+expectTarget(door, paper, false, () => {
+  clue('法租界地图');
+}, '圣约翰大学子场景：论文已查后，门房证词页不应再次显示论文入口');
+
+expectTarget(door, leaveUniversity, true, () => {
+  clue('舍监证词');
+  clue('法租界地图');
+}, '圣约翰大学子场景：从门房证词页完成三条线后，应开放离开大学');
+
 const school = 'ch3_school';
 const teacher = 'ch3_school_teacher';
 const yufang = 'ch3_school_yufang';
