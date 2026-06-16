@@ -1,5 +1,5 @@
 // ===== 故事举证润色模块 =====
-// 从 v0.6.3-evidence-polish.js 稳定迁出，负责老孙行动举证与周明远情感举证。
+// 从 v0.6.3-evidence-polish.js 稳定迁出，负责老孙行动举证与周怀安情感举证。
 
 function applyEvidencePolish() {
   if (typeof E === 'undefined' || typeof nodes === 'undefined') return;
@@ -87,10 +87,10 @@ function applyEvidencePolish() {
     title: '举证 · 日记残页',
     weather: 5,
     effect: () => {
-      E.addClue('周明远理解苏晚亭选择', '周明远读到日记后意识到苏晚亭不是任性失踪，而是在主动保护别人');
+      E.addClue('周怀安理解苏晚亭选择', '周怀安读到日记后意识到苏晚亭不是任性失踪，而是在主动保护别人');
       E.setFlag('zhou_understands_wanting', true);
     },
-    text: () => `你把日记残页递给周明远。<br><br>他读到<span class="sys">"如果我不去，沈老师怎么办"</span>时，手指停住了。<br><br><span class="sys">"她从前也是这样。路上看见被雨淋湿的小猫，都要抱回去。可我总以为，长大了就该学会少管闲事。"</span><br><br>他把纸还给你，声音很轻：<span class="sys">"沈先生，找到她以后，别先骂她。她一定已经骂过自己很多遍了。"</span>`,
+    text: () => `你把日记残页递给周怀安。<br><br>他读到<span class="sys">"如果我不去，沈老师怎么办"</span>时，手指停住了。<br><br><span class="sys">"她从前也是这样。路上看见被雨淋湿的小猫，都要抱回去。可我总以为，长大了就该学会少管闲事。"</span><br><br>他把纸还给你，声音很轻：<span class="sys">"沈先生，找到她以后，别先骂她。她一定已经骂过自己很多遍了。"</span>`,
     choices: [{ text: '🔙 回去整理证据', goto: 'ch4_conclusion' }]
   };
 
@@ -98,10 +98,10 @@ function applyEvidencePolish() {
     title: '举证 · 陈明远的信',
     weather: 5,
     effect: () => {
-      E.addClue('周明远面对陈明远的信', '周明远确认自己并不完全了解苏晚亭与陈明远之间的秘密，也愿意优先救人');
+      E.addClue('周怀安面对陈明远的信', '周怀安确认自己并不完全了解苏晚亭与陈明远之间的秘密，也愿意优先救人');
       E.setFlag('zhou_accepts_chen_link', true);
     },
-    text: () => `你把陈明远的信放在桌上。周明远看见<span class="sys">"晚亭吾爱"</span>几个字时，脸色变了一下。<br><br>他沉默很久，没有问你他们是什么关系。<br><br><span class="sys">"我以为我很了解她。现在想想，我了解的只是她愿意让我看的那一面。"</span><br><br>他把信折好，推回你面前：<span class="sys">"这些以后再说。先把她找回来。活着，别的都可以慢慢问。"</span>`,
+    text: () => `你把陈明远的信放在桌上。周怀安看见<span class="sys">"晚亭吾爱"</span>几个字时，脸色变了一下。<br><br>他沉默很久，没有问你他们是什么关系。<br><br><span class="sys">"我以为我很了解她。现在想想，我了解的只是她愿意让我看的那一面。"</span><br><br>他把信折好，推回你面前：<span class="sys">"这些以后再说。先把她找回来。活着，别的都可以慢慢问。"</span>`,
     choices: [{ text: '🔙 回去整理证据', goto: 'ch4_conclusion' }]
   };
 
@@ -109,10 +109,10 @@ function applyEvidencePolish() {
     title: '举证 · 三人合影',
     weather: 5,
     effect: () => {
-      E.addClue('周明远认出光华合影', '周明远确认苏晚亭曾提起光华小学，却把相关风险瞒了下来');
+      E.addClue('周怀安认出光华合影', '周怀安确认苏晚亭曾提起光华小学，却把相关风险瞒了下来');
       E.setFlag('zhou_recognizes_guanghua_photo', true);
     },
-    text: () => `你把三人合影放到灯下。<br><br>周明远盯着照片里的校门，喃喃念出四个字：<span class="sys">"光华小学。"</span><br><br><span class="sys">"她说那里有个孩子写英文特别好，想借几本书。我还笑她，自己论文都写不完，还管小学生。"</span><br><br>他抬起头，眼底的血丝更重了：<span class="sys">"原来她那时候已经在查了。"</span>`,
+    text: () => `你把三人合影放到灯下。<br><br>周怀安盯着照片里的校门，喃喃念出四个字：<span class="sys">"光华小学。"</span><br><br><span class="sys">"她说那里有个孩子写英文特别好，想借几本书。我还笑她，自己论文都写不完，还管小学生。"</span><br><br>他抬起头，眼底的血丝更重了：<span class="sys">"原来她那时候已经在查了。"</span>`,
     choices: [{ text: '🔙 回去整理证据', goto: 'ch4_conclusion' }]
   };
 }

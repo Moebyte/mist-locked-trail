@@ -95,7 +95,7 @@ const E = {
   registerAll() {
     // ── 注册关系 ──
     this.registerRelation('苏晚亭',['圣约翰大学学生','失踪者'],[]);
-    this.registerRelation('周明远',['商务印书馆编辑','委托者'],['苏晚亭']);
+    this.registerRelation('周怀安',['商务印书馆编辑','委托者'],['苏晚亭']);
     this.registerRelation('孙国栋',['法租界巡捕房探长'],['苏晚亭']);
     this.registerRelation('苏母',['苏晚亭母亲'],['苏晚亭']);
     this.registerRelation('陈明远',['光华小学教师','已故'],['苏晚亭','苏晚亭']);

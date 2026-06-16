@@ -550,7 +550,7 @@ function applyGameplayImprovements() {
 
   nodes.end_rescue = {
     title: '结局 · 黎明灯火',
-    text: () => `你没有急着写报告。<br><br>你先把人送去了医院。<br><br>沈玉芳在病床上睡了整整一天。苏晚亭如果被你从福生仓带出，也一直到第二天清晨才真正醒来。她醒来后的第一句话仍是：<br><br><span class="sys">"陈老师……他是不是已经死了？"</span><br><br>你点了点头。<br><br>她没有哭。只是把脸转向窗外，过了很久才说：<span class="sys">"那就别让他白死。"</span><br><br>陆念薇跑了，赵先生也跑了，傅启元仍然会找办法把自己洗干净。但这一次，他们没来得及灭口。<br><br>两个月后，苏晚亭离开上海。她临走前托周明远给你送来一封信，信里只有一句话：<br><br><span class="sys">"沈先生，谢谢你先找人，而不是先找凶手。"</span><br><br>案子没有真正结束。但那一夜，至少有两盏灯没有灭。<br><br><div style="color:#666;font-style:italic;margin-top:20px">—— 结局八 · 黎明灯火 ——</div>`,
+    text: () => `你没有急着写报告。<br><br>你先把人送去了医院。<br><br>沈玉芳在病床上睡了整整一天。苏晚亭如果被你从福生仓带出，也一直到第二天清晨才真正醒来。她醒来后的第一句话仍是：<br><br><span class="sys">"陈老师……他是不是已经死了？"</span><br><br>你点了点头。<br><br>她没有哭。只是把脸转向窗外，过了很久才说：<span class="sys">"那就别让他白死。"</span><br><br>陆念薇跑了，赵先生也跑了，傅启元仍然会找办法把自己洗干净。但这一次，他们没来得及灭口。<br><br>两个月后，苏晚亭离开上海。她临走前托周怀安给你送来一封信，信里只有一句话：<br><br><span class="sys">"沈先生，谢谢你先找人，而不是先找凶手。"</span><br><br>案子没有真正结束。但那一夜，至少有两盏灯没有灭。<br><br><div style="color:#666;font-style:italic;margin-top:20px">—— 结局八 · 黎明灯火 ——</div>`,
     type: 'end'
   };
 }

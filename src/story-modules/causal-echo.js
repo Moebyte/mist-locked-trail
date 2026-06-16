@@ -6,8 +6,8 @@ function applyCausalEchoes() {
 
   E.causalEchoSummary = function () {
     const echoes = [];
-    if (this.getFlag('echo_zhou_quick_trust')) echoes.push({ id: 'zhou_quick_trust', name: '周明远：雨中托付', desc: '你在茶馆里没有多问，直接接下委托。周明远后来一直把这件事记在心里。' });
-    if (this.getFlag('echo_zhou_questioned_first')) echoes.push({ id: 'zhou_questioned_first', name: '周明远：先问清楚', desc: '你先问清楚细节再接案。周明远后来更愿意补充事实，而不是只寄望于你的承诺。' });
+    if (this.getFlag('echo_zhou_quick_trust')) echoes.push({ id: 'zhou_quick_trust', name: '周怀安：雨中托付', desc: '你在茶馆里没有多问，直接接下委托。周怀安后来一直把这件事记在心里。' });
+    if (this.getFlag('echo_zhou_questioned_first')) echoes.push({ id: 'zhou_questioned_first', name: '周怀安：先问清楚', desc: '你先问清楚细节再接案。周怀安后来更愿意补充事实，而不是只寄望于你的承诺。' });
     if (this.getFlag('echo_yulan_promise')) echoes.push({ id: 'yulan_promise', name: '沈玉兰：一句承诺', desc: '你答应会一并查沈玉芳。后来沈玉芳听见你的名字时，先想起的是姐姐的托付。' });
     if (this.getFlag('echo_yulan_distance')) echoes.push({ id: 'yulan_distance', name: '沈玉兰：冷静边界', desc: '你告诉沈玉兰自己不能保证。后来沈玉芳的信任来得更慢，也更谨慎。' });
     if (this.getFlag('echo_sun_private_trust')) echoes.push({ id: 'sun_private_trust', name: '老孙：私下默契', desc: '你接受老孙的提醒，答应不走明面。福生仓行动中，他更愿意冒险压上私人关系。' });
@@ -34,14 +34,14 @@ function applyCausalEchoes() {
     return `${oldText}<br><br>${extra}`;
   }
 
-  // —— 因果链一：周明远委托线 ——
+  // —— 因果链一：周怀安委托线 ——
   replaceChoiceEffect('ch1_open', '接下委托', () => {
     E.setFlag('echo_zhou_quick_trust', true);
-    E.addClue('周明远的第一印象', '你在听雨茶馆没有多问，直接接下委托。周明远记住了这份干脆。');
+    E.addClue('周怀安的第一印象', '你在听雨茶馆没有多问，直接接下委托。周怀安记住了这份干脆。');
   });
   replaceChoiceEffect('ch1_ask', '好，这委托我接了', () => {
     E.setFlag('echo_zhou_questioned_first', true);
-    E.addClue('周明远的第一印象', '你先问清楚苏晚亭失踪前的异常，再接下委托。周明远记住了这份谨慎。');
+    E.addClue('周怀安的第一印象', '你先问清楚苏晚亭失踪前的异常，再接下委托。周怀安记住了这份谨慎。');
   });
 
   if (nodes.ch4_conclusion) {
@@ -49,10 +49,10 @@ function applyCausalEchoes() {
     nodes.ch4_conclusion.text = function (s) {
       const base = typeof oldText === 'function' ? oldText(s) : oldText;
       if (E.getFlag('echo_zhou_quick_trust')) {
-        return appendText(base, '<span class="sys">你想起周明远在茶馆里那一鞠躬。那时你几乎没有多问，只说会接。现在桌上的证据告诉你：有些承诺不是说出口那一刻成立的，是一路走到这里才真正成立。</span>');
+        return appendText(base, '<span class="sys">你想起周怀安在茶馆里那一鞠躬。那时你几乎没有多问，只说会接。现在桌上的证据告诉你：有些承诺不是说出口那一刻成立的，是一路走到这里才真正成立。</span>');
       }
       if (E.getFlag('echo_zhou_questioned_first')) {
-        return appendText(base, '<span class="sys">你想起周明远回答你第一个问题时的停顿。幸好你当时多问了那几句，否则黑衣男人、晚归和毕业论文之间的裂缝，未必会这么早露出来。</span>');
+        return appendText(base, '<span class="sys">你想起周怀安回答你第一个问题时的停顿。幸好你当时多问了那几句，否则黑衣男人、晚归和毕业论文之间的裂缝，未必会这么早露出来。</span>');
       }
       return base;
     };

@@ -23,7 +23,7 @@ function applyNarrativeDepthV07() {
     add(this.getFlag('v07_witnesses_protected'), 1, '你优先保护了活人证词');
     add(this.getFlag('v07_lu_confronted'), 1, '陆念薇线索与沈玉芳、苏晚亭线真正交汇');
     add(this.getFlag('v07_rejected_fu_deal'), 1, '你拒绝傅启元的私下交易');
-    add(this.getFlag('zhou_understands_wanting') || this.getFlag('zhou_accepts_chen_link'), 1, '周明远理解苏晚亭的选择，不再只是委托人');
+    add(this.getFlag('zhou_understands_wanting') || this.getFlag('zhou_accepts_chen_link'), 1, '周怀安理解苏晚亭的选择，不再只是委托人');
 
     return { score, reasons };
   };
@@ -41,7 +41,7 @@ function applyNarrativeDepthV07() {
 
   if (nodes.ch4_dock_escape_finish) {
     const oldEscapeText = nodes.ch4_dock_escape_finish.text;
-    nodes.ch4_dock_escape_finish.text = () => `${typeof oldEscapeText === 'function' ? oldEscapeText() : oldEscapeText}<br><br>车子没有直接回事务所，而是先拐进一家教会医院的后门。老孙的人守在巷口，周明远站在走廊尽头，脸色白得像墙灰。<br><br>你知道，真正难的不是把人从仓库里带出来，而是决定接下来牺牲什么、保护什么。`;
+    nodes.ch4_dock_escape_finish.text = () => `${typeof oldEscapeText === 'function' ? oldEscapeText() : oldEscapeText}<br><br>车子没有直接回事务所，而是先拐进一家教会医院的后门。老孙的人守在巷口，周怀安站在走廊尽头，脸色白得像墙灰。<br><br>你知道，真正难的不是把人从仓库里带出来，而是决定接下来牺牲什么、保护什么。`;
     nodes.ch4_dock_escape_finish.choices = [
       { text: '🏥 去医院走廊，面对所有人的争执', goto: 'ch4_hospital_conflict' },
       { text: '🔙 暂时回事务所整理证词和证据', goto: 'ch3_wrapup' }
@@ -52,14 +52,14 @@ function applyNarrativeDepthV07() {
     title: '教会医院 · 走廊里的三方争执',
     weather: 5,
     effect: () => {
-      E.addClue('医院走廊冲突', '救人之后，周明远、老孙和沈玉芳对下一步产生直接冲突');
+      E.addClue('医院走廊冲突', '救人之后，周怀安、老孙和沈玉芳对下一步产生直接冲突');
       E.setFlag('v07_triangle_conflict_seen', true);
     },
     text: () => {
       const suLine = E.getFlag('rescued_su')
         ? '苏晚亭躺在病房里，隔着一扇门，你能听见她很轻的咳声。'
         : '苏晚亭仍然不在这里，沈玉芳手里攥着那张学生证，像攥着一块会割手的玻璃。';
-      return `医院走廊很窄，消毒水的味道压住了码头带来的潮腥。<br><br>${suLine}<br><br>周明远第一个开口，声音压得很低：<span class="sys">"先别问了。她们刚逃出来。先让她们睡一觉。"</span><br><br>老孙把帽子夹在腋下，脸色很难看：<span class="sys">"睡一觉？天亮以前，傅启元的人就能把码头账本烧干净。活人要保，证据也要保。"</span><br><br>沈玉芳坐在长椅上，突然抬头：<span class="sys">"你们都在说傅启元，可陆念薇呢？她不是清白的。她知道箱子里是什么，也知道陈老师会死。"</span><br><br>三条线终于撞在同一条走廊里：苏晚亭要救，沈玉芳要活，陆念薇要交代。你不可能同时让所有人满意。`;
+      return `医院走廊很窄，消毒水的味道压住了码头带来的潮腥。<br><br>${suLine}<br><br>周怀安第一个开口，声音压得很低：<span class="sys">"先别问了。她们刚逃出来。先让她们睡一觉。"</span><br><br>老孙把帽子夹在腋下，脸色很难看：<span class="sys">"睡一觉？天亮以前，傅启元的人就能把码头账本烧干净。活人要保，证据也要保。"</span><br><br>沈玉芳坐在长椅上，突然抬头：<span class="sys">"你们都在说傅启元，可陆念薇呢？她不是清白的。她知道箱子里是什么，也知道陈老师会死。"</span><br><br>三条线终于撞在同一条走廊里：苏晚亭要救，沈玉芳要活，陆念薇要交代。你不可能同时让所有人满意。`;
     },
     choices: [
       { text: '🛏️ 先保住活人证词，任何审问等天亮以后', effect: () => E.setFlag('v07_choice_protect_witnesses', true), goto: 'ch4_hospital_protect_witnesses' },
@@ -91,7 +91,7 @@ function applyNarrativeDepthV07() {
       E.addClue('连夜压码头', '你说服老孙立刻封锁码头，但这会让傅启元提前意识到你掌握了关键证人');
       E.addHeat(2, '老孙连夜动人，傅启元也会立刻得到风声。');
     },
-    text: () => `老孙听完你的判断，终于把烟点着。<br><br><span class="sys">"好。我调两个人去码头，不走公文。出了事，我没来过医院。"</span><br><br>周明远猛地抬头：<span class="sys">"那病房怎么办？傅启元的人如果来呢？"</span><br><br>你看向走廊尽头。那里有一扇半开的窗，夜雾正从窗缝里渗进来。<br><br>你突然意识到：傅启元不一定要回码头。他更可能直接来医院，找最不能被留下的人。`,
+    text: () => `老孙听完你的判断，终于把烟点着。<br><br><span class="sys">"好。我调两个人去码头，不走公文。出了事，我没来过医院。"</span><br><br>周怀安猛地抬头：<span class="sys">"那病房怎么办？傅启元的人如果来呢？"</span><br><br>你看向走廊尽头。那里有一扇半开的窗，夜雾正从窗缝里渗进来。<br><br>你突然意识到：傅启元不一定要回码头。他更可能直接来医院，找最不能被留下的人。`,
     choices: [
       { text: '🚬 出门等傅启元来谈条件', goto: 'ch4_fu_private_offer' },
       { text: '🕯️ 先设法找陆念薇，让她补上缺口', goto: 'ch4_lu_confrontation' }
@@ -105,7 +105,7 @@ function applyNarrativeDepthV07() {
       E.setFlag('v07_lu_confronted', true);
       E.addClue('陆念薇医院现身', '陆念薇来到医院，沈玉芳当面指认她知道教具箱和傅启元的安排');
     },
-    text: () => `半小时后，后门传来两短一长的敲门声。<br><br>陆念薇站在门外，披着一件不合身的黑色大衣，眼底有很深的青影。<br><br>沈玉芳一看见她就站了起来：<span class="sys">"你还敢来？陈老师死前去找过你。晚亭也是因为信了你，才去查箱子。"</span><br><br>陆念薇没有反驳。她看向病房门，声音发紧：<span class="sys">"傅启元要把最后一批货从南码头送走。人如果还在他手里，也会一起走。"</span><br><br>周明远往前一步：<span class="sys">"那你为什么现在才说？"</span><br><br>陆念薇看着他，又像是在看另一个早就死掉的人：<span class="sys">"因为我一直以为，沉默至少能让一个人活着。后来我发现，沉默只是让他们更方便地挑下一个。"</span><br><br>这不是和解。是三条线终于互相咬住。`,
+    text: () => `半小时后，后门传来两短一长的敲门声。<br><br>陆念薇站在门外，披着一件不合身的黑色大衣，眼底有很深的青影。<br><br>沈玉芳一看见她就站了起来：<span class="sys">"你还敢来？陈老师死前去找过你。晚亭也是因为信了你，才去查箱子。"</span><br><br>陆念薇没有反驳。她看向病房门，声音发紧：<span class="sys">"傅启元要把最后一批货从南码头送走。人如果还在他手里，也会一起走。"</span><br><br>周怀安往前一步：<span class="sys">"那你为什么现在才说？"</span><br><br>陆念薇看着他，又像是在看另一个早就死掉的人：<span class="sys">"因为我一直以为，沉默至少能让一个人活着。后来我发现，沉默只是让他们更方便地挑下一个。"</span><br><br>这不是和解。是三条线终于互相咬住。`,
     choices: [
       { text: '🚓 把陆念薇交给老孙，换正式口供', effect: () => E.setFlag('v07_lu_to_sun', true), goto: 'ch4_conclusion' },
       { text: '🧾 让她写下傅启元的下一步安排', effect: () => { E.setFlag('v07_lu_statement', true); E.addClue('陆念薇补充口供', '陆念薇写下傅启元南码头转运安排'); }, goto: 'ch4_fu_private_offer' },
@@ -118,9 +118,9 @@ function applyNarrativeDepthV07() {
     weather: 5,
     effect: () => {
       E.setFlag('v07_fu_private_offer_seen', true);
-      E.addClue('傅启元私下交易', '傅启元没有只靠威胁，而是试图用事务所、周明远和苏母的安全与你交易');
+      E.addClue('傅启元私下交易', '傅启元没有只靠威胁，而是试图用事务所、周怀安和苏母的安全与你交易');
     },
-    text: () => `你在医院后巷等了不到十分钟，黑色汽车就停在了巷口。<br><br>傅启元没有带太多人。他下车时甚至还替你挡了一下风，像一个体面的上司在照顾下属。<br><br><span class="sys">"沈先生，你很会找人。这样的人，不该只开一家靠寻猫找债活着的小事务所。"</span><br><br>他递来一张名片，背面写着一个数字。足够买下你半辈子的安稳。<br><br><span class="sys">"明天早上，周明远会继续做他的编辑。苏太太会继续在闸北养病。你会得到一笔钱。至于陆念薇，她本来就是在逃犯。让她承担一切，所有人都轻松。"</span><br><br>他终于把刀递到你手里。不是杀人的刀，是让你替他选择谁该被牺牲。`,
+    text: () => `你在医院后巷等了不到十分钟，黑色汽车就停在了巷口。<br><br>傅启元没有带太多人。他下车时甚至还替你挡了一下风，像一个体面的上司在照顾下属。<br><br><span class="sys">"沈先生，你很会找人。这样的人，不该只开一家靠寻猫找债活着的小事务所。"</span><br><br>他递来一张名片，背面写着一个数字。足够买下你半辈子的安稳。<br><br><span class="sys">"明天早上，周怀安会继续做他的编辑。苏太太会继续在闸北养病。你会得到一笔钱。至于陆念薇，她本来就是在逃犯。让她承担一切，所有人都轻松。"</span><br><br>他终于把刀递到你手里。不是杀人的刀，是让你替他选择谁该被牺牲。`,
     choices: [
       { text: '💼 接下名片，假装答应交易', effect: () => { E.setFlag('v07_accepted_fu_card', true); E.addClue('傅启元名片', '傅启元亲自递出交易名片，试图让陆念薇背下全部罪名'); }, goto: 'ch4_conclusion' },
       { text: '🧾 拒绝交易，把货运单和清场指令压回他手里', effect: () => { E.setFlag('v07_rejected_fu_deal', true); E.addClue('拒绝傅启元交易', '你拒绝让陆念薇背下全部罪名，坚持追查傅启元本人'); }, goto: 'ch4_conclusion' },
