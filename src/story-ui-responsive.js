@@ -136,6 +136,15 @@ function applyResponsiveStoryUI() {
     this.renderScenePage();
   };
 
+  const oldScroll = E.scroll.bind(E);
+  E.scroll = function () {
+    if (document.body.classList.contains('game-active') && this.sceneEl) {
+      setTimeout(() => this.sceneEl.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+      return;
+    }
+    oldScroll();
+  };
+
   const oldStart = E.start.bind(E);
   E.start = function () {
     document.body.classList.add('game-active');
