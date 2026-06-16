@@ -1,5 +1,5 @@
-// ===== v0.6.1 故事一致性修复 =====
-// 这个补丁只修复 v0.6 合并后的叙事衔接问题，不新增主线内容。
+// ===== 故事一致性修复 =====
+// 从 v0.6.1-fixes.js 稳定迁出，作为长期一致性模块保留。
 
 function applyStoryConsistencyFixes() {
   if (typeof E === 'undefined' || typeof nodes === 'undefined') return;

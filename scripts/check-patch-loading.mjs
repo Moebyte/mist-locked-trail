@@ -17,17 +17,25 @@ function assert(condition, message) {
 
 const indexHtml = read('index.html');
 assert(indexHtml.includes('src/patches.js'), 'index.html 应只加载 src/patches.js 作为补丁入口');
-const directPatchScripts = [...indexHtml.matchAll(/src="(src\/v[^"']+\.js)"/g)].map(m => m[1]);
+const directPatchScripts = [...indexHtml.matchAll(/src="(src\/[^"]+\.js)"/g)]
+  .map(m => m[1])
+  .filter(src => src !== 'src/engine.js' && src !== 'src/story.js' && src !== 'src/main.js' && src !== 'src/patches.js');
 assert(directPatchScripts.length === 0, `index.html 不应直接加载补丁脚本：${directPatchScripts.join(', ')}`);
 
 const patchesJs = read('src/patches.js');
-const manifestPatches = [...patchesJs.matchAll(/['"](src\/v[^'"]+\.js)['"]/g)].map(m => m[1]);
+const manifestPatches = [];
+for (const quote of ["'", '"']) {
+  for (const part of patchesJs.split(quote)) {
+    if (part.startsWith('src/') && part.endsWith('.js') && part !== 'src/patches.js') manifestPatches.push(part);
+  }
+}
+const uniqueManifestPatches = [...new Set(manifestPatches)];
 const discoveredPatches = listPatchScripts(repoRoot);
 
-assert(manifestPatches.length > 0, 'src/patches.js 中没有登记任何补丁');
+assert(uniqueManifestPatches.length > 0, 'src/patches.js 中没有登记任何补丁或稳定模块');
 assert(
-  JSON.stringify(manifestPatches) === JSON.stringify(discoveredPatches),
-  `补丁清单不一致：\n  patches.js=${manifestPatches.join(', ')}\n  discovered=${discoveredPatches.join(', ')}`
+  JSON.stringify(uniqueManifestPatches) === JSON.stringify(discoveredPatches),
+  `补丁清单不一致：\n  patches.js=${uniqueManifestPatches.join(', ')}\n  loader=${discoveredPatches.join(', ')}`
 );
 
 function freshState() {
@@ -125,4 +133,4 @@ if (errors.length) {
   process.exit(1);
 }
 
-console.log(`Patch loading check passed: ${discoveredPatches.length} patches loaded.`);
+console.log(`Patch loading check passed: ${discoveredPatches.length} scripts loaded.`);
