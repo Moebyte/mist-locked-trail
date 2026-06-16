@@ -121,6 +121,19 @@ test('完整搜查路线能救出苏晚亭，有限搜查只得到转移痕迹',
   assert(tight.E.routeDockDeepByPressure() === 'ch4_dock_deep_trace', '晚到暗室应只找到苏晚亭转移痕迹');
 });
 
+test('隐藏结局信件按苏晚亭是否获救切换来源', () => {
+  const rescued = runtime({ flags: { rescued_su: true, rescued_yufang: true } });
+  const rescuedText = rescued.nodes.end_conspiracy_detail.text();
+  assert(rescuedText.includes('周怀安替苏晚亭送来一封信'), '救出苏晚亭时应由周怀安转交苏晚亭来信');
+  assert(rescuedText.includes('谢谢你先找人，而不是先找凶手。——苏晚亭'), '救出苏晚亭时应保留亲笔感谢句');
+
+  const traced = runtime({ flags: { su_moved_from_dock: true, rescued_yufang: true } });
+  const tracedText = traced.nodes.end_conspiracy_detail.text();
+  assert(tracedText.includes('她没有见过你'), '未救出苏晚亭时应说明她没有见过主角');
+  assert(tracedText.includes('请替我谢谢那位沈先生'), '未救出苏晚亭时应通过周怀安转述感谢');
+  assert(!tracedText.includes('你收到一封信。信上只有一行字'), '未救出苏晚亭时不应使用固定直接来信文案');
+});
+
 console.log('Fusheng route smoke reports:');
 for (const report of reports) console.log(`- ${report}`);
 
