@@ -130,9 +130,10 @@ function applyNarrativeDepthV07() {
 
   if (nodes.ch4_conclusion) {
     const oldConclusionText = nodes.ch4_conclusion.text;
-    const oldConclusionChoices = typeof nodes.ch4_conclusion.choices === 'function'
-      ? nodes.ch4_conclusion.choices
-      : () => nodes.ch4_conclusion.choices || [];
+    const originalConclusionChoices = nodes.ch4_conclusion.choices;
+    const oldConclusionChoices = typeof originalConclusionChoices === 'function'
+      ? originalConclusionChoices
+      : () => originalConclusionChoices || [];
 
     nodes.ch4_conclusion.text = (s) => {
       const base = typeof oldConclusionText === 'function' ? oldConclusionText(s) : oldConclusionText;
