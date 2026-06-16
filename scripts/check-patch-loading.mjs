@@ -6,6 +6,7 @@ import { listPatchScripts, runPatchScripts } from './patch-loader.mjs';
 
 const repoRoot = process.cwd();
 const errors = [];
+const moduleEntry = 'src/story-modules.js';
 
 function read(rel) {
   return fs.readFileSync(path.join(repoRoot, rel), 'utf8');
@@ -16,26 +17,27 @@ function assert(condition, message) {
 }
 
 const indexHtml = read('index.html');
-assert(indexHtml.includes('src/patches.js'), 'index.html 应只加载 src/patches.js 作为补丁入口');
-const directPatchScripts = [...indexHtml.matchAll(/src="(src\/[^"]+\.js)"/g)]
+assert(indexHtml.includes(moduleEntry), 'index.html 应加载 src/story-modules.js 作为故事模块入口');
+assert(!indexHtml.includes('src/patches.js'), 'index.html 不应继续加载 src/patches.js');
+const directStoryScripts = [...indexHtml.matchAll(/src="(src\/[^"]+\.js)"/g)]
   .map(m => m[1])
-  .filter(src => src !== 'src/engine.js' && src !== 'src/story.js' && src !== 'src/main.js' && src !== 'src/patches.js');
-assert(directPatchScripts.length === 0, `index.html 不应直接加载补丁脚本：${directPatchScripts.join(', ')}`);
+  .filter(src => src !== 'src/engine.js' && src !== 'src/story.js' && src !== 'src/main.js' && src !== moduleEntry);
+assert(directStoryScripts.length === 0, `index.html 不应直接加载故事模块：${directStoryScripts.join(', ')}`);
 
-const patchesJs = read('src/patches.js');
-const manifestPatches = [];
+const modulesJs = read(moduleEntry);
+const manifestModules = [];
 for (const quote of ["'", '"']) {
-  for (const part of patchesJs.split(quote)) {
-    if (part.startsWith('src/') && part.endsWith('.js') && part !== 'src/patches.js') manifestPatches.push(part);
+  for (const part of modulesJs.split(quote)) {
+    if (part.startsWith('src/') && part.endsWith('.js') && part !== moduleEntry) manifestModules.push(part);
   }
 }
-const uniqueManifestPatches = [...new Set(manifestPatches)];
-const discoveredPatches = listPatchScripts(repoRoot);
+const uniqueManifestModules = [...new Set(manifestModules)];
+const discoveredModules = listPatchScripts(repoRoot);
 
-assert(uniqueManifestPatches.length > 0, 'src/patches.js 中没有登记任何补丁或稳定模块');
+assert(uniqueManifestModules.length > 0, 'src/story-modules.js 中没有登记任何故事模块');
 assert(
-  JSON.stringify(uniqueManifestPatches) === JSON.stringify(discoveredPatches),
-  `补丁清单不一致：\n  patches.js=${uniqueManifestPatches.join(', ')}\n  loader=${discoveredPatches.join(', ')}`
+  JSON.stringify(uniqueManifestModules) === JSON.stringify(discoveredModules),
+  `故事模块清单不一致：\n  story-modules.js=${uniqueManifestModules.join(', ')}\n  loader=${discoveredModules.join(', ')}`
 );
 
 function freshState() {
@@ -56,7 +58,7 @@ function freshState() {
 
 const E = {
   state: freshState(),
-  saveKey: 'patch-loading-check',
+  saveKey: 'story-module-check',
   logEl: { innerHTML: '', style: {} },
   sceneEl: { style: {} },
   titleEl: {},
@@ -87,7 +89,7 @@ const E = {
   setFlag(k, v) { this.state.flags[k] = v; },
   getFlag(k) { return this.state.flags[k]; },
   canDeduce() { return true; },
-  caseStrength() { return { name: '补丁加载检查', desc: '补丁加载一致性检查占位。' }; },
+  caseStrength() { return { name: '故事模块检查', desc: '故事模块加载一致性检查占位。' }; },
 };
 
 const domReadyHandlers = [];
@@ -120,17 +122,17 @@ runPatchScripts(runScript, repoRoot);
 for (const handler of domReadyHandlers) handler();
 
 const nodes = context.nodes;
-assert(nodes && typeof nodes === 'object', '补丁加载后无法获得 nodes');
-assert(typeof E.v07ResolveEnding === 'function', '补丁加载后缺少 E.v07ResolveEnding');
-assert(typeof E.v07InvestigationQuality === 'function', '补丁加载后缺少 E.v07InvestigationQuality');
+assert(nodes && typeof nodes === 'object', '故事模块加载后无法获得 nodes');
+assert(typeof E.v07ResolveEnding === 'function', '故事模块加载后缺少 E.v07ResolveEnding');
+assert(typeof E.v07InvestigationQuality === 'function', '故事模块加载后缺少 E.v07InvestigationQuality');
 for (const nodeId of ['ch4_hospital_conflict', 'ch4_lu_confrontation', 'ch4_fu_private_offer', 'ch4_zhou_present_diary', 'ch4_sun_present_waybill']) {
-  assert(nodes[nodeId], `补丁加载后缺少节点：${nodeId}`);
+  assert(nodes[nodeId], `故事模块加载后缺少节点：${nodeId}`);
 }
 
 if (errors.length) {
-  console.error('\nPatch loading check failed:');
+  console.error('\nStory module loading check failed:');
   for (const error of errors) console.error(`- ${error}`);
   process.exit(1);
 }
 
-console.log(`Patch loading check passed: ${discoveredPatches.length} scripts loaded.`);
+console.log(`Story module loading check passed: ${discoveredModules.length} scripts loaded.`);
