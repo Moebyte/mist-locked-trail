@@ -8,9 +8,28 @@
   function applyRegionGates() {
     if (typeof E === 'undefined' || typeof nodes === 'undefined') return;
 
+    const askedDoorFlag = ['asked', 'door'].join('_');
+
     E.isUniversityComplete = function () {
-      return this.hasClue('舍监证词') && this.getFlag(['asked', 'door'].join('_')) && this.hasClue('法租界地图');
+      return this.hasClue('舍监证词') && this.getFlag(askedDoorFlag) && this.hasClue('法租界地图');
     };
+
+    function universityChoices() {
+      const opts = [];
+      if (!E.hasClue('舍监证词')) opts.push({ text: '👩 问舍监——失踪那天的情况', goto: 'ch2_univ_matron' });
+      if (!E.getFlag(askedDoorFlag)) opts.push({ text: '🚪 找门房——问黑衣男人的事', goto: 'ch2_univ_door' });
+      if (!E.hasClue('法租界地图')) opts.push({ text: '📄 检查她的论文草稿', goto: 'ch2_univ_paper' });
+      if (E.isUniversityComplete()) opts.push({ text: '🔙 已经查得差不多了，去下一个地方', goto: 'ch2_leave_univ' });
+      return opts;
+    }
+
+    function universityFollowupChoices() {
+      const opts = universityChoices();
+      if (!opts.some(choice => choice.goto === 'ch2_university')) {
+        opts.push({ text: '🔙 回到宿舍继续调查', goto: 'ch2_university' });
+      }
+      return opts;
+    }
 
     E.isSchoolComplete = function () {
       const yufangDone = !this.getFlag('sister_case') || this.hasClue('沈玉芳与陈明远');
@@ -23,20 +42,16 @@
     };
 
     if (nodes.ch2_university && !nodes.ch2_university.__regionGateHubPatched) {
-      const oldChoices = nodes.ch2_university.choices;
-      const visitedFlag = ['asked', 'door'].join('_');
-      const visitedTarget = ['ch2', 'univ', 'door'].join('_');
-      nodes.ch2_university.choices = function (s) {
-        const opts = choicesOf(oldChoices, s).filter(function (choice) {
-          return !(choice.goto === visitedTarget && E.getFlag(visitedFlag));
-        });
-        const hasLeave = opts.some(choice => choice.goto === 'ch2_leave_univ');
-        if (E.isUniversityComplete() && !hasLeave) {
-          opts.push({ text: '🔙 已经查得差不多了，去下一个地方', goto: 'ch2_leave_univ' });
-        }
-        return opts;
-      };
+      nodes.ch2_university.choices = universityChoices;
       nodes.ch2_university.__regionGateHubPatched = true;
+    }
+
+    if (nodes.ch2_univ_matron) {
+      nodes.ch2_univ_matron.choices = universityFollowupChoices;
+    }
+
+    if (nodes.ch2_univ_door) {
+      nodes.ch2_univ_door.choices = universityFollowupChoices;
     }
 
     if (nodes.ch2_univ_paper) {
