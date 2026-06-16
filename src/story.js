@@ -404,10 +404,13 @@ ${extra}`;
 
 苏母给你倒了一杯茶。`,
     effect: (s) => { E.addContact('苏母'); E.discoverRelation('苏母'); },
-    choices: [
-      { text: '💬 问苏晚亭最近的情况', goto: 'ch2_home_talk' },
-      { text: '🖼️ 注意墙上的照片', goto: 'ch2_home_photo' },
-    ],
+    choices: (s) => {
+      const opts = [];
+      if (!E.hasClue('母亲证词')) opts.push({ text: '💬 问苏晚亭最近的情况', goto: 'ch2_home_talk' });
+      if (!E.getFlag('asked_photo')) opts.push({ text: '🖼️ 注意墙上的照片', goto: 'ch2_home_photo' });
+      if (E.hasClue('母亲证词') && E.getFlag('asked_photo')) opts.push({ text: '🔙 告辞', goto: 'ch2_leave_home' });
+      return opts;
+    },
   },
 
   ch2_home_talk: {
@@ -425,7 +428,7 @@ ${extra}`;
     choices: (s) => {
       const opts = [];
       if (!E.getFlag('asked_photo')) opts.push({ text: '🖼️ 墙上的照片里有什么线索？', goto: 'ch2_home_photo' });
-      opts.push({ text: '🔙 告辞，去下一个地方', goto: 'ch2_leave_home' });
+      opts.push({ text: '🔙 回到苏家', goto: 'ch2_home' });
       return opts;
     },
   },
@@ -442,7 +445,7 @@ ${extra}`;
     effect: (s) => { E.addClue('裁切的照片', '全家福里有人被裁掉；袖口有校徽'); E.setFlag('asked_photo', true); },
     choices: [
       { text: '💬 问苏母——照片里还有谁？', goto: 'ch2_home_ask_photo' },
-      { text: '🔙 告辞', goto: 'ch2_leave_home' },
+      { text: '🔙 回到苏家', goto: 'ch2_home' },
     ],
   },
 
@@ -461,7 +464,7 @@ ${extra}`;
 离开苏家的时候，你回头看了一眼那扇门——一个坐着轮椅的母亲，一个失踪的女儿，一张被裁掉的照片。这个家藏着的事，比表面上看到的要多。`,
     effect: (s) => { E.addClue('表哥', '照片上裁掉的人是苏晚亭的"表哥"；苏母不愿多谈'); E.setFlag('asked_mother_photo', true); },
     choices: [
-      { text: '🔙 去下一个地方', goto: 'ch2_leave_home' },
+      { text: '🔙 回到苏家', goto: 'ch2_home' },
     ],
   },
 
@@ -474,7 +477,7 @@ ${extra}`;
     },
     text: () => `你从怀里掏出那张照片，递给苏母。<br><br>她接过去的时候手是稳的——但看到照片的那一瞬间，眼泪毫无预兆地落了下来。她没有抬手去擦。<br><br><span class="sys">"这是……她失踪前两个月拍的。光启公园。她说那天天气好，非要拉我去，我没去成。"</span><br><br>她用手指轻轻摩挲照片边缘，像在抚摸女儿的脸。<br><br><span class="sys">"她拍完回来说：妈，这张照片我要留给明远。如果有一天我不见了，他至少有张照片可以找我。"</span><br><br>她说到这里，忽然停住了。<br><br>苏晚亭在拍照那天就已经想到了自己会失踪。这不是临时起意的出走——她在做准备。<br><br>她把照片还给你，声音很轻：<span class="sys">"找到她。不管在哪里，找到她。"</span><br><br>你点点头，把照片贴胸收好。`,
     choices: [
-      { text: '🔙 告辞，继续调查', goto: 'ch2_leave_home' },
+      { text: '🔙 回到苏家', goto: 'ch2_home' },
     ],
   },
 
