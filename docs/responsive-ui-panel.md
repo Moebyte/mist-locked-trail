@@ -19,12 +19,12 @@
 
 ## 本次改动
 
-### 1. 新增响应式 UI 模块
+### 1. 响应式 UI 模块
 
-新增：
+当前模块位置：
 
 ```text
-src/story-ui-responsive.js
+src/story-modules/ui-responsive.js
 ```
 
 它不改剧情，不改存档，只增强 UI：
@@ -37,10 +37,10 @@ src/story-ui-responsive.js
 
 ### 2. 接入故事模块入口
 
-`src/story-modules.js` 新增加载：
+`src/story-modules.js` 加载：
 
 ```text
-src/story-ui-responsive.js
+src/story-modules/ui-responsive.js
 ```
 
 UI 增强也作为正式故事模块的一部分管理。
@@ -118,7 +118,7 @@ UI 增强也作为正式故事模块的一部分管理。
 
 ## 兼容性说明
 
-`story-ui-responsive.js` 会检测完整运行时是否存在。
+`src/story-modules/ui-responsive.js` 会检测完整运行时是否存在。
 
 如果是在 Node 测试环境里的轻量 stub，它会自动跳过，不影响现有剧情测试。
 
