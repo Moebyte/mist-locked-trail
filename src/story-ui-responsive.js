@@ -74,7 +74,8 @@ function applyResponsiveStoryUI() {
 
   function splitSceneHtml(html) {
     const isPhone = window.matchMedia && window.matchMedia('(max-width: 640px)').matches;
-    const limit = isPhone ? 190 : 340;
+    const limit = isPhone ? 150 : 260;
+    const maxBlocksPerPage = isPhone ? 1 : 2;
     const blocks = html
       .replace(/<br\s*\/?>\s*<br\s*\/?>/gi, '<!--PAGE_BREAK-->')
       .split('<!--PAGE_BREAK-->')
@@ -83,13 +84,16 @@ function applyResponsiveStoryUI() {
 
     if (blocks.length <= 1 && plainLength(html) <= limit) return [html];
 
+    const sourceBlocks = blocks.length ? blocks : [html];
     const pages = [];
     let current = [];
     let size = 0;
 
-    for (const block of blocks.length ? blocks : [html]) {
+    for (const block of sourceBlocks) {
       const blockSize = Math.max(plainLength(block), 20);
-      if (current.length && size + blockSize > limit) {
+      const wouldOverflowText = current.length && size + blockSize > limit;
+      const wouldOverflowBlocks = current.length >= maxBlocksPerPage;
+      if (wouldOverflowText || wouldOverflowBlocks) {
         pages.push(current.join('<br><br>'));
         current = [block];
         size = blockSize;
@@ -109,6 +113,7 @@ function applyResponsiveStoryUI() {
     this.scenePage = Math.max(0, Math.min(this.scenePage || 0, total - 1));
     const isLast = this.scenePage >= total - 1;
 
+    this.sceneEl.classList.toggle('has-scene-pager', total > 1);
     this.textEl.innerHTML = this.scenePages[this.scenePage];
     this.choicesEl.classList.toggle('choices-hidden', total > 1 && !isLast);
 
@@ -129,8 +134,8 @@ function applyResponsiveStoryUI() {
     pager.style.display = 'flex';
     pager.innerHTML = `
       <button class="scene-page-btn" ${this.scenePage === 0 ? 'disabled' : ''} onclick="E.prevScenePage()">上一页</button>
-      <button class="scene-page-btn primary" onclick="E.nextScenePage()">${isLast ? '查看选择' : '下一页'}</button>
-      <span class="scene-page-indicator">${this.scenePage + 1} / ${total}</span>
+      <button class="scene-page-btn primary" onclick="E.nextScenePage()">${isLast ? '显示选项' : '下一页'}</button>
+      <span class="scene-page-indicator">第 ${this.scenePage + 1} / ${total} 页</span>
     `;
   };
 
@@ -155,7 +160,7 @@ function applyResponsiveStoryUI() {
   };
 
   E.setupScenePager = function () {
-    if (!this.textEl || !this.choicesEl) return;
+    if (!this.textEl || !this.choicesEl || !this.sceneEl) return;
     const html = this.textEl.innerHTML || '';
     this.scenePages = splitSceneHtml(html);
     this.scenePage = 0;
