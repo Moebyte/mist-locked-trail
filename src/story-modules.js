@@ -10,7 +10,8 @@
     'src/story-modules/evidence-polish.js',
     'src/story-modules/narrative-depth.js',
     'src/story-modules/causal-echo.js',
-    'src/story-modules/ui-responsive.js'
+    'src/story-modules/ui-responsive.js',
+    'src/story-modules/region-gates.js'
   ];
 
   window.MLT_STORY_MODULES = modules.slice();
