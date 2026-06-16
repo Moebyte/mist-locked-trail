@@ -18,6 +18,29 @@ function applyResponsiveStoryUI() {
   E.scenePage = 0;
   E.scenePages = [];
 
+  E.themeKey = 'mlt_theme_mode';
+  E.themeMode = localStorage.getItem(E.themeKey) || 'night';
+
+  E.applyThemeMode = function (mode) {
+    const next = mode === 'day' ? 'day' : 'night';
+    this.themeMode = next;
+    document.body.classList.toggle('theme-day', next === 'day');
+    document.body.classList.toggle('theme-night', next !== 'day');
+    const btn = document.getElementById('btn-atmo');
+    if (btn) btn.textContent = next === 'day' ? '🌙 夜间' : '☀️ 日间';
+    try { localStorage.setItem(this.themeKey, next); } catch (err) {}
+  };
+
+  E.toggleThemeMode = function () {
+    const next = this.themeMode === 'day' ? 'night' : 'day';
+    this.applyThemeMode(next);
+    this.toast(next === 'day' ? '已切换到日间档案模式。' : '已切换到夜间侦探模式。');
+  };
+
+  E.applyThemeMode(E.themeMode);
+  const themeButton = document.getElementById('btn-atmo');
+  if (themeButton) themeButton.onclick = () => E.toggleThemeMode();
+
   E.setPanelTab = function (tab) {
     this.panelTab = tab || 'overview';
     this.renderPanel();
@@ -38,7 +61,7 @@ function applyResponsiveStoryUI() {
   function pageNav(key, page, totalPages, totalCount) {
     if (totalPages <= 1) return `<div class="panel-note">共 ${totalCount} 条。</div>`;
     return `
-      <div style="display:flex;align-items:center;gap:8px;margin-top:10px">
+      <div class="panel-page-nav">
         <button class="scene-page-btn" ${page <= 0 ? 'disabled' : ''} onclick="E.setPanelListPage('${key}', ${page - 1})">上一页</button>
         <button class="scene-page-btn primary" ${page >= totalPages - 1 ? 'disabled' : ''} onclick="E.setPanelListPage('${key}', ${page + 1})">下一页</button>
         <span class="scene-page-indicator">${page + 1} / ${totalPages} · 共 ${totalCount} 条</span>
