@@ -788,8 +788,10 @@ ${extra}`;
     effect: (s) => { E.addClue('沈玉芳与陈明远', '走得近，经常借书聊天；失踪前心不在焉，匆忙离开未带物品'); },
     choices: [
       { text: '💬 问陈老师的事', goto: 'ch3_school_teacher' },
+      { text: '🔙 回到校长办公室', goto: 'ch3_school' },
       { text: '💬 学校还有什么异常？', goto: 'ch3_school_weird' },
       { text: '📖 看陈老师的办公室', goto: 'ch3_school_office' },
+      { text: '🔙 回到校长办公室', goto: 'ch3_school' },
     ],
   },
 
@@ -869,6 +871,7 @@ ${extra}`;
     effect: (s) => { E.addClue('陆小姐与校董会', '陆小姐曾以翻译合同名义接触光华小学董事会秘书傅启元'); E.addContact('傅启元'); },
     choices: [
       { text: '📖 看陈老师的办公室', goto: 'ch3_school_office' },
+      { text: '🔙 回到校长办公室', goto: 'ch3_school' },
       { text: '🔙 整理线索', goto: 'ch3_wrapup' },
     ],
   },
@@ -893,7 +896,9 @@ ${extra}`;
     effect: (s) => { E.addClue('苏晚亭与陈明远', '失踪前多次来学校找陈老师借书'); E.setFlag('chen_su_link', true); },
     choices: [
       { text: '💬 学校还有什么异常？', goto: 'ch3_school_weird' },
+      { text: '🔙 回到校长办公室', goto: 'ch3_school' },
       { text: '📖 看陈老师的办公室', goto: 'ch3_school_office' },
+      { text: '🔙 回到校长办公室', goto: 'ch3_school' },
     ],
   },
 
@@ -913,6 +918,7 @@ ${extra}`;
     effect: (s) => { E.addClue('陈老师与女子争吵', '出事前三天；沈玉芳同时请假失踪'); },
     choices: [
       { text: '📖 看陈老师的办公室', goto: 'ch3_school_office' },
+      { text: '🔙 回到校长办公室', goto: 'ch3_school' },
     ],
   },
 
