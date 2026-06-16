@@ -1115,11 +1115,9 @@ ${strength.desc}
         if (score >= 6) return 'end_conspiracy';
         return 'end_archive';
       } },
-      { text: '📁 把现有材料交给巡捕房，暂时结案', goto: 'end_archive' },
       { text: '🔍 推理——指认幕后真凶', goto: 'ch4_accuse' },
       { text: '🕯️ 不急着抓人，先追苏晚亭和沈玉芳的下落', when: (s) => E.getFlag('rescued_yufang') && E.getFlag('deduced_fusheng') && !E.getFlag('missed_deadline'), goto: 'end_conspiracy_detail' },
       { text: '🕯️ 追查被转走的人质', when: (s) => E.getFlag('missed_deadline'), goto: 'end_too_late' },
-      { text: '🔍 推理——这是一个更大的阴谋，牵涉多方势力', goto: 'end_conspiracy' },
     ],
   },
 

@@ -138,11 +138,17 @@ function applyNarrativeDepthV07() {
     nodes.ch4_conclusion.text = (s) => {
       const base = typeof oldConclusionText === 'function' ? oldConclusionText(s) : oldConclusionText;
       const quality = E.v07InvestigationQuality();
-      const reasonText = quality.reasons.length
-        ? quality.reasons.map(r => `• ${r}`).join('<br>')
-        : '• 你的证据还散着，能写成报告，但很难逼任何人低头。';
-      return `${base}<br><br><b>调查质量：</b>${quality.score} 分<br>${reasonText}<br><br>这一刻，结论不再只是选择一个嫌疑人名字，而是看你救下了谁、保住了什么证据、有没有让关键人物当面对质。`;
-    };
+      const checks = [
+        ['沈玉芳获救', E.getFlag('rescued_yufang')],
+        ['苏晚亭获救', E.getFlag('rescued_su')],
+        ['查明福生仓', E.getFlag('deduced_fusheng')],
+        ['货运单曝光', E.getFlag('fu_waybill_exposed') || E.getFlag('sun_waybill_convinced')],
+        ['清场指令曝光', E.getFlag('fu_clearance_exposed') || E.getFlag('sun_clearance_convinced')],
+        ['保护了证人', E.getFlag('v07_witnesses_protected')],
+        ['陆念薇对质', E.getFlag('v07_lu_confronted')],
+      ];
+      const checklist = checks.map(([name, ok]) => ok ? `✅ ${name}` : `⚫ ${name}`).join('  ');
+      return `${base}<br><br><div style="border:1px solid var(--line);padding:10px;border-radius:4px;margin:8px 0"><b>📋 案件总结 · 调查质量 ${quality.score} 分</b><br>${checklist}</div><br>选择"按证据链自然收束"将根据你的调查质量自动得出最优结局。`; };
   }
 }
 
