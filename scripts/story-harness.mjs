@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
-import { runPatchScripts } from './patch-loader.mjs';
+import { runStoryModuleScripts } from './story-module-loader.mjs';
 
 export function freshState(overrides = {}) {
   return {
@@ -120,7 +120,7 @@ export function loadStoryRuntime(options = {}) {
 
   runScript('src/story.js', '\nglobalThis.nodes = nodes;');
   runScript('src/main.js');
-  runPatchScripts(runScript, repoRoot);
+  runStoryModuleScripts(runScript, repoRoot);
   for (const handler of domReadyHandlers) handler();
 
   const nodes = context.nodes;
