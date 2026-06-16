@@ -147,7 +147,7 @@
       } else {
         opts.push({ text: '🚓 带着福生仓线索回巡捕房找老孙', goto: 'ch4_sun_support' });
       }
-      opts.push({ text: '🔙 先回去整理线索', goto: 'ch3_wrapup' });
+      opts.push({ text: '🔙 暂不进仓，回去重新整理线索', goto: 'ch3_wrapup' });
       return opts;
     }
 
@@ -348,8 +348,7 @@
       nodes.ch4_sun_present_fusheng.text = () => `老孙看完纸条上的<span class="sys">"福生仓，三日清"</span>，脸色沉了下去。<br><br><span class="sys">"这是老王的字。他不会随便把一个仓库名留在卷宗里。"</span><br><br>他把纸条压在烟灰缸下，沉默很久。<br><br><span class="sys">"我不能走明面。能帮你的，只有私下这一步。立刻走，人少，快；调齐人手，稳，但慢，也更容易惊动他们。"</span>`;
       nodes.ch4_sun_present_fusheng.choices = [
         { text: '🏃 只带一个便衣立刻赶去福生仓（快，人少）', effect: () => E.setFlag('sun_fast_support', true), goto: 'ch4_dock_sun_fast_support' },
-        { text: '🚓 调齐人手再行动（稳，但慢，也更易惊动）', effect: () => E.setFlag('sun_full_support', true), goto: 'ch4_dock_wait' },
-        { text: '🔙 先回去整理线索', goto: 'ch3_wrapup' }
+        { text: '🚓 调齐人手再行动（稳，但慢，也更易惊动）', effect: () => E.setFlag('sun_full_support', true), goto: 'ch4_dock_wait' }
       ];
       nodes.ch4_sun_present_fusheng.__supportBalancePatched = true;
     }
@@ -389,7 +388,7 @@
           return [
             { text: '🚓 回巡捕房找老孙，并出示福生仓线索', goto: 'ch4_sun_support' },
             { text: '⚠️ 不等了，趁雾直接潜入仓库', effect: () => E.addHeat(1, '你放弃等待支援，选择冒险潜入。'), goto: () => E.routeDockByPressure() },
-            { text: '🔙 先回去整理线索', goto: 'ch3_wrapup' }
+            { text: '🔙 暂不等援，回去重新整理线索', goto: 'ch3_wrapup' }
           ];
         }
         return choicesOf(oldChoices, s);
