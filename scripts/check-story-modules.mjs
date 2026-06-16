@@ -54,6 +54,7 @@ const requiredModules = [
   'src/story-modules/evidence.js',
   'src/story-modules/evidence-polish.js',
   'src/story-modules/narrative-depth.js',
+  'src/story-modules/causal-echo.js',
   'src/story-modules/ui-responsive.js',
 ];
 for (const rel of requiredModules) {
