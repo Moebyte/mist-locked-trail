@@ -228,6 +228,8 @@ const E = {
     }
     const choices = typeof node.choices === 'function' ? node.choices(this.state) : node.choices;
     if (choices && choices.length) {
+      // Auto 2-column grid when 4+ choices
+      this.choicesEl.classList.toggle('choices-grid', choices.length >= 4);
       choices.forEach(c => {
         const btn = document.createElement('button');
         const locked = c.when && !c.when(this.state);

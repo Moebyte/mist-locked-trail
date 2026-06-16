@@ -426,12 +426,16 @@ body.theme-day #scene-card::after{
 }
 
 #choices{
-  display:flex;
-  flex-direction:column;
-  gap:10px;
+  display:grid;
+  grid-template-columns:1fr;
+  gap:8px;
   flex:0 0 auto;
   position:relative;
   z-index:1;
+}
+
+#choices.choices-grid{
+  grid-template-columns:1fr 1fr;
 }
 
 #scene-card.has-scene-pager #choices:not(.choices-hidden){
