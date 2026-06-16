@@ -1,5 +1,5 @@
-// ===== v0.7 剧情密度增强 =====
-// 目标：不继续堆系统，而是让人物线真正交汇、选择产生代价、结尾更依赖调查过程。
+// ===== 故事剧情密度模块 =====
+// 从 v0.7-narrative-depth.js 稳定迁出，负责三方冲突、傅启元交易与自然结局分流。
 
 function applyNarrativeDepthV07() {
   if (typeof E === 'undefined' || typeof nodes === 'undefined') return;
