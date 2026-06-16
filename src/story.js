@@ -143,7 +143,7 @@ ${extra}`;
       if (!E.hasClue('舍监证词')) opts.push({ text: '👩 问舍监——失踪那天的情况', goto: 'ch2_univ_matron' });
       if (!E.hasClue('黑衣男人') || !E.getFlag('asked_door')) opts.push({ text: '🚪 找门房——问黑衣男人的事', goto: 'ch2_univ_door' });
       if (!E.hasClue('法租界地图')) opts.push({ text: '📄 检查她的论文草稿', goto: 'ch2_univ_paper' });
-      if (E.hasClue('法租界地图')) opts.push({ text: '🔙 已经查得差不多了，去下一个地方', goto: 'ch2_leave_univ' });
+      if (E.hasClue('舍监证词') && E.getFlag('asked_door') && E.hasClue('法租界地图')) opts.push({ text: '🔙 已经查得差不多了，去下一个地方', goto: 'ch2_leave_univ' });
       return opts;
     },
   },
@@ -163,7 +163,7 @@ ${extra}`;
     choices: [
       { text: '🚪 去门房问黑衣男人的事', goto: 'ch2_univ_door' },
       { text: '📄 检查她的论文草稿', goto: 'ch2_univ_paper' },
-      { text: '🔙 差不多了，去下一站', goto: 'ch2_leave_univ' },
+      { text: '🔙 回到宿舍', goto: 'ch2_university' },
     ],
   },
 
@@ -183,7 +183,7 @@ ${extra}`;
     effect: (s) => { E.addClue('黑衣男人线索', '四十岁左右，北方口音，左手食指戴绿玉扳指'); E.setFlag('asked_door', true); },
     choices: [
       { text: '📄 检查论文草稿', goto: 'ch2_univ_paper' },
-      { text: '🔙 差不多了，去下一站', goto: 'ch2_leave_univ' },
+      { text: '🔙 回到宿舍', goto: 'ch2_university' },
     ],
   },
 
@@ -250,7 +250,6 @@ ${extra}`;
     effect: (s) => { E.addClue('法租界地图', '薛华立路 22 号被圈出'); E.addClue('铅笔清单', '薛华立路 22 号，周三下午三点，不要告诉任何人'); E.addItem('法租界地图', '夹在牛津字典里的书签地图，薛华立路 22 号被铅笔圈出。'); E.addItem('铅笔清单', '写在论文稿背面的轻淡字迹：薛华立路 22 号、周三下午三点、不要告诉任何人。'); },
     choices: [
       { text: '🔙 回到宿舍继续调查', goto: 'ch2_university' },
-      { text: '🔙 差不多了，去下一站', goto: 'ch2_leave_univ' },
     ],
   },
 
