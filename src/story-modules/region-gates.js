@@ -151,7 +151,7 @@
       return 'ch4_dock_deep_dual';
     };
 
-    if (!E.__heatPressureLabelPatched) {
+    if (!E.__heatPressureLabelPatched && typeof E.pressureLabel === 'function') {
       const oldPressureLabel = E.pressureLabel.bind(E);
       E.pressureLabel = function () {
         const base = oldPressureLabel();
@@ -163,7 +163,7 @@
       E.__heatPressureLabelPatched = true;
     }
 
-    if (!E.__heatCaseStrengthPatched) {
+    if (!E.__heatCaseStrengthPatched && typeof E.caseStrength === 'function') {
       const oldCaseStrength = E.caseStrength.bind(E);
       E.caseStrength = function () {
         const result = oldCaseStrength();
