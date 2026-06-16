@@ -1,0 +1,32 @@
+name: Validate story graph
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  validate-story:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Validate story graph
+        run: node scripts/validate-story.mjs
+
+      - name: Smoke test key story routes
+        run: node scripts/smoke-routes.mjs
+
+      - name: Smoke test evidence interactions
+        run: node scripts/smoke-evidence.mjs
+
+      - name: Smoke test evidence polish interactions
+        run: node scripts/smoke-evidence-polish.mjs

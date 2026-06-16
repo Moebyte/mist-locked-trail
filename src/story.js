@@ -29,7 +29,37 @@ const nodes = {
     choices: [
       { text: '💵 接下委托', effect: (s) => { s.chapter = 1; E.addContact('周明远'); E.addItem('苏晚亭的照片', '光启公园留影，照片背面写着"民国三十七年九月 · 光启公园 · 晚亭"。'); E.setFlag('took_case', true); }, goto: 'ch1_take' },
       { text: '❓ 先问几个问题', goto: 'ch1_ask' },
+      { text: '🚪 这个案子我不接', goto: 'end_refuse' },
     ],
+  },
+
+  end_refuse: {
+    title: '结局 · 雨不停',
+    weather: 0,
+    text: () => `你把信封推回去。
+
+<span class="sys">"周先生，这个案子我接不了。你另请高明吧。"</span>
+
+周明远愣了一下。他看着你，像是想说什么，最后只是把银元收回怀里。
+
+<span class="sys">"……我明白了。打扰了，沈先生。"</span>
+
+他站起来，鞠了一躬，走进雨里。
+
+你又叫了一壶茶。窗外的雨没有要停的意思。你看着对面的空椅子，心想：上海每天都有人失踪，你管不过来，也不想管。
+
+——三个月后。
+
+你在《申报》的社会版角落里看到一则简短的报道：「圣约翰大学女生苏某失踪案因线索不足，已由巡捕房归档。家属未再提出申诉。」
+
+报道旁边是一条皮鞋广告。
+
+你把报纸翻了过去，继续喝你的茶。
+
+雨还在下。
+
+<div style="color:#666;font-style:italic;margin-top:20px">—— 结局零 · 雨不停（隐藏结局）——</div>`,
+    type: 'end',
   },
 
   ch1_ask: {
@@ -49,6 +79,7 @@ const nodes = {
 他眼巴巴地看着你。`,
     choices: [
       { text: '💵 好，这委托我接了', effect: (s) => { s.chapter = 1; E.addContact('周明远'); E.addItem('苏晚亭的照片', '光启公园留影，照片背面写着"民国三十七年九月 · 光启公园 · 晚亭"。'); E.addClue('黑衣男人', '失踪前有人找过她'); E.setFlag('took_case', true); }, goto: 'ch1_take' },
+      { text: '🚪 听完了，但这个案子我不接', goto: 'end_refuse' },
     ],
   },
 
