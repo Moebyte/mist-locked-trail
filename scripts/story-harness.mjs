@@ -31,6 +31,7 @@ export function createEngineStub(initialState = {}) {
     titleEl: {},
     textEl: {},
     choicesEl: { innerHTML: '', appendChild() {} },
+    relationData: { nodes: [], edges: [] },
     init() {},
     freshState() { return freshState(); },
     toast() {},
@@ -64,7 +65,26 @@ export function createEngineStub(initialState = {}) {
     addItem(name, desc = '') { if (!this.hasItem(name)) this.state.items.push({ name, desc }); },
     hasItem(name) { return this.state.items.some(i => i.name === name); },
     addContact(name) { if (!this.state.contacts.includes(name)) this.state.contacts.push(name); },
-    discoverRelation(name) { this.addContact(name); },
+    registerRelation(person, labels = [], connectsTo = []) {
+      if (!this.relationData.nodes.find(n => n.id === person)) {
+        this.relationData.nodes.push({ id: person, labels, discovered: false });
+      }
+      for (const target of connectsTo || []) {
+        if (!this.relationData.edges.find(e => (e.from === person && e.to === target) || (e.from === target && e.to === person))) {
+          this.relationData.edges.push({ from: person, to: target, revealed: false });
+        }
+      }
+    },
+    discoverRelation(name) {
+      this.addContact(name);
+      const node = this.relationData.nodes.find(n => n.id === name);
+      if (node) node.discovered = true;
+      for (const edge of this.relationData.edges) {
+        const from = this.relationData.nodes.find(n => n.id === edge.from);
+        const to = this.relationData.nodes.find(n => n.id === edge.to);
+        if (from?.discovered && to?.discovered) edge.revealed = true;
+      }
+    },
     setFlag(k, v) { this.state.flags[k] = v; },
     getFlag(k) { return this.state.flags[k]; },
     canDeduce() { return true; },
