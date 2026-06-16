@@ -1056,6 +1056,24 @@ ${strength.desc}
 你要怎么结这个案？`;
     },
     choices: [
+      { text: '✍️ 按证据链自然收束此案', goto: (s) => {
+        if (E.getFlag('missed_deadline')) return 'end_too_late';
+        let score = 0;
+        if (E.getFlag('rescued_yufang')) score += 2;
+        if (E.getFlag('rescued_su')) score += 3;
+        if (E.getFlag('su_moved_from_dock') || E.getFlag('su_trace_only')) score += 1;
+        if (E.getFlag('deduced_fusheng')) score += 2;
+        if (E.getFlag('fu_waybill_exposed') || E.getFlag('sun_waybill_convinced')) score += 2;
+        if (E.getFlag('fu_clearance_exposed') || E.getFlag('sun_clearance_convinced')) score += 2;
+        if (E.getFlag('v07_witnesses_protected')) score += 1;
+        if (E.getFlag('v07_lu_confronted')) score += 1;
+        if (E.getFlag('v07_rejected_fu_deal')) score += 1;
+        if (E.getFlag('zhou_understands_wanting') || E.getFlag('zhou_accepts_chen_link')) score += 1;
+        if (score >= 10 && E.getFlag('rescued_yufang') && (E.getFlag('rescued_su') || E.getFlag('su_moved_from_dock'))) return 'end_conspiracy_detail';
+        if (E.getFlag('rescued_su') || E.getFlag('v07_witnesses_protected')) return 'end_rescue';
+        if (score >= 6) return 'end_conspiracy';
+        return 'end_archive';
+      } },
       { text: '📁 把现有材料交给巡捕房，暂时结案', goto: 'end_archive' },
       { text: '🔍 推理——指出真凶是陆小姐', goto: 'end_boss_lu' },
       { text: '🔍 推理——指出真凶是黑衣男人（赵先生）', goto: 'end_boss_zhao' },
