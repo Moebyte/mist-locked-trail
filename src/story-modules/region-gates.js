@@ -32,6 +32,30 @@
       return appendHubChoice(universityChoices(), '🔙 回到宿舍继续调查', 'ch2_university');
     }
 
+    function policeChoices() {
+      const opts = [];
+      if (!E.getFlag('got_wang_note')) opts.push({ text: '📎 追问王巡官调离前留下了什么', goto: 'ch2_police_wang' });
+      if (E.getFlag('got_wang_note')) {
+        opts.push({ text: '🏛️ 去薛华立路 22 号——王巡官的线索指向这里', goto: 'ch2_frenchtown' });
+        opts.push({ text: '🏠 去苏家', goto: 'ch2_home' });
+        opts.push({ text: '📚 去光华小学', goto: 'ch3_school' });
+      }
+      return opts;
+    }
+
+    function buildingChoices() {
+      const opts = [];
+      if (!E.getFlag('saw_man')) opts.push({ text: '🔍 先在周围观察一下', goto: 'ch2_building_stakeout' });
+      if (!E.getFlag('asked_landlord')) opts.push({ text: '🔍 问看门老头更多关于陆姓女子的事', goto: 'ch2_ask_landlord' });
+      if (!E.getFlag('searched_203')) opts.push({ text: '⬆️ 上二楼，敲 203 的门', goto: 'ch2_203_door' });
+      if (E.getFlag('searched_203')) opts.push({ text: '📚 去光华小学——那里是这一切的中心', goto: 'ch3_school' });
+      return opts;
+    }
+
+    function buildingFollowupChoices() {
+      return appendHubChoice(buildingChoices(), '🔙 回到薛华立路 22 号门口', 'ch2_frenchtown');
+    }
+
     E.isSchoolComplete = function () {
       const yufangDone = !this.getFlag('sister_case') || this.hasClue('沈玉芳与陈明远');
       return this.getFlag('asked_about_chen')
@@ -75,11 +99,19 @@
       nodes.ch2_leave_univ.__regionGatePatched = true;
     }
 
+    if (nodes.ch2_police_file) nodes.ch2_police_file.choices = policeChoices;
+    if (nodes.ch2_police_alt) nodes.ch2_police_alt.choices = policeChoices;
+
+    if (nodes.ch2_frenchtown) nodes.ch2_frenchtown.choices = buildingChoices;
+    if (nodes.ch2_building_enter) nodes.ch2_building_enter.choices = buildingFollowupChoices;
+    if (nodes.ch2_ask_landlord) nodes.ch2_ask_landlord.choices = buildingFollowupChoices;
+    if (nodes.ch2_landlord_map) nodes.ch2_landlord_map.choices = buildingFollowupChoices;
+    if (nodes.ch2_203_door) nodes.ch2_203_door.choices = buildingFollowupChoices;
+
     if (nodes.ch3_school && !nodes.ch3_school.__regionGatePatched) {
       nodes.ch3_school.choices = schoolChoices;
       nodes.ch3_school.__regionGatePatched = true;
     }
-
     if (nodes.ch3_school_yufang) nodes.ch3_school_yufang.choices = schoolFollowupChoices;
     if (nodes.ch3_school_teacher) nodes.ch3_school_teacher.choices = schoolFollowupChoices;
     if (nodes.ch3_wu_present_threat) nodes.ch3_wu_present_threat.choices = schoolFollowupChoices;
@@ -95,9 +127,7 @@
       };
     }
 
-    if (nodes.ch3_chen_letter) {
-      nodes.ch3_chen_letter.choices = [{ text: '🔙 回到校长办公室整理线索', goto: 'ch3_school' }];
-    }
+    if (nodes.ch3_chen_letter) nodes.ch3_chen_letter.choices = [{ text: '🔙 回到校长办公室整理线索', goto: 'ch3_school' }];
 
     if (nodes.ch3_wrapup && !nodes.ch3_wrapup.__regionGatePatched) {
       const oldChoices = nodes.ch3_wrapup.choices;
