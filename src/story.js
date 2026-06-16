@@ -796,7 +796,6 @@ ${extra}`;
       { text: '🔙 回到校长办公室', goto: 'ch3_school' },
       { text: '💬 学校还有什么异常？', goto: 'ch3_school_weird' },
       { text: '📖 看陈老师的办公室', goto: 'ch3_school_office' },
-      { text: '🔙 回到校长办公室', goto: 'ch3_school' },
     ],
   },
 
@@ -903,7 +902,6 @@ ${extra}`;
       { text: '💬 学校还有什么异常？', goto: 'ch3_school_weird' },
       { text: '🔙 回到校长办公室', goto: 'ch3_school' },
       { text: '📖 看陈老师的办公室', goto: 'ch3_school_office' },
-      { text: '🔙 回到校长办公室', goto: 'ch3_school' },
     ],
   },
 
