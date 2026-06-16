@@ -268,12 +268,14 @@ ${extra}`;
       const transition = E.getFlag('got_case_file') ? '你走出巡捕房。夜色已经漫上法租界的街道。' : '你走出校门。梧桐叶在脚下发出沙沙声，远处传来电车的叮当声。';
       return `你把线索整理了一下。${summary}\n\n${transition}你心里的图还缺太多拼图块。\n\n去哪？`;
     },
-    choices: [
-      { text: '🔙 回圣约翰大学继续调查', when: (s) => !E.hasClue('法租界地图'), goto: 'ch2_university' },
-      { text: '🏛️ 去法租界 · 薛华立路 22 号', goto: 'ch2_frenchtown' },
-      { text: '📋 去巡捕房查卷宗', effect: (s) => {}, goto: 'ch2_police_alt' },
-      { text: '🏠 去苏家看她母亲', effect: (s) => {}, goto: 'ch2_home' },
-    ],
+    choices: (s) => {
+      const opts = [];
+      if (!E.hasClue('法租界地图')) opts.push({ text: '🔙 回圣约翰大学继续调查', goto: 'ch2_university' });
+      opts.push({ text: '🏛️ 去法租界 · 薛华立路 22 号', goto: 'ch2_frenchtown' });
+      opts.push({ text: '📋 去巡捕房查卷宗', goto: 'ch2_police_alt' });
+      opts.push({ text: '🏠 去苏家看她母亲', goto: 'ch2_home' });
+      return opts;
+    },
   },
 
   // —— 巡捕房 ——
