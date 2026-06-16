@@ -328,7 +328,7 @@
         });
         if (fullSupport && !opts.some(choice => choice.goto === 'ch4_fu_confront' && choice.text && choice.text.includes('封住码头'))) {
           opts.unshift({
-            text: '🚓 老孙带人封住码头，正面压住傅启元',
+            text: '🚓 让老孙的人封住码头，正面压住傅启元',
             effect: () => E.setFlag('dock_blockade_active', true),
             goto: 'ch4_fu_confront'
           });
