@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 function readManifest(repoRoot = process.cwd()) {
-  const manifestPath = path.join(repoRoot, 'src', 'patches.js');
+  const manifestPath = path.join(repoRoot, 'src', 'story-modules.js');
   if (!fs.existsSync(manifestPath)) return [];
 
   const manifest = fs.readFileSync(manifestPath, 'utf8');
@@ -10,7 +10,7 @@ function readManifest(repoRoot = process.cwd()) {
   for (const quote of ["'", '"']) {
     const parts = manifest.split(quote);
     for (const part of parts) {
-      if (part.startsWith('src/') && part.endsWith('.js') && part !== 'src/patches.js') {
+      if (part.startsWith('src/') && part.endsWith('.js') && part !== 'src/story-modules.js') {
         matches.push(part);
       }
     }
