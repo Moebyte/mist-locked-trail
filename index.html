@@ -82,7 +82,7 @@ body{background:radial-gradient(circle at 50% 0,#17172a 0,#0c0c15 42%,#07070d 10
 body.w0::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:9998;background-image:radial-gradient(1px 1px at 10% 0%,rgba(200,220,240,.15) 50%,transparent 50%),radial-gradient(1px 1px at 30% 0%,rgba(200,220,240,.12) 50%,transparent 50%),radial-gradient(1px 1px at 50% 0%,rgba(200,220,240,.1) 50%,transparent 50%),radial-gradient(1px 1px at 70% 0%,rgba(200,220,240,.14) 50%,transparent 50%),radial-gradient(1px 1px at 90% 0%,rgba(200,220,240,.11) 50%,transparent 50%);background-size:100% 100%;background-repeat:no-repeat;animation:rainDrop 1.2s linear infinite}
 body.w1::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9998;background:radial-gradient(ellipse at 30% 50%,rgba(160,180,200,.03) 0%,transparent 60%)}
 /* 年代滤镜 */
-body.vintage::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:9998;background:radial-gradient(ellipse at 50% 50%,transparent 50%,rgba(140,100,50,.08) 100%);mix-blend-mode:multiply}
+body.vintage{filter:sepia(.15) saturate(.88) brightness(.95);transition:filter .6s}
 /* 亮度过渡 */
 body{transition:background 1.2s}
 /* 场景卡片入场动画 */
@@ -285,6 +285,34 @@ const E = {
       'deduc_fail',
       ['陈明远坠楼案','恐吓信','陆小姐的笔记','陈明远的信']
     );
+    this.registerDeduction(
+      'deduce_lu_zhao',
+      '陆小姐与黑衣男人的真实关系是？',
+      [
+        'A. 情人与合谋——他们一起做敲诈生意',
+        'B. 黑衣男人是陆小姐的上线——陆小姐受他指挥',
+        'C. 黑衣男在追查陆小姐——沈玉兰雇他调查',
+        'D. 没有关系——黑衣男只是恰好去过薛华立路'
+      ],
+      2,
+      'deduc_lu_zhao_ok',
+      'deduc_lu_zhao_fail',
+      ['跟踪黑衣男人','神秘女子','沈玉兰的妹妹','翡翠镯']
+    );
+    this.registerDeduction(
+      'deduce_fusheng',
+      '福生仓与公董局的关联意味着什么？',
+      [
+        'A. 一场普通的商业纠纷',
+        'B. 法租界高层有人利用学校掩护走私，陈老师和沈玉芳发现了真相',
+        'C. 吴校长私自挪用学校资金',
+        'D. 公董局要拆除光华小学建仓库'
+      ],
+      1,
+      'deduc_fusheng_ok',
+      'deduc_fusheng_fail',
+      ['王巡官遗留纸条','陈明远的信','恐吓信','光华小学事件']
+    );
   },
 
   logNarration(text) {
@@ -349,7 +377,7 @@ const E = {
         this.ambientLine();
       }
     }
-    this.titleEl.textContent = node.title ? node.title + '  ' + this.atmosphereTag() : '';
+    this.titleEl.innerHTML = node.title ? node.title + '  ' + this.atmosphereTag() : '';
     this.textEl.innerHTML = this.resolveText(node);
     this.choicesEl.innerHTML = '';
     if (node.type === 'end') {
@@ -391,6 +419,10 @@ const E = {
           if (target) this.go(target);
         }, 800);
       }
+    }
+    // Show present button if node has onPresent handler
+    if (node.onPresent) {
+      this.showPresentBtn();
     }
     this.updateStatus();
     this.saveGame(false);
@@ -550,7 +582,80 @@ const E = {
 
   applyWeatherClass() {
     const w = this.state.weatherIdx;
-    document.body.className = 'w' + w;
+    document.body.classList.remove('w0','w1','w2','w3','w4','w5','w6');
+    document.body.classList.add('w' + w);
+  },
+
+  // ── 举证系统 ──
+  showPresentBtn() {
+    const existing = document.getElementById('present-btn-wrapper');
+    if (existing) return;
+    const wrap = document.createElement('div');
+    wrap.id = 'present-btn-wrapper';
+    wrap.style.cssText = 'margin-top:10px;border-top:1px dashed #2a2a48;padding-top:12px';
+    const btn = document.createElement('button');
+    btn.className = 'tool-btn';
+    btn.textContent = '🔍 出示线索或物品';
+    btn.style.cssText = 'width:100%';
+    btn.onclick = () => this.openPresentModal();
+    wrap.appendChild(btn);
+    this.choicesEl.appendChild(wrap);
+  },
+
+  openPresentModal() {
+    const state = this.state;
+    const allThings = [...state.clues.map(c=>({type:'clue',...c})), ...state.items.map(i=>({type:'item',...i}))];
+    if (allThings.length === 0) { this.toast('你身上没有可以出示的东西。'); return; }
+    // Create modal
+    const mask = document.createElement('div');
+    mask.style.cssText = 'position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;padding:20px';
+    const box = document.createElement('div');
+    box.style.cssText = 'background:#0f0f1e;border:1px solid #3a3a58;border-radius:12px;max-width:460px;width:100%;max-height:70vh;padding:20px;overflow:auto';
+    box.innerHTML = '<h3 style="color:#c8a87c;font-size:16px;margin-bottom:12px">选择要出示的线索或物品</h3>';
+    allThings.forEach(t => {
+      const card = document.createElement('div');
+      card.style.cssText = 'background:#171727;border:1px solid #282846;border-radius:8px;padding:10px 12px;margin:6px 0;cursor:pointer;transition:.12s';
+      card.innerHTML = `<b style="color:#d8bd8e">${t.type==='item'?'🎒':'🔍'} ${t.name}</b><br><span style="color:#999;font-size:13px">${t.desc}</span>`;
+      card.onmouseenter = () => { card.style.borderColor = '#6f86c8'; card.style.background = '#1c1c30'; };
+      card.onmouseleave = () => { card.style.borderColor = '#282846'; card.style.background = '#171727'; };
+      card.onclick = () => {
+        mask.remove();
+        this.handlePresent(t);
+      };
+      box.appendChild(card);
+    });
+    const close = document.createElement('button');
+    close.className = 'tool-btn';
+    close.textContent = '取消';
+    close.style.cssText = 'margin-top:10px';
+    close.onclick = () => mask.remove();
+    box.appendChild(close);
+    mask.appendChild(box);
+    document.body.appendChild(mask);
+  },
+
+  handlePresent(item) {
+    const nodeId = this.state.currentScene;
+    const node = nodes[nodeId];
+    if (node && node.onPresent) {
+      const result = typeof node.onPresent === 'function' ? node.onPresent(item, this.state) : node.onPresent;
+      if (result) {
+        if (result.goto) {
+          this.logChoice(`出示了「${item.name}」`);
+          this.toast(`你出示了「${item.name}」`);
+          this.go(result.goto);
+          return;
+        }
+        if (result.text) {
+          this.logChoice(`出示了「${item.name}」`);
+          this.toast(`你出示了「${item.name}」`);
+          this.textEl.innerHTML += `<div class="notice" style="margin-top:12px">${result.text}</div>`;
+          if (result.effect) result.effect(this.state);
+          return;
+        }
+      }
+    }
+    this.toast(`出示「${item.name}」似乎没有引起特别的反应。`);
   },
 
   // ── 推理拼图 ──
@@ -679,6 +784,43 @@ const E = {
     svg.innerHTML = svgContent;
   },
 
+  renderClueWall() {
+    const clues = this.state.clues;
+    if (clues.length < 3) return '';
+    const wallNodes = [
+      {id:'苏晚亭失踪', label:'苏晚亭失踪', color:'#c8a87c', check: () => true},
+      {id:'陈明远坠楼', label:'陈明远坠楼', color:'#d08070', check: () => E.hasClue('陈明远坠楼案')},
+      {id:'沈玉芳失踪', label:'沈玉芳失踪', color:'#d08070', check: () => E.hasClue('沈玉芳')},
+      {id:'陆小姐身份', label:'陆小姐身份', color:'#8a7ab8', check: () => E.hasClue('恐吓信') && E.hasClue('陆小姐的笔记')},
+      {id:'黑衣男人暗线', label:'黑衣男人暗线', color:'#b8a070', check: () => E.hasClue('跟踪黑衣男人') || E.hasClue('神秘女子')},
+      {id:'福生仓真相', label:'福生仓真相', color:'#6f86c8', check: () => E.hasClue('王巡官遗留纸条')},
+    ];
+    const edges = [
+      ['苏晚亭失踪','陈明远坠楼'],
+      ['苏晚亭失踪','沈玉芳失踪'],
+      ['陈明远坠楼','陆小姐身份'],
+      ['陆小姐身份','黑衣男人暗线'],
+      ['黑衣男人暗线','福生仓真相'],
+      ['沈玉芳失踪','福生仓真相'],
+    ];
+    const visibleNodes = wallNodes.filter(n => n.check());
+    const visibleIds = new Set(visibleNodes.map(n => n.id));
+    const visibleEdges = edges.filter(e => visibleIds.has(e[0]) && visibleIds.has(e[1]));
+    if (visibleNodes.length < 2) return '';
+    let html = '<div style="position:relative;padding:8px 4px">';
+    html += visibleNodes.map((n,i) => {
+      const pct = 5 + (i * 85 / (visibleNodes.length - 1 || 1));
+      return `<div style="display:inline-block;background:rgba(23,23,40,.9);border:1px solid ${n.color};border-radius:6px;padding:6px 10px;margin:3px 2px;font-size:12px;color:#ddd">${n.label}</div>`;
+    }).join('');
+    if (visibleEdges.length > 0) {
+      html += '<div style="margin-top:8px;border-top:1px solid #2a2a48;padding-top:8px;font-size:11px;color:#667">';
+      html += visibleEdges.map(e => `↗ ${e[0]} ↔ ${e[1]}`).join('<br>');
+      html += '</div>';
+    }
+    html += '</div>';
+    return html;
+  },
+
   caseStrength() {
     const n = this.state.clues.length;
     if (n >= 13) return {name:'证据成链', desc:'关键人物、地点与动机已经能互相印证。'};
@@ -706,13 +848,15 @@ const E = {
     const route = this.state.sceneLog.slice(-10).map(id => nodes[id] ? nodes[id].title : id).join(' → ') || '尚未开始';
     const endings = this.state.endings.map(e => `<div class="clue-card"><b>${e.title}</b><br>${new Date(e.at).toLocaleString('zh-CN')}</div>`).join('') || '<div class="empty">还没有解锁结局。</div>';
     const graphCount = this.relationData.nodes.filter(n => n.discovered).length;
+    const wallHtml = this.renderClueWall();
     document.getElementById('panel-content').innerHTML = `
       <div class="panel-section"><h3>案情判断</h3><div class="clue-card"><b>${strength.name}</b><br>${strength.desc}</div></div>
+      ${wallHtml ? `<div class="panel-section"><h3>🧩 推理墙</h3>${wallHtml}</div>` : ''}
       <div class="panel-section"><h3>关键线索（${this.state.clues.length}）</h3>${clues}</div>
       <div class="panel-section"><h3>随身物品（${this.state.items.length}）</h3>${items}</div>
       <div class="panel-section"><h3>人物关系（${this.state.contacts.length}） <button class="tool-btn" onclick="E.openGraph()" style="float:right;font-size:11px;padding:3px 8px">查看关系图</button></h3>${contacts}<p style="color:#556;font-size:12px;margin-top:4px">已发现 ${graphCount}/${this.relationData.nodes.length} 位人物</p></div>
       <div class="panel-section"><h3>最近足迹</h3><div class="clue-card">${route}</div></div>
-      <div class="panel-section"><h3>结局记录（${this.state.endings.length}/6）</h3>${endings}</div>
+      <div class="panel-section"><h3>结局记录（${this.state.endings.length}/7）</h3>${endings}</div>
     `;
   },
 
@@ -918,6 +1062,13 @@ ${extra}`;
     title: '上海法租界巡捕房',
     time: {d:1, h:16, m:0},
     weather: 1,
+    onPresent: (item, s) => {
+      if (item.name === '半张烟盒纸' && !E.getFlag('presented_note')) {
+        E.setFlag('presented_note', true);
+        return { goto: 'ch2_police_present' };
+      }
+      return null;
+    },
     text: () => `巡捕房坐落在薛华立路上，灰扑扑的建筑，门口挂着青天白日旗。
 
 你认识这里的一个探长——<b>老孙</b>，孙国栋，跟你打过几次交道。他正坐在办公桌前抽烟，看到你来了也不意外。
@@ -972,6 +1123,17 @@ ${extra}`;
       { text: '📎 追问王巡官调离前留下了什么', goto: 'ch2_police_wang' },
       { text: '🏛️ 去薛华立路 22 号', goto: 'ch2_frenchtown' },
       { text: '🏠 去苏家', goto: 'ch2_home' },
+    ],
+  },
+
+  ch2_police_present: {
+    title: '巡捕房 · 出示烟盒纸',
+    time: {d:1, h:16, m:15},
+    weather: 1,
+    effect: (s) => { E.addClue('老孙承认暗查', '巡捕房也在秘密调查福生仓——那是公董局的人插手的线。王巡官的调离不是巧合。'); },
+    text: () => `你把王巡官留下的半张烟盒纸放在老孙桌上。<br><br>老孙低头看了一眼，表情凝固了一瞬。然后他叹了口气，把烟掐灭。<br><br><span class="sys">"你见到王巡官了？"</span><br><br><span class="sys">"他调走了。这是他留在卷宗里的。"</span><br><br>老孙拿起烟盒纸，翻来覆去看了两遍。然后他把纸折好，揣进自己口袋里。<br><span class="sys">"这件事……我本来不想让你卷进去。"</span><br><br>他告诉你，王巡官是他的老部下。光华小学出事之后，王巡官一直觉得不对劲，私下在查福生仓这条线。查了一个月，被公董局的人知道了。<br><br><span class="sys">"他没有被调走。他是被调走的。你明白我的意思吗？"</span><br><br>你明白。明升暗降，把人从案子上挪开。<br><br><span class="sys">"福生仓的事，你最好别碰。"</span>老孙的声音很低。<span class="sys">"但如果你碰了……查到什么，别走官方渠道。直接来找我。私下。"</span><br><br>你点了点头。老孙拿起烟盒纸，划了一根火柴，把它烧了。<br><br>灰烬飘进废纸篓里。`,
+    choices: [
+      { text: '🔙 离开巡捕房', goto: 'ch2_leave_univ' },
     ],
   },
 
@@ -1511,8 +1673,18 @@ ${clues || '暂时还没有关键线索。'}
     choices: (s) => {
       const opts = [];
       if (E.getFlag('got_case_file') && !E.getFlag('got_wang_note')) opts.push({ text: '📎 回巡捕房追查王巡官的批注', goto: 'ch2_police_wang' });
+      if (!E.getFlag('found_yufang')) opts.push({ text: '⛵ 去苏州河废弃码头——查福生仓', goto: 'ch4_suzhou_creek' });
       if (E.canDeduce('deduce_chen') && !E.getFlag('deduced_chen') && !E.getFlag('deduced_wrong')) {
         opts.push({ text: '🧩 拼合线索——推理陈明远之死', effect: (s) => { E.openDeduction('deduce_chen'); } });
+      }
+      if (E.canDeduce('deduce_lu_zhao') && E.getFlag('deduced_chen') && !E.getFlag('deduced_lu_zhao') && !E.getFlag('deduced_lu_zhao_fail')) {
+        opts.push({ text: '🧩 推理——黑衣男人与陆小姐的关系', effect: (s) => { E.openDeduction('deduce_lu_zhao'); } });
+      }
+      if (E.canDeduce('deduce_fusheng') && E.getFlag('deduced_lu_zhao') && !E.getFlag('deduced_fusheng') && !E.getFlag('deduced_fusheng_fail')) {
+        opts.push({ text: '🧩 推理——福生仓与公董局的真相', effect: (s) => { E.openDeduction('deduce_fusheng'); } });
+      }
+      if (E.getFlag('deduced_fusheng') && !E.getFlag('hidden_end_unlocked')) {
+        opts.push({ text: '🌟 完整拼图——直指法租界幕后', effect: (s) => { E.setFlag('hidden_end_unlocked', true); }, goto: 'end_conspiracy_detail' });
       }
       opts.push({ text: '🏛️ 去当铺——查当票上的翡翠镯', goto: 'ch4_pawnshop' });
       opts.push({ text: '🔙 回顾所有证据，做出推断', goto: 'ch4_conclusion' });
@@ -1649,6 +1821,134 @@ ${strength.desc}
     ],
   },
 
+  // ── 推理节点 二层 ──
+  deduc_lu_zhao_ok: {
+    title: '推理 · 暗线浮出',
+    weather: 4,
+    effect: (s) => { E.setFlag('deduced_lu_zhao', true); E.addClue('推理结论：黑衣男是巡捕房暗线', '他受法租界高层指使，名义上替沈玉兰查案，实际在监视陆小姐与学校的联系。'); },
+    text: () => `你把沈玉兰的证词和薛华立路的监视记录放在一起。
+
+黑衣男人——赵先生——他根本不是沈玉兰请的普通侦探。他是巡捕房的人，或者说，是法租界高层安插的一条暗线。
+
+沈玉兰付他一百大洋查妹妹的下落，他每次都敷衍说"有进展"，其实他的目光一直盯着薛华立路22号——盯着陆小姐。
+
+而陆小姐——陆念薇——她在法租界做的那些事，巡捕房不是不知道，是有人不让动她。因为她的上线，牵涉到公董局的人。
+
+赵先生的出现，说明上面有人开始动摇了。他们想查清楚陆念薇到底知道多少，但她背后的人也不是吃素的。
+
+这就是为什么王巡官会在卷宗上写"别信公董局来的电话"——调查还没开始，就已经有人在压了。
+
+你把这些暗线理清楚之后，一片更大的棋盘在你眼前浮现。
+
+苏晚亭和沈玉芳，不过是棋盘边缘不小心碰倒的两枚棋子。`,
+    choices: [
+      { text: '🔙 带着这个判断继续调查', goto: 'ch3_wrapup' },
+    ],
+  },
+
+  deduc_lu_zhao_fail: {
+    title: '推理 · 暗线模糊',
+    weather: 4,
+    effect: (s) => { E.setFlag('deduced_lu_zhao_fail', true); },
+    text: () => `你把沈玉兰的话和薛华立路的线索放在一起，总觉得哪里对不上。
+
+黑衣男人去找陆小姐，沈玉兰雇他查妹妹——这两件事可能有关，也可能只是时间上的巧合。
+
+你决定不急着下判断，先收集更多证据。`,
+    choices: [
+      { text: '🔙 继续调查', goto: 'ch3_wrapup' },
+    ],
+  },
+
+  // ── 推理节点 三层 ──
+  deduc_fusheng_ok: {
+    title: '推理 · 棋局',
+    weather: 5,
+    effect: (s) => { E.setFlag('deduced_fusheng', true); E.addClue('推理结论：法租界利益链', '有人利用光华小学做掩护走私，陈老师和沈玉芳无意中发现后被灭口。'); },
+    text: () => `王巡官留下的那半张烟盒纸上写着："福生仓，三日清；别信公董局来的电话。"
+
+福生仓——法租界码头边上的一个仓库。光华小学的校产登记册上，有一批"教具"最后送到了福生仓。而福生仓的租户，是公董局一个副秘书长的远亲。
+
+你终于看清楚了。
+
+光华小学不只是一所小学。有人利用学校作为掩护，通过教具采购和校产租赁的渠道，在法租界码头上做走私生意。陈明远发现了这件事——不是有意调查，而是他值夜那天晚上，亲眼看到有人在教学楼里搬运东西。
+
+他被灭口了。
+
+沈玉芳呢？她跟陈明远走得太近，可能从他那里知道了什么。她不是失踪——她是被送走了，藏在福生仓里。
+
+而陆念薇，是这条利益链上的中间人。她负责联络、收钱、处理"麻烦"。
+
+法租界的霓虹灯下，光鲜体面的公董局大楼里，有人在夜色中数着不干净的钱。`,
+    choices: [
+      { text: '🔙 推演完毕', goto: 'ch3_wrapup' },
+    ],
+  },
+
+  deduc_fusheng_fail: {
+    title: '推理 · 无从下手',
+    weather: 5,
+    effect: (s) => { E.setFlag('deduced_fusheng_fail', true); },
+    text: () => `你盯着王巡官留下的纸条看了很久。"福生仓，三日清"——你知道这几个字一定有分量，但你手上的证据还不足以把它们跟整个案子联系起来。
+
+也许你需要亲自去一趟福生仓。`,
+    choices: [
+      { text: '🔙 继续调查', goto: 'ch3_wrapup' },
+    ],
+  },
+
+  // ── 苏州河新场景 ──
+  ch4_suzhou_creek: {
+    title: '苏州河 · 废弃码头',
+    time: {d:2, h:21, m:0},
+    weather: 2,
+    effect: (s) => { E.addClue('福生仓位置', '苏州河下游废弃码头第三号仓库'); E.addItem('福生仓地址', '王巡官纸条上写的福生仓就在苏州河边的废弃码头。'); },
+    text: () => `夜雾从苏州河上漫过来，混着煤烟和腥味。<br><br>你沿着河岸走了二十分钟，在第三个废弃码头找到了福生仓——一栋锈蚀的铁皮仓库，卷帘门半开着，里面透出昏暗的灯光。<br><br>你贴着墙根靠近。门缝里能看到一个穿黑大褂的身影——黑衣男人。他背对着你，正在跟另一个人说话。<br><br>你听不清内容，但你看到他从怀里掏出一个信封，跟茶楼里沈玉兰给他的一模一样。他把信封放在一个木箱上，转身走了。<br><br>等他走远，你溜进仓库。木箱上的信封还在——里面是五十大洋和一封信。信上只有一行字：<br><br><span class="sys">"三日内清走。别留痕迹。"</span><br><br>没有署名，但信纸是公董局的公文纸。`,
+    choices: [
+      { text: '🔦 搜索仓库深处', goto: 'ch4_dock_deep' },
+      { text: '🔙 先回去整理线索', goto: 'ch3_wrapup' },
+    ],
+  },
+
+  ch4_dock_deep: {
+    title: '福生仓 · 深处',
+    time: {d:2, h:21, m:30},
+    weather: 2,
+    effect: (s) => { E.addClue('仓库暗室', '木箱背后有一个暗门，通向一个被改造成囚室的小房间。'); },
+    text: () => `你绕过堆叠的木箱向深处走。仓库很大，堆满了标着"光华小学"字样的教具箱——你撬开一个，里面不是教具，是洋酒和香烟。<br><br>再往里走，你听到一个微弱的声音——像是有人在哭。<br><br>你循着声音找到仓库尽头，木箱背后有一扇暗门。推开——<br><br>里面是一间不足十平米的房间。一张行军床，一个水桶，一盏煤油灯。床上蜷缩着一个年轻女人，穿着灰扑扑的旗袍，头发散乱。<br><br>她抬起头，看到你的一瞬间，瞳孔猛地收缩了一下。<br><br><span class="sys">"你……你是谁？"</span>她的声音沙哑。<br><br>你出示了证件。<br><br>她愣了几秒，然后捂住脸，浑身发抖。<br><br><span class="sys">"你是来救我的？"</span>`,
+    choices: [
+      { text: '💬 你是沈玉芳还是苏晚亭？', goto: 'ch4_dock_who' },
+    ],
+  },
+
+  ch4_dock_who: {
+    title: '暗室 · 身份',
+    weather: 2,
+    effect: (s) => {
+      E.addClue('获救者身份', '被关在福生仓的女人是沈玉芳——沈玉兰的妹妹，光华小学的数学老师。');
+      E.discoverRelation('沈玉芳');
+      E.setFlag('found_yufang', true);
+    },
+    text: () => `<span class="sys">"我叫沈玉芳。我是光华小学的老师。"</span><br><br>沈玉芳。沈玉兰的妹妹。她还活着。<br><br>她告诉你，她发现陈老师出事前一周，有一批"教具"在深夜被运进学校。陈老师撞见了，第二天就被威胁不准说出去。他把这件事告诉了她——因为他信任她。<br><br><span class="sys">"他让我别说出去。他说他来处理。但几天后他就死了。"</span><br><br>她还没来得及报警，就被几个穿黑衣服的人从家里带走了。他们把她关在这里，已经快一个月了。<br><br><span class="sys">"他们不杀我，可能是因为他们还不敢。但陈老师……陈老师知道了不该知道的事。"</span><br><br>她低下头。<span class="sys">"他是为我死的。如果不是我把那些事告诉他……"</span><br><br>你想安慰她，但你说不出口。因为你知道——她说得对。`,
+    choices: [
+      { text: '🔙 带她离开这里', goto: 'ch4_dock_escape' },
+    ],
+  },
+
+  ch4_dock_escape: {
+    title: '逃离码头',
+    weather: 2,
+    effect: (s) => {
+      E.setFlag('rescued_yufang', true);
+      E.addClue('沈玉芳证词', '陈老师死前曾向她求助，说发现了学校的走私勾当。她被关在福生仓近一个月。');
+    },
+    text: () => `你搀着沈玉芳走出暗室。她走得很慢——被关得太久了，腿有些发软。<br><br>你们刚走到仓库门口，外面传来脚步声。<br><br>你示意她别出声，贴着墙等了半分钟。脚步声渐远。是巡夜的更夫。<br><br>你带她穿过夜雾中的码头，叫了一辆黄包车。她缩在车座上，裹着你脱下来的大衣。<br><br><span class="sys">"你打算怎么办？"</span>她问你。<br><br><span class="sys">"把这件事查到底。"</span><br><br>她看着你，点了点头。<br><br>黄包车的铃铛在深夜的街道上叮当作响。苏州河的雾在身后慢慢合拢，像什么也没发生过。`,
+    choices: [
+      { text: '🔙 回事务所整理所有证据', goto: 'ch3_wrapup' },
+    ],
+  },
+
+  // ── 结局 ──
   end_boss_lu: {
     title: '结局 · 面具之下',
     text: () => `你断定陆小姐是真凶。
@@ -1773,6 +2073,15 @@ ${strength.desc}
 案子没有真正结束。但那一夜，至少有两盏灯没有灭。
 
 <div style="color:#666;font-style:italic;margin-top:20px">—— 结局五 · 雨夜灯火 ——</div>`,
+    type: 'end',
+  },
+
+  end_conspiracy_detail: {
+    title: '结局 · 雨夜灯火',
+    time: {d:2, h:23, m:0},
+    weather: 0,
+    effect: (s) => { E.setFlag('hidden_end', true); },
+    text: () => `所有的碎片都拼上了。<br><br>陈明远发现光华小学的走私勾当——被灭口。<br>沈玉芳从他那里知道了一部分真相——被关在福生仓。<br>陆念薇是中间人——她不是主谋，她上面还有人。<br>黑衣男人是巡捕房的暗线——有人想查这条线，但查不动。<br><br>而福生仓里的货，和公董局的公文纸——它们指向同一个方向。<br><br>你没有去找巡捕房。<br>你写了一封信——不是报案信，是一封私人信件。收信人是《申报》的副总编辑，你认识他。你把所有证据的副本随信附上。<br><br>三天后，《申报》头版刊登了一篇报道：《法租界光华小学教具箱暗藏走私通道，两教师一死一失踪》。<br><br>报道没有点名公董局的人，但所有的描述都足够让人对号入座。<br><br>又过了三天，福生仓被查封。公董局那位副秘书长以"健康原因"辞职。<br><br>一个月后，你收到了一封信，没有署名。<br><br><span class="sys">"沈先生：晚亭已平安。她让我代她向你说一声谢谢。另外，那条线上的人，不止一个。但你能做到的，已经比大多数人多了。——孙"</span><br><br>你把信折好，放进口袋。<br><br>窗外又下雨了。你泡了一壶新茶。<br><br>民国三十七年的冬天，比往年来得都晚一些。但终究是来了。<br><br><div style="color:#666;font-style:italic;margin-top:20px">—— 结局七 · 雨夜灯火（隐藏结局）——</div>`,
     type: 'end',
   },
 
