@@ -606,6 +606,13 @@ ${extra}`;
   // —— 薛华立路 22 号 ——
   ch2_building_enter: {
     title: '永兴贸易商行',
+    onPresent: (item, s) => {
+      if (item.name === '法租界地图' && !E.getFlag('shown_map_to_landlord')) {
+        E.setFlag('shown_map_to_landlord', true);
+        return { goto: 'ch2_landlord_map' };
+      }
+      return null;
+    },
     text: () => `你推门走进商行。里面空荡荡的，只有一个老头趴在柜台后面打瞌睡。
 
 你敲了敲柜台。老头抬起头，迷糊地看了你一眼。
@@ -646,6 +653,18 @@ ${extra}`;
 
 <span class="sys">"就那一次。她敲了门，陆小姐开了门，让她进去了。大约过了一个时辰，那女孩子出来了——眼眶红红的，像是哭过。然后一个多星期后，你就来了。"</span>`,
     effect: (s) => { E.addClue('看门人证词', '陆姓女子行踪可疑；苏晚亭见了她后哭着离开'); E.setFlag('asked_landlord', true); },
+    choices: [
+      { text: '⬆️ 上二楼，敲 203 的门', goto: 'ch2_203_door' },
+    ],
+  },
+
+  ch2_landlord_map: {
+    title: '向老头出示地图',
+    weather: 4,
+    effect: () => {
+      E.addClue('福生仓标识', '法租界地图上，福生仓用地块被额外标注了记号，老头认出那是公董局常用的标记。');
+    },
+    text: () => `你从怀里掏出那张法租界地图，在柜台上摊开。<br><br>老头戴上老花镜凑过来看了一眼，忽然指着地图上的一个位置：<br><br><span class="sys">"这个——福生仓。前两个月有人来打听过这个仓库。"</span><br><br>他抬眼看了你一下，压低声音：<br><br><span class="sys">"来打听的是个穿西装的，拿公事包。我看他那派头像是公董局的人。他问这个仓库归谁管。我当时告诉他，这仓库是光华小学的校产——名义上是学校仓库，实际上从来没放过学校的教具。"</span><br><br>老头摘下眼镜，擦了擦：<br><br><span class="sys">"那之后没几天，就有人封了仓库。说是消防不达标。但你我都知道，上海哪有什么消防查得这么勤的。"</span><br><br>你把地图收好。福生仓——这个名字又出现了。光华小学的校产仓库，公董局的人来找过，然后被封了。这不是巧合。`,
     choices: [
       { text: '⬆️ 上二楼，敲 203 的门', goto: 'ch2_203_door' },
     ],
