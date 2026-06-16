@@ -355,7 +355,13 @@
     }
 
     if (nodes.ch4_dock_wait && !nodes.ch4_dock_wait.__dockSupportPatched) {
+      nodes.ch4_dock_wait.cost = null;
       chainEffect(nodes.ch4_dock_wait, () => {
+        if (!sunSupportApproved()) return;
+        if (!E.getFlag('sun_wait_time_spent')) {
+          E.spendTime(2, 15, '你去找老孙调人，耽误了两个多小时');
+          E.setFlag('sun_wait_time_spent', true);
+        }
         E.setFlag('sun_support_available', true);
         E.setFlag('sun_wait_support', true);
         E.setFlag('sun_support_in_action', true);
