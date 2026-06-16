@@ -70,20 +70,39 @@ function freshState() {
   };
 }
 
+const noopEl = () => ({
+  style: {},
+  innerHTML: '',
+  textContent: '',
+  className: '',
+  title: '',
+  onclick: null,
+  appendChild() {},
+  insertAdjacentElement() {},
+  scrollIntoView() {},
+  addEventListener() {},
+  classList: { add() {}, remove() {}, toggle() {}, contains() { return false; } },
+});
+
 const E = {
   state: freshState(),
   saveKey: 'story-module-check',
-  logEl: { innerHTML: '', style: {} },
-  sceneEl: { style: {} },
-  titleEl: {},
-  textEl: {},
-  choicesEl: { innerHTML: '', appendChild() {} },
-  init() {}, toast() {}, logChoice() {}, logNarration() {}, updateStatus() {}, saveGame() {}, scroll() {}, openPanel() {}, showPresentBtn() {}, applyWeatherClass() {}, ambientLine() {}, openDeduction() {},
+  logEl: noopEl(),
+  sceneEl: noopEl(),
+  titleEl: noopEl(),
+  textEl: noopEl(),
+  choicesEl: noopEl(),
+  relationData: { nodes: [] },
+  panelTab: 'overview',
+  panelListPages: {},
+  init() {}, toast() {}, logChoice() {}, logNarration() {}, updateStatus() {}, saveGame() {}, scroll() {}, openPanel() {}, openGraph() {}, showPresentBtn() {}, applyWeatherClass() {}, ambientLine() {}, openDeduction() {},
   setWeather(i) { this.state.weatherIdx = i; },
   renderAtmosphere() { return ''; },
+  renderPanel() {},
   setTime(day, hour, minute) { this.state.inGameTime = { day: day || 1, hour: hour || 14, minute: minute || 0 }; },
   timeToMinutes(t) { return (t.day || 1) * 24 * 60 + (t.hour || 0) * 60 + (t.minute || 0); },
   minutesUntilDeadline() { return this.timeToMinutes(this.state.pressure.deadline) - this.timeToMinutes(this.state.inGameTime); },
+  pressureLabel() { return '剩余时间检查占位'; },
   advanceTime(hours = 0, minutes = 0) {
     const t = this.state.inGameTime;
     t.minute += minutes;
@@ -109,10 +128,10 @@ const E = {
 
 const domReadyHandlers = [];
 const documentStub = {
-  body: { classList: { add() {}, remove() {}, toggle() {}, contains() { return false; } } },
+  body: noopEl(),
   addEventListener(event, handler) { if (event === 'DOMContentLoaded') domReadyHandlers.push(handler); },
-  getElementById() { return { style: {}, innerHTML: '', textContent: '', appendChild() {}, scrollIntoView() {}, addEventListener() {} }; },
-  createElement() { return { className: '', innerHTML: '', textContent: '', title: '', onclick: null, style: {}, appendChild() {} }; },
+  getElementById() { return noopEl(); },
+  createElement() { return noopEl(); },
   write() {},
 };
 
@@ -128,21 +147,28 @@ const context = vm.createContext({
 context.globalThis = context;
 
 function runScript(rel, suffix = '') {
-  const code = read(rel) + suffix;
-  vm.runInContext(code, context, { filename: rel });
+  try {
+    const code = read(rel) + suffix;
+    vm.runInContext(code, context, { filename: rel });
+  } catch (err) {
+    errors.push(`脚本加载失败 ${rel}: ${err.message}`);
+  }
 }
 
 runScript('src/story.js', '\nglobalThis.nodes = nodes;');
 runScript('src/main.js');
 runStoryModuleScripts(runScript, repoRoot);
-for (const handler of domReadyHandlers) handler();
+for (const handler of domReadyHandlers) {
+  try { handler(); }
+  catch (err) { errors.push(`DOMContentLoaded handler failed: ${err.message}`); }
+}
 
 const nodes = context.nodes;
 assert(nodes && typeof nodes === 'object', '故事模块加载后无法获得 nodes');
 assert(typeof E.v07ResolveEnding === 'function', '故事模块加载后缺少 E.v07ResolveEnding');
 assert(typeof E.v07InvestigationQuality === 'function', '故事模块加载后缺少 E.v07InvestigationQuality');
 for (const nodeId of ['ch4_hospital_conflict', 'ch4_lu_confrontation', 'ch4_fu_private_offer', 'ch4_zhou_present_diary', 'ch4_sun_present_waybill']) {
-  assert(nodes[nodeId], `故事模块加载后缺少节点：${nodeId}`);
+  assert(nodes && nodes[nodeId], `故事模块加载后缺少节点：${nodeId}`);
 }
 
 if (errors.length) {
