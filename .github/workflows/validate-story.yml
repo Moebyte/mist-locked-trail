@@ -27,3 +27,6 @@ jobs:
 
       - name: Smoke test evidence interactions
         run: node scripts/smoke-evidence.mjs
+
+      - name: Smoke test evidence polish interactions
+        run: node scripts/smoke-evidence-polish.mjs
