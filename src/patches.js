@@ -5,7 +5,7 @@
 (function loadStoryPatches() {
   const patches = [
     'src/story-consistency.js',
-    'src/v0.6.2-evidence.js',
+    'src/story-evidence.js',
     'src/v0.6.3-evidence-polish.js',
     'src/v0.7-narrative-depth.js'
   ];
