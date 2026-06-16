@@ -9,6 +9,7 @@ function assert(condition, message) { if (!condition) errors.push(message); }
 function clue(name, desc = '') { E.addClue(name, desc); }
 function item(name, desc = '') { E.addItem(name, desc); }
 function flag(name, value = true) { E.setFlag(name, value); }
+function heat(value) { E.addHeat(value); }
 function choices(id) { rt.renderNode(id); return rt.choicesOf(id); }
 function hasTarget(list, target) { return list.some(choice => choice.goto === target || (typeof choice.goto === 'function' && choice.goto(E.state) === target)); }
 function hasText(list, fragment) { return list.some(choice => choice.text && choice.text.includes(fragment)); }
@@ -26,6 +27,12 @@ function expectText(id, fragment, expected, setup, message) {
   const list = choices(id);
   const actual = hasText(list, fragment);
   assert(actual === expected, `${message}\n  ${id} choices: ${labelList(list)}`);
+}
+function expectRoute(fnName, expected, setup, message) {
+  rt.resetState();
+  setup?.();
+  const actual = E[fnName]();
+  assert(actual === expected, `${message}\n  ${fnName} returned: ${actual}, expected: ${expected}`);
 }
 
 const university = 'ch2_university';
@@ -89,10 +96,19 @@ expectTarget('ch3_wu_present_photo', wrapup, false, () => { flag('asked_about_ch
 expectTarget(wrapup, school, true, () => flag('asked_about_chen'), '光华小学：未完成时误入整理线索，应引导返回学校继续调查');
 
 const dockEscape = 'ch4_dock_escape';
+expectRoute('routeDockByPressure', 'ch4_dock_full_search', null, '福生仓 heat：低风险且时间充裕时，应进入完整搜查');
+expectRoute('routeDockByPressure', 'ch4_dock_limited_search', () => heat(4), '福生仓 heat：heat>=4 应让仓库入口结果下降一档');
+expectRoute('routeDockByPressure', 'ch4_dock_rescue_only', () => heat(6), '福生仓 heat：heat>=6 应让仓库入口结果下降两档');
+expectRoute('routeDockDeepByPressure', 'ch4_dock_deep_trace', () => heat(4), '福生仓 heat：heat>=4 应让暗室结果下降一档');
+expectRoute('routeDockDeepByPressure', 'ch4_dock_deep_rescue_only', () => heat(6), '福生仓 heat：heat>=6 应让暗室结果下降两档');
+expectRoute('routeDockByPressure', 'ch4_dock_full_search', () => { heat(4); flag('sun_support_in_action'); }, '福生仓 heat：老孙实际到场时，应抵消一档 heat 压力');
 expectText(dockEscape, '老孙的人', false, () => flag('sun_support_available'), '福生仓：老孙只是答应支援但未随行时，不应出现老孙的人亮明身份');
 expectText(dockEscape, '老孙的人', true, () => rt.renderNode('ch4_dock_wait'), '福生仓：等待支援后，老孙的人应在码头可用');
 expectText(dockEscape, '老孙的人', true, () => rt.renderNode('ch4_dock_sun_fast_support'), '福生仓：私下增援后，老孙的人应在码头可用');
-expectText(dockEscape, '当场质问傅启元', true, () => flag('sun_support_available'), '福生仓：即使老孙未随行，也应保留独自质问傅启元的选项');
+expectText(dockEscape, '当场质问傅启元', true, () => flag('sun_support_available'), '福生仓：heat 未升高时，即使老孙未随行，也应保留独自质问傅启元的选项');
+expectText(dockEscape, '当场质问傅启元', false, () => heat(4), '福生仓 heat：heat>=4 且无支援时，不应允许独自当场质问傅启元');
+expectText(dockEscape, '动静太大', true, () => heat(6), '福生仓 heat：heat>=6 且无支援时，应进入强行撤离选项');
+expectText(dockEscape, '借雾', false, () => heat(6), '福生仓 heat：heat>=6 且无支援时，不应还能轻松借雾绕开');
 
 if (errors.length) {
   console.error('\nStateful hub audit failed:');
