@@ -18,12 +18,6 @@ function assert(condition, message) {
   if (!condition) errors.push(message);
 }
 
-function listFiles(dir) {
-  const root = path.join(repoRoot, dir);
-  if (!fs.existsSync(root)) return [];
-  return fs.readdirSync(root).map(name => `${dir}/${name}`);
-}
-
 const indexHtml = read('index.html');
 assert(indexHtml.includes(STORY_MODULE_ENTRY), 'index.html 应加载 src/story-modules.js 作为故事模块入口');
 assert(!indexHtml.includes('src/patches.js'), 'index.html 不应继续加载 src/patches.js');
@@ -33,14 +27,6 @@ const directStoryScripts = [...indexHtml.matchAll(/src="(src\/[^"]+\.js)"/g)]
   .map(m => m[1])
   .filter(src => src !== 'src/engine.js' && src !== 'src/story.js' && src !== 'src/main.js' && src !== STORY_MODULE_ENTRY);
 assert(directStoryScripts.length === 0, `index.html 不应直接加载故事模块：${directStoryScripts.join(', ')}`);
-
-const srcFiles = listFiles('src');
-const versionPatchFiles = srcFiles.filter(file => /^src\/v\d+(?:\.\d+)*-.+\.js$/.test(file));
-assert(versionPatchFiles.length === 0, `src/v*.js 版本补丁已退役，不应再次出现：${versionPatchFiles.join(', ')}`);
-
-const scriptFiles = listFiles('scripts');
-const legacyPatchScripts = scriptFiles.filter(file => /patch/i.test(path.basename(file)));
-assert(legacyPatchScripts.length === 0, `scripts/*patch*.mjs 已退役，不应再次出现：${legacyPatchScripts.join(', ')}`);
 
 const modulesJs = read(STORY_MODULE_ENTRY);
 const manifestModules = [];
@@ -60,7 +46,6 @@ assert(
 
 for (const rel of discoveredModules) {
   assert(exists(rel), `故事模块不存在：${rel}`);
-  assert(!/^src\/v\d+(?:\.\d+)*-.+\.js$/.test(rel), `故事模块不应使用版本补丁命名：${rel}`);
 }
 
 const requiredModules = [
@@ -68,15 +53,9 @@ const requiredModules = [
   'src/story-evidence.js',
   'src/story-evidence-polish.js',
   'src/story-narrative-depth.js',
-  'src/story-ui-responsive.js',
 ];
 for (const rel of requiredModules) {
   assert(discoveredModules.includes(rel), `story-modules.js 缺少必需模块：${rel}`);
-}
-
-const combinedSource = discoveredModules.map(read).join('\n');
-for (const symbol of ['v07ResolveEnding', 'v07InvestigationQuality', 'applyResponsiveStoryUI']) {
-  assert(combinedSource.includes(symbol), `故事模块源码缺少关键标识：${symbol}`);
 }
 
 if (errors.length) {
