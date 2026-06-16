@@ -143,14 +143,6 @@ function applyNarrativeDepthV07() {
         : '• 你的证据还散着，能写成报告，但很难逼任何人低头。';
       return `${base}<br><br><b>调查质量：</b>${quality.score} 分<br>${reasonText}<br><br>这一刻，结论不再只是选择一个嫌疑人名字，而是看你救下了谁、保住了什么证据、有没有让关键人物当面对质。`;
     };
-
-    nodes.ch4_conclusion.choices = (s) => {
-      const opts = oldConclusionChoices(s) || [];
-      return [
-        { text: '✍️ 按证据链自然收束此案', goto: () => E.v07ResolveEnding() },
-        ...opts
-      ];
-    };
   }
 }
 
