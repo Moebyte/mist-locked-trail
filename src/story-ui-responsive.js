@@ -1,5 +1,5 @@
 // ===== 响应式 UI、分页阅读与分页线索簿 =====
-// 目标：桌面端常驻右侧信息栏，手机端底部抽屉分页；场景正文按页阅读，减少上下滑动。
+// 目标：桌面端常驻右侧信息栏，手机端底部抽屉分页；场景正文按页阅读，线索簿按档案分页。
 
 function applyResponsiveStoryUI() {
   if (typeof E === 'undefined' || typeof document === 'undefined') return;
@@ -14,6 +14,7 @@ function applyResponsiveStoryUI() {
   if (!hasRuntimeUI) return;
 
   E.panelTab = E.panelTab || 'overview';
+  E.panelListPages = E.panelListPages || {};
   E.scenePage = 0;
   E.scenePages = [];
 
@@ -22,13 +23,38 @@ function applyResponsiveStoryUI() {
     this.renderPanel();
   };
 
-  function cardList(list, empty, icon) {
+  E.setPanelListPage = function (key, page) {
+    this.panelListPages = this.panelListPages || {};
+    this.panelListPages[key] = Math.max(0, page || 0);
+    this.renderPanel();
+  };
+
+  function itemCard(item, icon) {
+    const name = typeof item === 'string' ? item : item.name;
+    const desc = typeof item === 'string' ? '' : item.desc;
+    return `<div class="clue-card"><b>${icon || ''}${name}</b>${desc ? `<br>${desc}` : ''}</div>`;
+  }
+
+  function pageNav(key, page, totalPages, totalCount) {
+    if (totalPages <= 1) return `<div class="panel-note">共 ${totalCount} 条。</div>`;
+    return `
+      <div style="display:flex;align-items:center;gap:8px;margin-top:10px">
+        <button class="scene-page-btn" ${page <= 0 ? 'disabled' : ''} onclick="E.setPanelListPage('${key}', ${page - 1})">上一页</button>
+        <button class="scene-page-btn primary" ${page >= totalPages - 1 ? 'disabled' : ''} onclick="E.setPanelListPage('${key}', ${page + 1})">下一页</button>
+        <span class="scene-page-indicator">${page + 1} / ${totalPages} · 共 ${totalCount} 条</span>
+      </div>`;
+  }
+
+  function pagedCardList(key, list, empty, icon, pageSize) {
     if (!list || list.length === 0) return `<div class="empty">${empty}</div>`;
-    return `<div class="panel-list">${list.map(item => {
-      const name = typeof item === 'string' ? item : item.name;
-      const desc = typeof item === 'string' ? '' : item.desc;
-      return `<div class="clue-card"><b>${icon || ''}${name}</b>${desc ? `<br>${desc}` : ''}</div>`;
-    }).join('')}</div>`;
+    const totalPages = Math.max(1, Math.ceil(list.length / pageSize));
+    const page = Math.max(0, Math.min(E.panelListPages[key] || 0, totalPages - 1));
+    E.panelListPages[key] = page;
+    const start = page * pageSize;
+    const visible = list.slice(start, start + pageSize);
+    return `
+      <div class="panel-list compact-list">${visible.map(item => itemCard(item, icon)).join('')}</div>
+      ${pageNav(key, page, totalPages, list.length)}`;
   }
 
   function tabButton(active, id, label, count) {
@@ -37,7 +63,7 @@ function applyResponsiveStoryUI() {
   }
 
   function compactRoute(state) {
-    return state.sceneLog.slice(-12).map(id => nodes[id] ? nodes[id].title : id).filter(Boolean);
+    return state.sceneLog.slice(-30).map(id => nodes[id] ? nodes[id].title : id).filter(Boolean).reverse();
   }
 
   function plainLength(html) {
@@ -177,10 +203,10 @@ function applyResponsiveStoryUI() {
     const active = this.panelTab || 'overview';
     const strength = this.caseStrength();
     const pressure = this.pressureLabel();
-    const clues = this.state.clues || [];
-    const items = this.state.items || [];
+    const clues = (this.state.clues || []).slice().reverse();
+    const items = (this.state.items || []).slice().reverse();
     const contacts = this.state.contacts || [];
-    const endings = this.state.endings || [];
+    const endings = (this.state.endings || []).slice().reverse();
     const route = compactRoute(this.state);
     const graphCount = this.relationData.nodes.filter(n => n.discovered).length;
     const wallHtml = this.renderClueWall();
@@ -204,40 +230,38 @@ function applyResponsiveStoryUI() {
           <div class="summary-card"><small>人物</small><b>${graphCount}/${this.relationData.nodes.length}</b><span>已发现关系</span></div>
         </div>
         ${wallHtml ? `<div class="panel-section"><h3>🧩 推理墙</h3>${wallHtml}</div>` : ''}
-        <div class="panel-section"><h3>最近线索</h3>${cardList(clues.slice(-4).reverse(), '还没有记录到关键线索。', '🔍 ')}</div>
+        <div class="panel-section"><h3>最近线索</h3>${pagedCardList('overview-clues', clues, '还没有记录到关键线索。', '🔍 ', 4)}</div>
       </div>`;
 
     const cluePage = `
       <div class="panel-page ${active === 'clues' ? 'active' : ''}">
-        <div class="panel-section"><h3>关键线索（${clues.length}）</h3>${cardList(clues.slice().reverse(), '还没有记录到关键线索。', '🔍 ')}</div>
+        <div class="panel-section"><h3>关键线索（${clues.length}）</h3>${pagedCardList('clues', clues, '还没有记录到关键线索。', '🔍 ', 5)}</div>
       </div>`;
 
     const itemPage = `
       <div class="panel-page ${active === 'items' ? 'active' : ''}">
-        <div class="panel-section"><h3>随身物品（${items.length}）</h3>${cardList(items.slice().reverse(), '口袋里还没有关键物件。', '🎒 ')}</div>
+        <div class="panel-section"><h3>随身物品（${items.length}）</h3>${pagedCardList('items', items, '口袋里还没有关键物件。', '🎒 ', 5)}</div>
       </div>`;
 
     const peoplePage = `
       <div class="panel-page ${active === 'people' ? 'active' : ''}">
         <div class="panel-section">
           <h3>人物关系（${contacts.length}） <button class="tool-btn mini" onclick="E.openGraph()">关系图</button></h3>
-          ${cardList(contacts, '还没有可追踪的人物。', '📇 ')}
+          ${pagedCardList('people', contacts, '还没有可追踪的人物。', '📇 ', 8)}
           <p class="panel-note">已发现 ${graphCount}/${this.relationData.nodes.length} 位人物。关系图会随人物发现逐步显现。</p>
         </div>
       </div>`;
 
+    const routeItems = route.map(title => ({ name: title, desc: '' }));
     const routePage = `
       <div class="panel-page ${active === 'route' ? 'active' : ''}">
-        <div class="panel-section"><h3>最近足迹</h3>
-          ${route.length ? `<ol class="route-list">${route.map(title => `<li>${title}</li>`).join('')}</ol>` : '<div class="empty">尚未开始调查。</div>'}
-        </div>
+        <div class="panel-section"><h3>最近足迹</h3>${pagedCardList('route', routeItems, '尚未开始调查。', '↗ ', 8)}</div>
       </div>`;
 
+    const endingItems = endings.map(e => ({ name: e.title, desc: new Date(e.at).toLocaleString('zh-CN') }));
     const endingPage = `
       <div class="panel-page ${active === 'endings' ? 'active' : ''}">
-        <div class="panel-section"><h3>结局记录（${endings.length}/8）</h3>
-          ${endings.length ? `<div class="panel-list">${endings.map(e => `<div class="clue-card"><b>🏁 ${e.title}</b><br>${new Date(e.at).toLocaleString('zh-CN')}</div>`).join('')}</div>` : '<div class="empty">还没有解锁结局。</div>'}
-        </div>
+        <div class="panel-section"><h3>结局记录（${endings.length}/8）</h3>${pagedCardList('endings', endingItems, '还没有解锁结局。', '🏁 ', 4)}</div>
       </div>`;
 
     panel.innerHTML = tabs + overview + cluePage + itemPage + peoplePage + routePage + endingPage;
