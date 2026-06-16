@@ -472,12 +472,16 @@ const E = {
     const node = nodes[nodeId];
     if (!node || !node.onPresent) return;
     const allThings = [...this.state.clues.map(c=>({type:'clue',...c})), ...this.state.items.map(i=>({type:'item',...i}))];
+    // Pre-filter with flag save/restore to avoid side effects
+    const savedFlags = this.state.flags ? {...this.state.flags} : {};
     const hasValid = allThings.some(t => {
       try {
         const r = typeof node.onPresent === 'function' ? node.onPresent(t, this.state) : node.onPresent;
         return r && (r.goto || r.text);
       } catch(e) { return false; }
     });
+    this.state.flags = savedFlags;
+    if (typeof E !== 'undefined' && E.state) E.state.flags = savedFlags;
     if (!hasValid) return;
     const wrap = document.createElement('div');
     wrap.id = 'present-btn-wrapper';
@@ -500,12 +504,16 @@ const E = {
     const allThings = [...state.clues.map(c=>({type:'clue',...c})), ...state.items.map(i=>({type:'item',...i}))];
     if (allThings.length === 0) { this.toast('你身上没有可以出示的东西。'); return; }
     // Pre-filter: only show items that trigger a real response from onPresent
+    // Save & restore flags to prevent side effects from corrupting game state
+    const savedFlags = state.flags ? {...state.flags} : {};
     const validThings = allThings.filter(t => {
       try {
         const r = typeof node.onPresent === 'function' ? node.onPresent(t, state) : node.onPresent;
         return r && (r.goto || r.text);
       } catch(e) { return false; }
     });
+    state.flags = savedFlags;
+    if (typeof E !== 'undefined' && E.state) E.state.flags = savedFlags;
     if (validThings.length === 0) { this.toast('没有能在此处出示的线索。'); return; }
     // Create modal
     const mask = document.createElement('div');
