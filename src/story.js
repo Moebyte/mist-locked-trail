@@ -142,7 +142,7 @@ ${extra}`;
       const opts = [];
       if (!E.hasClue('舍监证词')) opts.push({ text: '👩 问舍监——失踪那天的情况', goto: 'ch2_univ_matron' });
       if (!E.hasClue('黑衣男人') || !E.getFlag('asked_door')) opts.push({ text: '🚪 找门房——问黑衣男人的事', goto: 'ch2_univ_door' });
-      opts.push({ text: '📄 检查她的论文草稿', goto: 'ch2_univ_paper' });
+      if (!E.hasClue('法租界地图')) opts.push({ text: '📄 检查她的论文草稿', goto: 'ch2_univ_paper' });
       if (E.hasClue('法租界地图')) opts.push({ text: '🔙 已经查得差不多了，去下一个地方', goto: 'ch2_leave_univ' });
       return opts;
     },
