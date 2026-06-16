@@ -11,22 +11,23 @@ function item(name, desc = '') { E.addItem(name, desc); }
 function flag(name, value = true) { E.setFlag(name, value); }
 function heat(value) { E.addHeat(value); }
 function choices(id) { rt.renderNode(id); return rt.choicesOf(id); }
+function resolveGoto(choice) { return typeof choice.goto === 'function' ? choice.goto(E.state) : choice.goto; }
 function hasTarget(list, target) { return list.some(choice => choice.goto === target || (typeof choice.goto === 'function' && choice.goto(E.state) === target)); }
 function hasText(list, fragment) { return list.some(choice => choice.text && choice.text.includes(fragment)); }
-function labelList(list) { return list.map(choice => `${choice.text} -> ${typeof choice.goto === 'function' ? choice.goto(E.state) : choice.goto}`).join(' | '); }
+function labelList(list) { return list.map(choice => `${choice.text} -> ${typeof choice.goto === 'function' ? '[dynamic goto]' : choice.goto}`).join(' | '); }
 function expectTarget(id, target, expected, setup, message) {
   rt.resetState();
   setup?.();
   const list = choices(id);
   const actual = hasTarget(list, target);
-  assert(actual === expected, `${message}\n  ${id} choices: ${labelList(list)}`);
+  assert(actual === expected, `${message}\n  ${id} choices: ${actual === expected ? '[omitted]' : labelList(list)}`);
 }
 function expectText(id, fragment, expected, setup, message) {
   rt.resetState();
   setup?.();
   const list = choices(id);
   const actual = hasText(list, fragment);
-  assert(actual === expected, `${message}\n  ${id} choices: ${labelList(list)}`);
+  assert(actual === expected, `${message}\n  ${id} choices: ${actual === expected ? '[omitted]' : labelList(list)}`);
 }
 function expectRoute(fnName, expected, setup, message) {
   rt.resetState();
