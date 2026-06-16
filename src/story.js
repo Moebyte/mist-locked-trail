@@ -28,7 +28,7 @@ const nodes = {
 
 窗外的雨还在下。梧桐叶被打落一地，一辆黄包车从街角拐过，车夫的吆喝声被雨幕吞没。你看着照片上的苏晚亭，她望着镜头之外的某个方向，眼神清澈而执拗，像是早已知道有人在找她。`,
     choices: [
-      { text: '💵 接下委托', effect: (s) => { s.chapter = 1; E.addContact('周明远'); E.addItem('苏晚亭的照片', '光启公园留影，照片背面写着"民国三十七年九月 · 光启公园 · 晚亭"。'); E.setFlag('took_case', true); }, goto: 'ch1_take' },
+      { text: '💵 接下委托', effect: (s) => { s.chapter = 1; E.addContact('周明远'); E.addItem('苏晚亭的照片', '光启公园留影，照片背面写着"民国三十七年九月 · 光启公园 · 晚亭"。'); }, goto: 'ch1_take' },
       { text: '❓ 先问几个问题', goto: 'ch1_ask' },
       { text: '🚪 这个案子我不接', goto: 'end_refuse' },
     ],
@@ -79,7 +79,7 @@ const nodes = {
 
 他眼巴巴地看着你。`,
     choices: [
-      { text: '💵 好，这委托我接了', effect: (s) => { s.chapter = 1; E.addContact('周明远'); E.addItem('苏晚亭的照片', '光启公园留影，照片背面写着"民国三十七年九月 · 光启公园 · 晚亭"。'); E.addClue('黑衣男人', '失踪前有人找过她'); E.setFlag('took_case', true); }, goto: 'ch1_take' },
+      { text: '💵 好，这委托我接了', effect: (s) => { s.chapter = 1; E.addContact('周明远'); E.addItem('苏晚亭的照片', '光启公园留影，照片背面写着"民国三十七年九月 · 光启公园 · 晚亭"。'); E.addClue('黑衣男人', '失踪前有人找过她'); }, goto: 'ch1_take' },
       { text: '🚪 听完了，但这个案子我不接', goto: 'end_refuse' },
     ],
   },
@@ -377,6 +377,13 @@ ${extra}`;
     title: '苏家',
     time: {d:1, h:17, m:30},
     weather: 0,
+    onPresent: (item, s) => {
+      if (item.name === '苏晚亭的照片' && !E.getFlag('shown_photo_to_mother')) {
+        E.setFlag('shown_photo_to_mother', true);
+        return { goto: 'ch2_home_showphoto' };
+      }
+      return null;
+    },
     text: () => `苏晚亭的家在闸北一条狭窄的弄堂里。青石板路面湿漉漉的，墙根长着青苔。
 
 你敲开门。苏母是个五十多岁的妇人，坐在轮椅上，腿上盖着一条薄毯。她脸色苍白，但眼神清亮。
@@ -445,6 +452,19 @@ ${extra}`;
     effect: (s) => { E.addClue('表哥', '照片上裁掉的人是苏晚亭的"表哥"；苏母不愿多谈'); E.setFlag('asked_mother_photo', true); },
     choices: [
       { text: '🔙 去下一个地方', goto: 'ch2_leave_home' },
+    ],
+  },
+
+  // 向苏母出示苏晚亭的照片（由 ch2_home 的 onPresent 触发）
+  ch2_home_showphoto: {
+    title: '向苏母出示照片',
+    weather: 0,
+    effect: () => {
+      E.addClue('苏母认出照片', '苏母看着照片说：这是她失踪前两个月拍的，她很珍惜。');
+    },
+    text: () => `你从怀里掏出那张照片，递给苏母。<br><br>她接过去的时候手是稳的——但看到照片的那一瞬间，眼泪毫无预兆地落了下来。她没有抬手去擦。<br><br><span class="sys">"这是……她失踪前两个月拍的。光启公园。她说那天天气好，非要拉我去，我没去成。"</span><br><br>她用手指轻轻摩挲照片边缘，像在抚摸女儿的脸。<br><br><span class="sys">"她拍完回来说：妈，这张照片我要留给明远。如果有一天我不见了，他至少有张照片可以找我。"</span><br><br>她说到这里，忽然停住了。<br><br>苏晚亭在拍照那天就已经想到了自己会失踪。这不是临时起意的出走——她在做准备。<br><br>她把照片还给你，声音很轻：<span class="sys">"找到她。不管在哪里，找到她。"</span><br><br>你点点头，把照片贴胸收好。`,
+    choices: [
+      { text: '🔙 告辞，继续调查', goto: 'ch2_leave_home' },
     ],
   },
 
@@ -678,7 +698,7 @@ ${extra}`;
 这封信没有署名，没有日期。
 
 你把照片和信收好。这个房间里发生过什么，正在逐渐清晰。但也越来越不祥。`,
-    effect: (s) => { E.addClue('三人合影', '苏晚亭、陆小姐、陈老师的合影'); E.addClue('恐吓信', '"如果你不说，他们下一个就是你"'); E.addItem('三人合影', '苏晚亭、陆小姐、陈老师在光华小学门前的合影。'); E.addItem('恐吓信', '没有署名的信：如果你不说，他们下一个就是你。'); E.setFlag('got_photo_letter', true); s.chapter = 3; },
+    effect: (s) => { E.addClue('三人合影', '苏晚亭、陆小姐、陈老师的合影'); E.addClue('恐吓信', '"如果你不说，他们下一个就是你"'); E.addItem('三人合影', '苏晚亭、陆小姐、陈老师在光华小学门前的合影。'); E.addItem('恐吓信', '没有署名的信：如果你不说，他们下一个就是你。'); s.chapter = 3; },
     choices: [
       { text: '📚 去光华小学——那里是这一切的中心', goto: 'ch3_school' },
     ],
@@ -1075,9 +1095,7 @@ ${strength.desc}
         return 'end_archive';
       } },
       { text: '📁 把现有材料交给巡捕房，暂时结案', goto: 'end_archive' },
-      { text: '🔍 推理——指出真凶是陆小姐', goto: 'end_boss_lu' },
-      { text: '🔍 推理——指出真凶是黑衣男人（赵先生）', goto: 'end_boss_zhao' },
-      { text: '🔍 推理——真凶是吴校长', goto: 'end_boss_wu' },
+      { text: '🔍 推理——指认幕后真凶', goto: 'ch4_accuse' },
       { text: '🕯️ 不急着抓人，先追苏晚亭和沈玉芳的下落', when: (s) => E.getFlag('rescued_yufang') && E.getFlag('deduced_fusheng') && !E.getFlag('missed_deadline'), goto: 'end_conspiracy_detail' },
       { text: '🕯️ 追查被转走的人质', when: (s) => E.getFlag('missed_deadline'), goto: 'end_too_late' },
       { text: '🔍 推理——这是一个更大的阴谋，牵涉多方势力', goto: 'end_conspiracy' },
@@ -1085,6 +1103,18 @@ ${strength.desc}
   },
 
   // ===== 结局 =====
+  ch4_accuse: {
+    title: '指认幕后真凶',
+    weather: 5,
+    text: () => `你摊开所有材料，在灯下重新梳理了一遍。<br><br>三个人的名字从不同方向浮出来，但他们不可能都是主谋。<br><br>你决定指控谁？`,
+    choices: [
+      { text: '🔍 陆小姐——她是中间人，是执行者', goto: 'end_boss_lu' },
+      { text: '🔍 黑衣男人赵先生——他是上线，是策划者', goto: 'end_boss_zhao' },
+      { text: '🔍 吴校长——他是保护伞，是地头蛇', goto: 'end_boss_wu' },
+      { text: '🔙 再想想', goto: 'ch4_conclusion' },
+    ],
+  },
+
   end_too_late: {
     title: '结局 · 迟到一步',
     time: {d:3, h:0, m:20},
@@ -1488,7 +1518,7 @@ ${strength.desc}
     title: '结局 · 雨夜灯火',
     time: {d:2, h:23, m:0},
     weather: 0,
-    effect: (s) => { E.setFlag('hidden_end', true); },
+    effect: (s) => { },
     text: () => `所有的碎片都拼上了。<br><br>陈明远发现光华小学的走私勾当——被灭口。<br>沈玉芳从他那里知道了一部分真相——被关在福生仓。<br>陆念薇是中间人——她不是主谋，她上面还有人。<br>黑衣男人是巡捕房的暗线——有人想查这条线，但查不动。<br><br>而福生仓里的货，和公董局的公文纸——它们指向同一个方向。<br><br>你没有去找巡捕房。<br>你写了一封信——不是报案信，是一封私人信件。收信人是《申报》的副总编辑，你认识他。你把所有证据的副本随信附上。<br><br>三天后，《申报》头版刊登了一篇报道：《法租界光华小学教具箱暗藏走私通道，两教师一死一失踪》。<br><br>报道没有点名公董局的人，但所有的描述都足够让人对号入座。<br><br>又过了三天，福生仓被查封。公董局那位副秘书长以"健康原因"辞职。<br><br>一个月后，你收到了一封信，没有署名。<br><br><span class="sys">"沈先生：晚亭已平安。她让我代她向你说一声谢谢。另外，那条线上的人，不止一个。但你能做到的，已经比大多数人多了。——孙"</span><br><br>你把信折好，放进口袋。<br><br>窗外又下雨了。你泡了一壶新茶。<br><br>民国三十七年的冬天，比往年来得都晚一些。但终究是来了。<br><br><div style="color:#666;font-style:italic;margin-top:20px">—— 结局七 · 雨夜灯火（隐藏结局）——</div>`,
     type: 'end',
   },

@@ -100,8 +100,6 @@ function applyGameplayImprovements() {
       E.addItem('三人合影', '苏晚亭、陆小姐、陈老师在光华小学门前的合影。');
       E.addItem('恐吓信', '没有署名的信：如果你不说，他们下一个就是你。');
       E.addItem('烧毁的剪报', '203室抽屉暗格里的半张剪报，提到杭州旧案和陆念薇。');
-      E.setFlag('got_photo_letter', true);
-      E.setFlag('found_lu_old_case', true);
       E.state.chapter = 3;
     },
     choices: [{ text: '📚 去光华小学——那里是这一切的中心', goto: 'ch3_school' }]
@@ -540,7 +538,7 @@ function applyGameplayImprovements() {
     title: '结局 · 雨夜灯火',
     time: { d: 2, h: 23, m: 0 },
     weather: 0,
-    effect: () => E.setFlag('hidden_end', true),
+    effect: () => E.addClue('结局已解锁', '隐藏结局已解锁'),
     text: () => {
       const suLine = E.getFlag('rescued_su')
         ? '苏晚亭在医院醒来后，亲手写下了她在福生仓听见的名字：傅启元。'
