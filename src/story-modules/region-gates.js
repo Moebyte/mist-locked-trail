@@ -116,6 +116,25 @@
       return E.getFlag('sun_fast_support') || E.getFlag('sun_wait_support') || E.getFlag('sun_support_in_action');
     }
 
+    function hardDockEvidenceReady() {
+      return E.hasItem('清场指令')
+        || E.hasItem('光华货运单')
+        || E.hasClue('公董局公文纸')
+        || E.hasClue('教具箱走私')
+        || E.getFlag('fu_waybill_exposed')
+        || E.getFlag('fu_clearance_exposed');
+    }
+
+    function fullSupportAtDock() {
+      return E.getFlag('sun_full_support')
+        || E.getFlag('sun_wait_support')
+        || (E.getFlag('sun_support_in_action') && !E.getFlag('sun_fast_support'));
+    }
+
+    function supportCanConfrontAtDock() {
+      return sunSupportPresentAtDock() && (fullSupportAtDock() || hardDockEvidenceReady());
+    }
+
     function adjustedDockPhase(basePhase) {
       const phases = ['safe', 'tight', 'critical', 'expired'];
       const start = Math.max(0, phases.indexOf(basePhase));
@@ -177,6 +196,24 @@
       E.__heatCaseStrengthPatched = true;
     }
 
+    if (!E.__fullSupportQualityPatched && typeof E.v07InvestigationQuality === 'function') {
+      const oldQuality = E.v07InvestigationQuality.bind(E);
+      E.v07InvestigationQuality = function () {
+        const quality = oldQuality();
+        if (this.getFlag('dock_blockade_record')) {
+          quality.score += 1;
+          quality.reasons.push('老孙封住码头，留下官方封锁记录');
+        }
+        return quality;
+      };
+      E.__fullSupportQualityPatched = true;
+    }
+
+    if (nodes.end_conspiracy_detail && !nodes.end_conspiracy_detail.__rainyNightTitlePatched) {
+      nodes.end_conspiracy_detail.title = '结局 · 雨夜灯火';
+      nodes.end_conspiracy_detail.__rainyNightTitlePatched = true;
+    }
+
     if (nodes.ch2_university && !nodes.ch2_university.__regionGateHubPatched) {
       nodes.ch2_university.choices = universityChoices;
       nodes.ch2_university.__regionGateHubPatched = true;
@@ -233,13 +270,32 @@
       nodes.ch3_wrapup.__regionGatePatched = true;
     }
 
+    if (nodes.ch4_sun_present_fusheng && !nodes.ch4_sun_present_fusheng.__supportBalancePatched) {
+      nodes.ch4_sun_present_fusheng.title = '举证 · 王巡官留下的福生仓线索';
+      nodes.ch4_sun_present_fusheng.text = () => `老孙看完纸条上的<span class="sys">"福生仓，三日清"</span>，脸色沉了下去。<br><br><span class="sys">"这是老王的字。他不会随便把一个仓库名留在卷宗里。"</span><br><br>他把纸条压在烟灰缸下，沉默很久。<br><br><span class="sys">"我不能走明面。能帮你的，只有私下这一步。立刻走，人少，快；调齐人手，稳，但慢，也更容易惊动他们。"</span>`;
+      nodes.ch4_sun_present_fusheng.choices = [
+        { text: '🏃 只带一个便衣立刻赶去福生仓（快，人少）', effect: () => E.setFlag('sun_fast_support', true), goto: 'ch4_dock_sun_fast_support' },
+        { text: '🚓 调齐人手再行动（稳，但慢，也更易惊动）', effect: () => E.setFlag('sun_full_support', true), goto: 'ch4_dock_wait' },
+        { text: '🔙 先回去整理线索', goto: 'ch3_wrapup' }
+      ];
+      nodes.ch4_sun_present_fusheng.__supportBalancePatched = true;
+    }
+
     if (nodes.ch4_dock_wait && !nodes.ch4_dock_wait.__dockSupportPatched) {
       chainEffect(nodes.ch4_dock_wait, () => {
         E.setFlag('sun_support_available', true);
         E.setFlag('sun_wait_support', true);
         E.setFlag('sun_support_in_action', true);
+        E.setFlag('sun_full_support', true);
       });
       nodes.ch4_dock_wait.__dockSupportPatched = true;
+    }
+
+    if (nodes.ch4_dock_wait && !nodes.ch4_dock_wait.__fullSupportTextPatched) {
+      nodes.ch4_dock_wait.text = () => E.deadlinePhase() === 'expired'
+        ? `你带人赶回时，福生仓已经清空。老孙低声说：<span class="sys">"他们比我们快一步。"</span>`
+        : `你带着老孙调来的几名便衣和巡捕赶回码头。人手齐了，车道也能暗暗封住，但这一路耽误的时间足够让码头上的风声传出去。<br><br><span class="sys">${E.deadlinePhaseLabel()}。</span>`;
+      nodes.ch4_dock_wait.__fullSupportTextPatched = true;
     }
 
     if (nodes.ch4_dock_sun_fast_support && !nodes.ch4_dock_sun_fast_support.__dockSupportPatched) {
@@ -250,18 +306,44 @@
       nodes.ch4_dock_sun_fast_support.__dockSupportPatched = true;
     }
 
+    if (nodes.ch4_dock_sun_fast_support && !nodes.ch4_dock_sun_fast_support.__fastSupportTextPatched) {
+      nodes.ch4_dock_sun_fast_support.text = () => `老孙只叫来一个信得过的便衣。你们分头靠近福生仓。<br><br>人少，动静小，能抢时间；但真要在码头上正面扣人，仅靠一个便衣还压不住傅启元。<br><br><span class="sys">${E.deadlinePhaseLabel()}。</span>`;
+      nodes.ch4_dock_sun_fast_support.__fastSupportTextPatched = true;
+    }
+
     if (nodes.ch4_dock_escape && !nodes.ch4_dock_escape.__dockSupportChoicesPatched) {
       const oldChoices = nodes.ch4_dock_escape.choices;
       nodes.ch4_dock_escape.choices = function (s) {
         const support = sunSupportPresentAtDock();
+        const fullSupport = fullSupportAtDock();
+        const canSupportConfront = supportCanConfrontAtDock();
         const heat = currentHeat();
         let opts = choicesOf(oldChoices, s).filter(choice => {
-          if (choice.goto === 'ch4_fu_confront' && choice.text && choice.text.includes('老孙的人')) return support;
-          if (choice.goto === 'ch4_fu_confront' && choice.text && choice.text.includes('当场质问傅启元')) return support || heat < 4;
+          if (choice.goto === 'ch4_fu_confront' && choice.text && choice.text.includes('老孙的人')) return canSupportConfront;
+          if (choice.goto === 'ch4_fu_confront' && choice.text && choice.text.includes('当场质问傅启元')) {
+            if (support && !canSupportConfront) return false;
+            return canSupportConfront || heat < 4;
+          }
           return true;
         });
-        if (support && !opts.some(choice => choice.goto === 'ch4_fu_confront' && choice.text && choice.text.includes('老孙的人'))) {
+        if (fullSupport && !opts.some(choice => choice.goto === 'ch4_fu_confront' && choice.text && choice.text.includes('封住码头'))) {
+          opts.unshift({
+            text: '🚓 老孙带人封住码头，正面压住傅启元',
+            effect: () => E.setFlag('dock_blockade_active', true),
+            goto: 'ch4_fu_confront'
+          });
+        } else if (canSupportConfront && !opts.some(choice => choice.goto === 'ch4_fu_confront' && choice.text && choice.text.includes('老孙的人'))) {
           opts.unshift({ text: '🚓 让老孙的人亮明身份，正面压住傅启元', goto: 'ch4_fu_confront' });
+        }
+        if (support && !canSupportConfront && !opts.some(choice => choice.text && choice.text.includes('便衣拖住傅启元'))) {
+          opts.unshift({
+            text: '🕶️ 让便衣拖住傅启元，趁雾把人带走',
+            effect: () => {
+              E.setFlag('sun_plainclothes_screened_escape', true);
+              E.addClue('便衣掩护撤离', '老孙派来的便衣拖住傅启元片刻，但人手不足以当场封控码头');
+            },
+            goto: 'ch4_dock_escape_finish'
+          });
         }
         if (!support && heat >= 6) {
           opts = opts.filter(choice => !(choice.text && choice.text.includes('借雾')));
@@ -279,10 +361,24 @@
       nodes.ch4_dock_escape.__dockSupportChoicesPatched = true;
     }
 
+    if (nodes.ch4_fu_confront && !nodes.ch4_fu_confront.__fullSupportEffectPatched) {
+      chainEffect(nodes.ch4_fu_confront, () => {
+        if (fullSupportAtDock() || E.getFlag('dock_blockade_active')) {
+          E.setFlag('dock_blockade_record', true);
+          E.addClue('码头封锁记录', '老孙带人封住福生仓码头，留下了能被写进案卷的现场封锁记录');
+          E.addClue('码头看守口供', '福生仓看守被老孙的人扣下，承认今晚接到过清场指令');
+        }
+      });
+      nodes.ch4_fu_confront.__fullSupportEffectPatched = true;
+    }
+
     if (nodes.ch4_fu_confront && !nodes.ch4_fu_confront.__supportAwareTextPatched) {
       nodes.ch4_fu_confront.text = () => {
-        if (sunSupportPresentAtDock()) {
-          return `你把清场指令、光华货运单和蓝封纸角一件件摆出来。<br><br>傅启元的表情没有变，但你看到他握公文夹的手指收紧了。<br><br>老孙的人从雾里走出来，枪没有拔，却把路堵住了。<br><br><span class="sys">"傅秘书，今晚这两个人，得先跟我们走。"</span><br><br>傅启元看了你很久，最后让开半步。<br><br>这不是胜利，只是他暂时不愿在码头上开枪。`;
+        if (fullSupportAtDock() || E.getFlag('dock_blockade_active')) {
+          return `你把清场指令、光华货运单和蓝封纸角一件件摆出来。<br><br>傅启元的表情没有变，但你看到他握公文夹的手指收紧了。<br><br>老孙带来的人从雾里散开，封住码头两端。枪没有拔，车道却已经走不通。<br><br><span class="sys">"傅秘书，今晚这地方先封。人跟货，都得留下说清楚。"</span><br><br>傅启元看了你很久，最后让开半步。<br><br>这不是彻底扳倒他，但第一次，有一份能写进案卷的记录把他的名字钉在了福生仓。`;
+        }
+        if (sunSupportPresentAtDock() && hardDockEvidenceReady()) {
+          return `你把清场指令、光华货运单和蓝封纸角一件件摆出来。<br><br>傅启元的表情没有变，但你看到他握公文夹的手指收紧了。<br><br>老孙派来的便衣从雾里走出来，枪没有拔，却把路堵住了。<br><br><span class="sys">"傅秘书，今晚这两个人，得先跟我们走。"</span><br><br>傅启元看了你很久，最后让开半步。<br><br>这不是胜利，只是你用硬证据和一个便衣抢出了一条活路。`;
         }
         return `你把清场指令、光华货运单和蓝封纸角一件件摆出来。<br><br>傅启元看着你，像是在判断你背后到底有没有人。你没有老孙的人撑场，只能把声音压稳，赌他不敢在码头上把事情闹大。<br><br>他没有让路，只是冷冷地说：<span class="sys">"沈先生，你今天带走的人，明天未必还能替你说话。"</span><br><br>这不是压住了他，只是抢出了一条缝。你不能再多停。`;
       };
@@ -296,6 +392,9 @@
         const base = typeof oldText === 'function' ? oldText(s) : oldText;
         if (E.getFlag('messy_escape')) {
           return `${base}<br><br>只是这次撤离太响了。码头上的守卫、车灯和枪套声都记住了你的脸。你救出了人，也把自己推到了更明处。`;
+        }
+        if (E.getFlag('sun_plainclothes_screened_escape')) {
+          return `${base}<br><br>老孙派来的便衣没有亮明全部身份，只在雾里拖住傅启元几句话。你们抢出了人，却没能把码头彻底按住。`;
         }
         return base;
       };
