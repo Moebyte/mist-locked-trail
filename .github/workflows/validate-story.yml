@@ -19,5 +19,8 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Validate story graph and smoke routes
+      - name: Validate story graph
         run: node scripts/validate-story.mjs
+
+      - name: Smoke test key story routes
+        run: node scripts/smoke-routes.mjs
