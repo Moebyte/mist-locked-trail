@@ -163,6 +163,7 @@
 
     if (nodes.ch4_dock_wait && !nodes.ch4_dock_wait.__dockSupportPatched) {
       chainEffect(nodes.ch4_dock_wait, () => {
+        E.setFlag('sun_support_available', true);
         E.setFlag('sun_wait_support', true);
         E.setFlag('sun_support_in_action', true);
       });
