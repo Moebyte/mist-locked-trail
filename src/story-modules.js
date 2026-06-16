@@ -11,7 +11,8 @@
     'src/story-modules/narrative-depth.js',
     'src/story-modules/causal-echo.js',
     'src/story-modules/ui-responsive.js',
-    'src/story-modules/region-gates.js'
+    'src/story-modules/region-gates.js',
+    'src/story-modules/fusheng-choice-polish.js'
   ];
 
   window.MLT_STORY_MODULES = modules.slice();
