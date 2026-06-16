@@ -7,7 +7,8 @@
     'src/story-consistency.js',
     'src/story-evidence.js',
     'src/story-evidence-polish.js',
-    'src/story-narrative-depth.js'
+    'src/story-narrative-depth.js',
+    'src/story-ui-responsive.js'
   ];
 
   window.MLT_STORY_MODULES = modules.slice();
