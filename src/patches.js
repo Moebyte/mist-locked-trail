@@ -6,7 +6,7 @@
   const patches = [
     'src/story-consistency.js',
     'src/story-evidence.js',
-    'src/v0.6.3-evidence-polish.js',
+    'src/story-evidence-polish.js',
     'src/v0.7-narrative-depth.js'
   ];
 
