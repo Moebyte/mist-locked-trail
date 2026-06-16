@@ -324,22 +324,30 @@ ${extra}`;
 
 老孙耸耸肩。<span class="sys">"不知道。写这备注的同事姓王，上个月调走了。你要是想查，得自己去挖。"</span>`,
     effect: (s) => { E.addClue('光华小学事件', '男教师跳楼自杀；备注提到与苏案可能有关'); E.addItem('卷宗摘抄', '苏晚亭失踪案卷宗边缘有铅笔批注：此案与光华小学事件有关联？'); E.addContact('王巡官（已调离）'); E.setFlag('got_case_file', true); },
-    choices: [
-      { text: '📎 追问王巡官调离前留下了什么', goto: 'ch2_police_wang' },
-      { text: '🏛️ 去薛华立路 22 号——老孙说王巡官查过这里', goto: 'ch2_frenchtown' },
-      { text: '🏠 去苏家看她母亲', goto: 'ch2_home' },
-    ],
+    choices: (s) => {
+      const opts = [];
+      opts.push({ text: '📎 追问王巡官调离前留下了什么', goto: 'ch2_police_wang' });
+      if (E.getFlag('got_wang_note')) {
+        opts.push({ text: '🏛️ 去薛华立路 22 号——老孙说王巡官查过这里', goto: 'ch2_frenchtown' });
+        opts.push({ text: '🏠 去苏家看她母亲', goto: 'ch2_home' });
+      }
+      return opts;
+    },
   },
 
   ch2_police_alt: {
     title: '上海法租界巡捕房',
     text: () => `老孙还坐在那里抽烟，看你来了把卷宗推过来。<br><br><span class="sys">"你倒是勤快。卷宗我给你翻出来了——别问我为什么又给你翻，反正你迟早自己来拿。"</span><br><br>卷宗里有一行铅笔批注引起了你的注意：<span class="sys">"此案与光华小学事件有关联？建议并案——王"</span><br><br>你问了老孙才知道，光华小学上个月有个男老师跳楼自杀了，姓陈，三十七岁。现场留了一封遗书，写的是"愧对学生，无颜苟活"。当时定性为自杀，案子已结。<br><br><span class="sys">"写批注的那个王巡官，后来调走了。调走的原因嘛……你自己猜。"</span>老孙把烟掐灭了，像是不想再多说。`,
     effect: (s) => { E.addContact('孙国栋探长'); E.addClue('光华小学事件', '男教师跳楼自杀；备注提到与苏案可能有关'); E.addItem('卷宗摘抄', '苏晚亭失踪案卷宗边缘有铅笔批注：此案与光华小学事件有关联？'); E.setFlag('got_case_file', true); },
-    choices: [
-      { text: '📎 追问王巡官调离前留下了什么', goto: 'ch2_police_wang' },
-      { text: '🏛️ 去薛华立路 22 号——王巡官的线索指向这里', goto: 'ch2_frenchtown' },
-      { text: '🏠 去苏家', goto: 'ch2_home' },
-    ],
+    choices: (s) => {
+      const opts = [];
+      opts.push({ text: '📎 追问王巡官调离前留下了什么', goto: 'ch2_police_wang' });
+      if (E.getFlag('got_wang_note')) {
+        opts.push({ text: '🏛️ 去薛华立路 22 号——王巡官的线索指向这里', goto: 'ch2_frenchtown' });
+        opts.push({ text: '🏠 去苏家', goto: 'ch2_home' });
+      }
+      return opts;
+    },
   },
 
   ch2_police_present: {
