@@ -44,6 +44,52 @@
       };
       hiddenEnding.__routeAwareLetterPatched = true;
     }
+
+    const mistEnding = nodes.end_conspiracy;
+    if (mistEnding && !mistEnding.__routeAwarePostcardPatched) {
+      mistEnding.text = () => {
+        let extra = '';
+        if (E.getFlag('read_letter')) extra += '\n\n你把陈老师的信又看了一遍。你意识到他说的"全部的真相"可能不只是这一桩案子的真相——而是涉及更大层面的事。';
+        if (E.getFlag('sister_case')) extra += '\n\n而沈玉芳的失踪，显然与这个案子有关。天知道她发现了什么。';
+
+        return `你没有急于指认任何一个凶手。因为你觉得——这件事没有这么简单。
+
+陈明远的死、苏晚亭的失踪、沈玉芳的失踪、陆小姐的潜逃、黑衣男人的神秘现身、玉扳指、当票、恐吓信、法租界公董局的介入、巡捕房的敷衍……
+
+所有线索像一张蛛网，而你只看到了其中的几根丝。${extra}
+
+你做了一个决定——不结案。
+
+你把自己的调查结果分成了三份。一份留给自己，一份寄给了香港《大公报》的一个记者朋友，一份锁在了银行的保险柜里。
+
+然后你坐等。
+
+你等了两个月。没有动静。
+
+第七十三天的深夜，你的事务所被人翻了一遍。什么都没丢。但有人在你桌上留下一张字条——用印刷体写的：
+
+<span class="sys">"你很聪明。别太聪明。"</span>
+
+你知道你猜对了。你也知道自己该收手了。
+
+苏晚亭的案子没有被正式结案。档案存在巡捕房的柜子里，落满了灰。
+
+但有一件事是好的——春天的时候，周怀安托人给你送来一张明信片。寄自杭州西湖，正面是"三潭印月"的风景照。
+
+他说，那张明信片先寄到了他那里，没有署名，没有回信地址。背面只有一行字，是女人的笔迹：
+
+<span class="sys">"我还活着。谢谢。"</span>
+
+你没有问周怀安是不是认得那笔迹。他也没有说。
+
+你只是把明信片收进了抽屉里，跟那张学生装的照片放在了一起。
+
+你和苏晚亭从没真正见过面。可是至少这一次，你知道她没有被这片雾吞掉。
+
+<div style="color:#666;font-style:italic;margin-top:20px">—— 结局七 · 迷雾未尽 ——</div>`;
+      };
+      mistEnding.__routeAwarePostcardPatched = true;
+    }
   }
 
   document.addEventListener('DOMContentLoaded', applyFushengChoicePolish);
