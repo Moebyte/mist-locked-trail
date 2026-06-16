@@ -467,6 +467,18 @@ const E = {
   showPresentBtn() {
     const existing = document.getElementById('present-btn-wrapper');
     if (existing) return;
+    // Pre-check: only show button if at least one item/clue triggers a response
+    const nodeId = this.state.currentScene;
+    const node = nodes[nodeId];
+    if (!node || !node.onPresent) return;
+    const allThings = [...this.state.clues.map(c=>({type:'clue',...c})), ...this.state.items.map(i=>({type:'item',...i}))];
+    const hasValid = allThings.some(t => {
+      try {
+        const r = typeof node.onPresent === 'function' ? node.onPresent(t, this.state) : node.onPresent;
+        return r && (r.goto || r.text);
+      } catch(e) { return false; }
+    });
+    if (!hasValid) return;
     const wrap = document.createElement('div');
     wrap.id = 'present-btn-wrapper';
     wrap.style.cssText = 'margin-top:10px;border-top:1px dashed #2a2a48;padding-top:12px';
@@ -481,15 +493,27 @@ const E = {
 
   openPresentModal() {
     const state = this.state;
+    const nodeId = state.currentScene;
+    const node = nodes[nodeId];
+    // No onPresent handler → nothing to show
+    if (!node || !node.onPresent) { this.toast('当前没有可以出示的东西。'); return; }
     const allThings = [...state.clues.map(c=>({type:'clue',...c})), ...state.items.map(i=>({type:'item',...i}))];
     if (allThings.length === 0) { this.toast('你身上没有可以出示的东西。'); return; }
+    // Pre-filter: only show items that trigger a real response from onPresent
+    const validThings = allThings.filter(t => {
+      try {
+        const r = typeof node.onPresent === 'function' ? node.onPresent(t, state) : node.onPresent;
+        return r && (r.goto || r.text);
+      } catch(e) { return false; }
+    });
+    if (validThings.length === 0) { this.toast('没有能在此处出示的线索。'); return; }
     // Create modal
     const mask = document.createElement('div');
     mask.style.cssText = 'position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;padding:20px';
     const box = document.createElement('div');
     box.style.cssText = 'background:#0f0f1e;border:1px solid #3a3a58;border-radius:12px;max-width:460px;width:100%;max-height:70vh;padding:20px;overflow:auto';
     box.innerHTML = '<h3 style="color:#c8a87c;font-size:16px;margin-bottom:12px">选择要出示的线索或物品</h3>';
-    allThings.forEach(t => {
+    validThings.forEach(t => {
       const card = document.createElement('div');
       card.style.cssText = 'background:#171727;border:1px solid #282846;border-radius:8px;padding:10px 12px;margin:6px 0;cursor:pointer;transition:.12s';
       card.innerHTML = `<b style="color:#d8bd8e">${t.type==='item'?'🎒':'🔍'} ${t.name}</b><br><span style="color:#999;font-size:13px">${t.desc}</span>`;
