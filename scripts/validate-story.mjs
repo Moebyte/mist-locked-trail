@@ -2,6 +2,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
+import { readPatchSources, runPatchScripts } from './patch-loader.mjs';
 
 const repoRoot = process.cwd();
 const errors = [];
@@ -9,10 +10,6 @@ const warnings = [];
 
 function read(rel) {
   return fs.readFileSync(path.join(repoRoot, rel), 'utf8');
-}
-
-function exists(rel) {
-  return fs.existsSync(path.join(repoRoot, rel));
 }
 
 function freshState(overrides = {}) {
@@ -40,24 +37,13 @@ const E = {
   titleEl: {},
   textEl: {},
   choicesEl: { innerHTML: '', appendChild() {} },
-  init() {},
-  toast() {},
-  logChoice() {},
-  logNarration() {},
-  updateStatus() {},
-  saveGame() {},
-  scroll() {},
-  openPanel() {},
-  showPresentBtn() {},
-  applyWeatherClass() {},
-  ambientLine() {},
+  init() {}, toast() {}, logChoice() {}, logNarration() {}, updateStatus() {}, saveGame() {}, scroll() {}, openPanel() {}, showPresentBtn() {}, applyWeatherClass() {}, ambientLine() {}, openDeduction() {},
   setWeather(i) { this.state.weatherIdx = i; },
   renderAtmosphere() { return ''; },
   setTime(day, hour, minute) { this.state.inGameTime = { day: day || 1, hour: hour || 14, minute: minute || 0 }; },
   advanceTime(hours = 0, minutes = 0) {
     const t = this.state.inGameTime;
-    t.minute += minutes;
-    t.hour += hours;
+    t.minute += minutes; t.hour += hours;
     while (t.minute >= 60) { t.minute -= 60; t.hour += 1; }
     while (t.hour >= 24) { t.hour -= 24; t.day += 1; }
   },
@@ -75,28 +61,14 @@ const E = {
   setFlag(k, v) { this.state.flags[k] = v; },
   getFlag(k) { return this.state.flags[k]; },
   canDeduce() { return true; },
-  openDeduction() {},
   caseStrength() { return { name: '自动验收', desc: '自动化校验环境下的案情强度占位。' }; },
 };
 
 const domReadyHandlers = [];
 const documentStub = {
-  addEventListener(event, handler) {
-    if (event === 'DOMContentLoaded') domReadyHandlers.push(handler);
-  },
-  getElementById() {
-    return {
-      style: {},
-      innerHTML: '',
-      textContent: '',
-      appendChild() {},
-      scrollIntoView() {},
-      addEventListener() {},
-    };
-  },
-  createElement() {
-    return { className: '', textContent: '', title: '', onclick: null, style: {}, appendChild() {} };
-  },
+  addEventListener(event, handler) { if (event === 'DOMContentLoaded') domReadyHandlers.push(handler); },
+  getElementById() { return { style: {}, innerHTML: '', textContent: '', appendChild() {}, scrollIntoView() {}, addEventListener() {} }; },
+  createElement() { return { className: '', textContent: '', title: '', onclick: null, style: {}, appendChild() {} }; },
 };
 
 const context = vm.createContext({
@@ -111,34 +83,51 @@ const context = vm.createContext({
 context.globalThis = context;
 
 function runScript(rel, suffix = '') {
-  const file = path.join(repoRoot, rel);
-  const code = fs.readFileSync(file, 'utf8') + suffix;
-  vm.runInContext(code, context, { filename: rel });
+  vm.runInContext(read(rel) + suffix, context, { filename: rel });
 }
 
 runScript('src/story.js', '\nglobalThis.nodes = nodes;');
 runScript('src/main.js');
-if (exists('src/v0.6.1-fixes.js')) runScript('src/v0.6.1-fixes.js');
+runPatchScripts(runScript, repoRoot);
 for (const handler of domReadyHandlers) handler();
 
 const nodes = context.nodes;
-if (!nodes || typeof nodes !== 'object') {
-  throw new Error('无法加载 nodes。请确认 src/story.js 定义 const nodes。');
-}
+if (!nodes || typeof nodes !== 'object') throw new Error('Unable to load nodes.');
 
-function resetState(overrides = {}) {
-  E.state = freshState(overrides);
-}
-
-function cloneStatePatch(patch) {
+function resetState(overrides = {}) { E.state = freshState(overrides); }
+function applyScenario(patch = {}) {
   resetState();
   if (patch.time) E.state.inGameTime = { ...patch.time };
   if (patch.flags) E.state.flags = { ...patch.flags };
   if (patch.items) E.state.items = patch.items.map(name => ({ name, desc: '' }));
   if (patch.clues) E.state.clues = patch.clues.map(name => ({ name, desc: '' }));
 }
+function assertNode(target, source, kind) {
+  if (target && !nodes[target]) errors.push(`${kind}: ${source} -> missing node ${target}`);
+}
+function choicesFor(node, id) {
+  const raw = typeof node.choices === 'function' ? node.choices(E.state) : node.choices;
+  if (!raw) return [];
+  if (!Array.isArray(raw)) { warnings.push(`${id} choices is ${typeof raw}`); return []; }
+  return raw;
+}
+function visit(id) {
+  const node = nodes[id];
+  if (!node) throw new Error(`missing node ${id}`);
+  E.state.currentScene = id;
+  E.state.sceneLog.push(id);
+  E.state.visitedNodes[id] = (E.state.visitedNodes[id] || 0) + 1;
+  if (typeof node.effect === 'function') node.effect(E.state);
+  if (node.time) E.setTime(node.time.d, node.time.h, node.time.m);
+  if (node.cost && E.state.visitedNodes[id] <= 1) E.spendTime(node.cost.h || 0, node.cost.m || 0);
+  if (typeof node.text === 'function') node.text(E.state);
+  return node;
+}
+function expectEqual(actual, expected, label) {
+  if (actual !== expected) errors.push(`${label}: expected ${expected}, got ${actual}`);
+}
 
-const scenarioPatches = [
+const scenarios = [
   { name: 'base', time: { day: 1, hour: 14, minute: 30 } },
   { name: 'safe', time: { day: 1, hour: 15, minute: 0 } },
   { name: 'tight', time: { day: 2, hour: 15, minute: 0 } },
@@ -149,60 +138,25 @@ const scenarioPatches = [
   { name: 'with-su-found', time: { day: 2, hour: 15, minute: 0 }, flags: { found_su_at_dock: true, rescued_su: true } },
 ];
 
-function assertNode(target, source, kind) {
-  if (!target) return;
-  if (!nodes[target]) errors.push(`${kind}: ${source} 跳转到不存在的节点 ${target}`);
-}
-
-function normalizeChoices(raw, id) {
-  if (!raw) return [];
-  if (!Array.isArray(raw)) {
-    warnings.push(`${id} choices 返回值不是数组：${typeof raw}`);
-    return [];
-  }
-  return raw;
-}
-
 for (const [id, node] of Object.entries(nodes)) {
-  for (const scenario of scenarioPatches) {
-    cloneStatePatch(scenario);
+  for (const scenario of scenarios) {
+    applyScenario(scenario);
+    try { if (typeof node.text === 'function') node.text(E.state); } catch (err) { errors.push(`text failed: ${id}/${scenario.name}: ${err.message}`); }
     try {
-      if (typeof node.text === 'function') node.text(E.state);
-    } catch (err) {
-      errors.push(`text 执行失败: ${id} / ${scenario.name}: ${err.message}`);
-    }
-    try {
-      const rawChoices = typeof node.choices === 'function' ? node.choices(E.state) : node.choices;
-      const choices = normalizeChoices(rawChoices, id);
-      for (const choice of choices) {
+      for (const choice of choicesFor(node, id)) {
         if (typeof choice.goto === 'string') assertNode(choice.goto, id, 'choice.goto');
         if (typeof choice.goto === 'function') {
-          try {
-            const target = choice.goto(E.state);
-            assertNode(target, `${id} / ${choice.text || 'unnamed'} / ${scenario.name}`, 'choice.goto(fn)');
-          } catch (err) {
-            errors.push(`goto 函数执行失败: ${id} / ${choice.text || 'unnamed'} / ${scenario.name}: ${err.message}`);
-          }
+          try { assertNode(choice.goto(E.state), `${id}/${choice.text || 'unnamed'}/${scenario.name}`, 'choice.goto(fn)'); }
+          catch (err) { errors.push(`goto function failed: ${id}/${scenario.name}: ${err.message}`); }
         }
       }
-    } catch (err) {
-      errors.push(`choices 执行失败: ${id} / ${scenario.name}: ${err.message}`);
-    }
-    try {
-      if (typeof node.auto === 'function') {
-        const target = node.auto(E.state);
-        assertNode(target, `${id} / ${scenario.name}`, 'auto');
-      }
-    } catch (err) {
-      errors.push(`auto 执行失败: ${id} / ${scenario.name}: ${err.message}`);
-    }
+    } catch (err) { errors.push(`choices failed: ${id}/${scenario.name}: ${err.message}`); }
+    try { if (typeof node.auto === 'function') assertNode(node.auto(E.state), `${id}/${scenario.name}`, 'auto'); }
+    catch (err) { errors.push(`auto failed: ${id}/${scenario.name}: ${err.message}`); }
   }
 }
 
-const sourceText = ['src/story.js', 'src/main.js', exists('src/v0.6.1-fixes.js') ? 'src/v0.6.1-fixes.js' : null]
-  .filter(Boolean)
-  .map(read)
-  .join('\n');
+const sourceText = [read('src/story.js'), read('src/main.js'), readPatchSources(read, repoRoot)].join('\n');
 const itemNames = [...new Set([
   ...[...sourceText.matchAll(/E\.addItem\(['"`]([^'"`]+)['"`]/g)].map(m => m[1]),
   '半张烟盒纸', '福生仓地址', '翡翠镯', '三人合影', '陈明远的信', '未寄出的信', '铁钎', '光华货运单', '清场指令'
@@ -214,63 +168,29 @@ for (const [id, node] of Object.entries(nodes)) {
     resetState();
     try {
       const result = node.onPresent({ name: itemName, desc: '' }, E.state);
-      if (result && result.goto) assertNode(result.goto, `${id} / present ${itemName}`, 'onPresent');
-    } catch (err) {
-      errors.push(`onPresent 执行失败: ${id} / ${itemName}: ${err.message}`);
-    }
+      if (result && result.goto) assertNode(result.goto, `${id}/present ${itemName}`, 'onPresent');
+    } catch (err) { errors.push(`onPresent failed: ${id}/${itemName}: ${err.message}`); }
   }
 }
 
-function visit(id) {
-  const node = nodes[id];
-  if (!node) throw new Error(`场景丢失：${id}`);
-  E.state.currentScene = id;
-  E.state.sceneLog.push(id);
-  E.state.visitedNodes[id] = (E.state.visitedNodes[id] || 0) + 1;
-  if (typeof node.effect === 'function') node.effect(E.state);
-  if (node.time) E.setTime(node.time.d, node.time.h, node.time.m);
-  if (node.cost && E.state.visitedNodes[id] <= 1) E.spendTime(node.cost.h || 0, node.cost.m || 0, node.cost.reason || '调查耗时');
-  if (typeof node.text === 'function') node.text(E.state);
-  return node;
-}
-
-function expectEqual(actual, expected, label) {
-  if (actual !== expected) errors.push(`${label}: 预期 ${expected}，实际 ${actual}`);
-}
-
-function runPressureSmoke() {
+try {
   resetState({ inGameTime: { day: 1, hour: 14, minute: 30 }, pressure: { heat: 0, deadline: { day: 2, hour: 23, minute: 0 } }, visitedNodes: {}, sceneLog: [] });
-  visit('ch4_suzhou_creek');
-  expectEqual(E.routeDockByPressure(), 'ch4_dock_full_search', 'safe routeDockByPressure');
-  visit('ch4_dock_full_search');
-  visit('ch4_dock_crates');
-  visit('ch4_dock_locked_door');
+  visit('ch4_suzhou_creek'); expectEqual(E.routeDockByPressure(), 'ch4_dock_full_search', 'safe routeDockByPressure');
+  visit('ch4_dock_full_search'); visit('ch4_dock_crates'); visit('ch4_dock_locked_door');
   expectEqual(E.routeDockDeepByPressure(), 'ch4_dock_deep_dual', 'safe routeDockDeepByPressure');
 
   resetState({ inGameTime: { day: 2, hour: 14, minute: 0 }, pressure: { heat: 0, deadline: { day: 2, hour: 23, minute: 0 } }, visitedNodes: {}, sceneLog: [] });
-  visit('ch4_suzhou_creek');
-  expectEqual(E.routeDockByPressure(), 'ch4_dock_limited_search', 'tight routeDockByPressure');
-  visit('ch4_dock_limited_search');
-  visit('ch4_dock_crates');
-  visit('ch4_dock_locked_door');
+  visit('ch4_suzhou_creek'); expectEqual(E.routeDockByPressure(), 'ch4_dock_limited_search', 'tight routeDockByPressure');
+  visit('ch4_dock_limited_search'); visit('ch4_dock_crates'); visit('ch4_dock_locked_door');
   expectEqual(E.routeDockDeepByPressure(), 'ch4_dock_deep_trace', 'tight routeDockDeepByPressure');
 
   resetState({ inGameTime: { day: 2, hour: 20, minute: 30 }, pressure: { heat: 0, deadline: { day: 2, hour: 23, minute: 0 } }, visitedNodes: {}, sceneLog: [] });
-  visit('ch4_suzhou_creek');
-  expectEqual(E.routeDockByPressure(), 'ch4_dock_rescue_only', 'critical routeDockByPressure');
-  visit('ch4_dock_rescue_only');
-  expectEqual(E.routeDockDeepByPressure(), 'ch4_dock_deep_rescue_only', 'critical routeDockDeepByPressure');
+  visit('ch4_suzhou_creek'); expectEqual(E.routeDockByPressure(), 'ch4_dock_rescue_only', 'critical routeDockByPressure');
+  visit('ch4_dock_rescue_only'); expectEqual(E.routeDockDeepByPressure(), 'ch4_dock_deep_rescue_only', 'critical routeDockDeepByPressure');
 
   resetState({ inGameTime: { day: 2, hour: 23, minute: 30 }, pressure: { heat: 0, deadline: { day: 2, hour: 23, minute: 0 } }, visitedNodes: {}, sceneLog: [] });
-  visit('ch4_suzhou_creek');
-  expectEqual(E.routeDockByPressure(), 'ch4_dock_cleared', 'expired routeDockByPressure');
-}
-
-try {
-  runPressureSmoke();
-} catch (err) {
-  errors.push(`压力分支烟测失败: ${err.message}`);
-}
+  visit('ch4_suzhou_creek'); expectEqual(E.routeDockByPressure(), 'ch4_dock_cleared', 'expired routeDockByPressure');
+} catch (err) { errors.push(`pressure smoke failed: ${err.message}`); }
 
 const staticGotoMatches = [...sourceText.matchAll(/goto:\s*['"`]([^'"`]+)['"`]/g)].map(m => m[1]);
 for (const target of staticGotoMatches) assertNode(target, 'source-regex', 'static goto');
