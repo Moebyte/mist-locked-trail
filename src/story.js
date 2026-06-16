@@ -252,12 +252,19 @@ ${extra}`;
   },
 
   ch2_leave_univ: {
-    title: '离开校园',
-    text: () => `你把线索整理了一下。苏晚亭失踪前频繁外出，有人来找过她，她去过法租界的薛华立路 22 号，失踪前夜在哭泣。铅笔清单上那行“不要告诉任何人”像一根细针扎在记忆里。
-
-你走出校门。梧桐叶在脚下发出沙沙声，远处传来电车的叮当声。南京路上的霓虹灯已经开始亮了，但你心里的图还缺太多拼图块。
-
-去哪？`,
+    title: '下一步调查',
+    text: () => {
+      let summary = '';
+      if (E.hasClue('铅笔清单') || E.hasClue('法租界地图')) {
+        summary = '苏晚亭失踪前频繁外出，有人来找过她，她去过法租界的薛华立路 22 号，失踪前夜在哭泣。铅笔清单上那行"不要告诉任何人"像一根细针扎在记忆里。';
+      } else if (E.getFlag('got_case_file')) {
+        summary = '巡捕房的卷宗里有一行铅笔批注——“此案与光华小学事件有关联？”写批注的王巡官已经被调走。老孙说那不是巧合。';
+      } else {
+        summary = '苏晚亭失踪四天了。巡捕房没有进展，周怀安急得团团转。你手里还没有多少线索。';
+      }
+      const transition = E.getFlag('got_case_file') ? '你走出巡捕房。夜色已经漫上法租界的街道。' : '你走出校门。梧桐叶在脚下发出沙沙声，远处传来电车的叮当声。';
+      return `你把线索整理了一下。${summary}\n\n${transition}你心里的图还缺太多拼图块。\n\n去哪？`;
+    },
     choices: [
       { text: '🏛️ 去法租界 · 薛华立路 22 号', goto: 'ch2_frenchtown' },
       { text: '📋 去巡捕房查卷宗', effect: (s) => {}, goto: 'ch2_police_alt' },
@@ -475,8 +482,8 @@ ${extra}`;
 你在心里盘算下一步。苏晚亭的线索指向三个方向——巡捕房、法租界、苏家。你的时间不多。`,
     choices: [
       { text: '🏛️ 去法租界 · 薛华立路 22 号', goto: 'ch2_frenchtown' },
-      { text: '📋 去巡捕房（如果还没去）', effect: (s) => {}, goto: (s) => E.getFlag('got_case_file') ? 'ch2_frenchtown' : 'ch2_police' },
-      { text: '📚 去光华小学——查跳楼案', goto: 'ch3_school' },
+      { text: '📋 去巡捕房查卷宗', when: (s) => !E.getFlag('got_case_file'), goto: 'ch2_police' },
+      { text: '📚 去圣约翰大学调查', when: (s) => !E.hasClue('铅笔清单'), goto: 'ch2_university' },
     ],
   },
 
