@@ -497,7 +497,7 @@ ${extra}`;
 
 你在心里盘算下一步。苏晚亭的线索指向三个方向——巡捕房、法租界、苏家。你的时间不多。`,
     choices: [
-      { text: '🏛️ 去法租界 · 薛华立路 22 号', goto: 'ch2_frenchtown' },
+      { text: '🏛️ 去薛华立路 22 号', when: (s) => E.hasClue('法租界地图') || E.getFlag('got_wang_note'), goto: 'ch2_frenchtown' },
       { text: '📋 去巡捕房查卷宗', when: (s) => !E.getFlag('got_case_file'), goto: 'ch2_police' },
       { text: '📚 去圣约翰大学调查', when: (s) => !E.hasClue('铅笔清单'), goto: 'ch2_university' },
     ],
@@ -513,6 +513,8 @@ ${extra}`;
 22 号是一栋灰色的三层小楼，底楼是一家挂着"永兴贸易商行"招牌的店铺，看起来半死不活的。二楼三楼看起来像是民宅。
 
 你站在门口观察了一会儿——没有什么特别的。但苏晚亭专门记下了这个地址，一定有问题。
+
+你感到时间在流逝。每多查一个地方，苏晚亭就多一分危险。
 
 你决定怎么进去？`,
     choices: [
@@ -746,7 +748,8 @@ ${extra}`;
 你把照片和信收好。这个房间里发生过什么，正在逐渐清晰。但也越来越不祥。`,
     effect: (s) => { E.addClue('三人合影', '苏晚亭、陆小姐、陈老师的合影'); E.addClue('恐吓信', '"如果你不说，他们下一个就是你"'); E.addItem('三人合影', '苏晚亭、陆小姐、陈老师在光华小学门前的合影。'); E.addItem('恐吓信', '没有署名的信：如果你不说，他们下一个就是你。'); s.chapter = 3; },
     choices: [
-      { text: '📚 去光华小学——那里是这一切的中心', goto: 'ch3_school' },
+      { text: '🕵️ 在楼外转转——看看进出的人', goto: 'ch2_building_stakeout' },
+      { text: '📚 去光华小学——照片背景上的学校', goto: 'ch3_school' },
     ],
   },
 
@@ -996,20 +999,21 @@ ${extra}`;
     weather: 3,
     text: (s) => {
       const clues = s.clues.map(c => `• ${c.name}：${c.desc}`).join('\n');
-      return `你在办公室里坐了一会儿，把所有线索串起来。
-
-目前掌握的证据：
-
-${clues || '暂时还没有关键线索。'}
-
-现在你掌握的信息足够去追查真相了。但关键人物陆小姐已经失踪，黑衣男人身份不明，陈老师死了，苏晚亭和沈玉芳都下落不明。
-
-你还有最后一个地方可以去——或者你已经想明白了，可以直接去结案。`;
+      const checklist = [];
+      checklist.push((E.getFlag('got_wang_note') ? '✅' : '⚫') + ' 王巡官纸条');
+      checklist.push((E.hasClue('三人合影') ? '✅' : '⚫') + ' 三人合影');
+      checklist.push((E.getFlag('read_letter') ? '✅' : '⚫') + ' 陈老师的信');
+      checklist.push((E.hasItem('翡翠镯') ? '✅' : '⚫') + ' 翡翠镯');
+      checklist.push((E.getFlag('found_yufang') ? '✅' : '⚫') + ' 福生仓');
+      const checklistText = checklist.join('  ');
+      const phase = E.deadlinePhase ? E.deadlinePhase() : 'safe';
+      const timeHint = phase === 'critical' ? '⚠️ 时间只够最后一次行动了。' : phase === 'tight' ? '⏰ 时间吃紧——苏晚亭可能撑不了太久。' : '';
+      return `你在办公室里坐了一会儿，把所有线索串起来。\n\n目前掌握的证据：\n\n${clues || '暂时还没有关键线索。'}\n\n<div style="border:1px solid var(--line);padding:8px;border-radius:4px;margin:6px 0"><b>调查进度</b><br>${checklistText}</div>\n${timeHint ? timeHint + '<br>' : ''}现在你掌握的信息足够去追查真相了。但关键人物陆小姐已经失踪，黑衣男人身份不明，陈老师死了，苏晚亭和沈玉芳都下落不明。`;
     },
     choices: (s) => {
       const opts = [];
       if (E.getFlag('got_case_file') && !E.getFlag('got_wang_note')) opts.push({ text: '📎 回巡捕房追查王巡官的批注', goto: 'ch2_police_wang' });
-      if (!E.getFlag('found_yufang') && !E.getFlag('missed_deadline')) opts.push({ text: '⛵ 去苏州河废弃码头——查福生仓', goto: 'ch4_suzhou_creek' });
+      if (!E.getFlag('found_yufang') && !E.getFlag('missed_deadline') && (E.getFlag('got_wang_note') || E.hasClue('福生仓位置'))) opts.push({ text: '⛵ 去苏州河废弃码头——查福生仓', goto: 'ch4_suzhou_creek' });
       if (E.canDeduce('deduce_chen') && !E.getFlag('deduced_chen') && !E.getFlag('deduced_wrong')) {
         opts.push({ text: '🧩 拼合线索——推理陈明远之死', effect: (s) => { E.openDeduction('deduce_chen'); } });
       }
