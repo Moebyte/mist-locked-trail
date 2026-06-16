@@ -11,12 +11,20 @@ function item(name, desc = '') { E.addItem(name, desc); }
 function flag(name, value = true) { E.setFlag(name, value); }
 function choices(id) { rt.renderNode(id); return rt.choicesOf(id); }
 function hasTarget(list, target) { return list.some(choice => choice.goto === target || (typeof choice.goto === 'function' && choice.goto(E.state) === target)); }
+function hasText(list, fragment) { return list.some(choice => choice.text && choice.text.includes(fragment)); }
 function labelList(list) { return list.map(choice => `${choice.text} -> ${typeof choice.goto === 'function' ? choice.goto(E.state) : choice.goto}`).join(' | '); }
 function expectTarget(id, target, expected, setup, message) {
   rt.resetState();
   setup?.();
   const list = choices(id);
   const actual = hasTarget(list, target);
+  assert(actual === expected, `${message}\n  ${id} choices: ${labelList(list)}`);
+}
+function expectText(id, fragment, expected, setup, message) {
+  rt.resetState();
+  setup?.();
+  const list = choices(id);
+  const actual = hasText(list, fragment);
   assert(actual === expected, `${message}\n  ${id} choices: ${labelList(list)}`);
 }
 
@@ -79,6 +87,12 @@ expectTarget(chenSu, weird, false, () => clue('陈老师与女子争吵'), '光�
 expectTarget(weird, office, false, () => flag('got_chen_evidence'), '光华小学子场景：办公室已看后，学校异常页不应再次显示办公室入口');
 expectTarget('ch3_wu_present_photo', wrapup, false, () => { flag('asked_about_chen'); }, '光华小学举证页：未完成学校调查时不应直接整理线索');
 expectTarget(wrapup, school, true, () => flag('asked_about_chen'), '光华小学：未完成时误入整理线索，应引导返回学校继续调查');
+
+const dockEscape = 'ch4_dock_escape';
+expectText(dockEscape, '老孙的人', false, () => flag('sun_support_available'), '福生仓：老孙只是答应支援但未随行时，不应出现老孙的人亮明身份');
+expectText(dockEscape, '老孙的人', true, () => rt.renderNode('ch4_dock_wait'), '福生仓：等待支援后，老孙的人应在码头可用');
+expectText(dockEscape, '老孙的人', true, () => rt.renderNode('ch4_dock_sun_fast_support'), '福生仓：私下增援后，老孙的人应在码头可用');
+expectText(dockEscape, '当场质问傅启元', true, () => flag('sun_support_available'), '福生仓：即使老孙未随行，也应保留独自质问傅启元的选项');
 
 if (errors.length) {
   console.error('\nStateful hub audit failed:');
