@@ -1,32 +1,25 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-const PATCH_RE = /^v(\d+(?:\.\d+)*)-.+\.js$/;
+function readManifest(repoRoot = process.cwd()) {
+  const manifestPath = path.join(repoRoot, 'src', 'patches.js');
+  if (!fs.existsSync(manifestPath)) return [];
 
-function versionParts(fileName) {
-  const match = fileName.match(PATCH_RE);
-  if (!match) return [];
-  return match[1].split('.').map(n => Number.parseInt(n, 10));
-}
-
-function comparePatchFiles(a, b) {
-  const av = versionParts(a);
-  const bv = versionParts(b);
-  const len = Math.max(av.length, bv.length);
-  for (let i = 0; i < len; i += 1) {
-    const diff = (av[i] || 0) - (bv[i] || 0);
-    if (diff !== 0) return diff;
+  const manifest = fs.readFileSync(manifestPath, 'utf8');
+  const matches = [];
+  for (const quote of ["'", '"']) {
+    const parts = manifest.split(quote);
+    for (const part of parts) {
+      if (part.startsWith('src/') && part.endsWith('.js') && part !== 'src/patches.js') {
+        matches.push(part);
+      }
+    }
   }
-  return a.localeCompare(b);
+  return [...new Set(matches)];
 }
 
 export function listPatchScripts(repoRoot = process.cwd()) {
-  const srcDir = path.join(repoRoot, 'src');
-  if (!fs.existsSync(srcDir)) return [];
-  return fs.readdirSync(srcDir)
-    .filter(file => PATCH_RE.test(file))
-    .sort(comparePatchFiles)
-    .map(file => `src/${file}`);
+  return readManifest(repoRoot);
 }
 
 export function runPatchScripts(runScript, repoRoot = process.cwd()) {
