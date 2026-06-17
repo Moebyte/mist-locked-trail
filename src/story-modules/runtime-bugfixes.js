@@ -93,6 +93,38 @@
     return choice?.text || choice?.fogText || '';
   }
 
+  function hasThing(name) {
+    return typeof E.hasItem === 'function' && typeof E.hasClue === 'function' && (E.hasItem(name) || E.hasClue(name));
+  }
+
+  function hasDockEvidence() {
+    return hasThing('公董局公文纸')
+      || hasThing('暗室刚被清空')
+      || hasThing('教具箱走私')
+      || hasThing('管制药品走私')
+      || hasThing('光华货运单')
+      || hasThing('清场指令')
+      || E.getFlag('rescued_yufang')
+      || E.getFlag('found_su_at_dock')
+      || E.getFlag('missed_both_at_dock');
+  }
+
+  function isFushengActionStage() {
+    return E.getFlag('deduced_lu_zhao')
+      && !E.getFlag('deduced_fusheng')
+      && !E.getFlag('deduced_fusheng_fail')
+      && !hasDockEvidence();
+  }
+
+  function normalizeWrapupReviewLoop(choice) {
+    if (!choice || !isFushengActionStage()) return choice;
+    const text = textOf(choice);
+    if (choice.goto === 'ch4_conclusion' || text.includes('回顾现有证据') || text.includes('证据链仍不完整')) {
+      return { ...choice, text: '🔙 回顾现有证据（暂不行动）', goto: 'ch4_conclusion' };
+    }
+    return choice;
+  }
+
   function hasFushengDeductionChoice(choices) {
     return choices.some(choice => textOf(choice).includes('福生仓与公董局'));
   }
@@ -109,8 +141,9 @@
     if (!node || node.__runtimeFushengDeductionChoicePatched) return;
     const oldChoices = node.choices;
     node.choices = function (state) {
-      const choices = typeof oldChoices === 'function' ? oldChoices(state) : (oldChoices || []);
+      let choices = typeof oldChoices === 'function' ? oldChoices(state) : (oldChoices || []);
       if (!Array.isArray(choices)) return choices;
+      choices = choices.map(normalizeWrapupReviewLoop);
       if (hasFushengDeductionChoice(choices)) return choices;
       if (!E.getFlag('deduced_lu_zhao') || E.getFlag('deduced_fusheng') || E.getFlag('deduced_fusheng_fail')) return choices;
       if (typeof E.canDeduce === 'function' && !E.canDeduce('deduce_fusheng')) return choices;
