@@ -22,7 +22,7 @@ function has(id, fragment) {
 }
 
 function hasOldReturn22(id) {
-  return texts(id).some(text => text.includes('回薛华立路 22 号') || text.includes('回去搜 22 号') || text.includes('先回去搜 22 号'));
+  return texts(id).some(text => text.includes('回薛华立路 22 号') || text.includes('回去搜 22 号') || text.includes('先回去搜 22号'));
 }
 
 reset();
@@ -76,6 +76,30 @@ reset({
 });
 assert(has('ch2_203_search', '光华小学'), '拿到王巡官纸条后，203线才应引导去光华小学');
 assert(!has('ch2_203_search', '回巡捕房'), '拿到王巡官纸条后，不应继续要求回巡捕房');
+
+reset({
+  flags: { visited_pawn: true },
+  clues: [{ name: '翡翠镯', desc: '' }],
+  items: [{ name: '翡翠镯', desc: '' }],
+});
+assert(!has('ch3_wrapup', '去当铺'), '当铺查完并拿到翡翠镯后，线索整理页不应继续显示去当铺');
+
+reset({
+  flags: { visited_pawn: true },
+  items: [
+    { name: '翡翠镯', desc: '' },
+    { name: '陈明远的信', desc: '' },
+    { name: '苏晚亭的遗书', desc: '' },
+    { name: '半张烟盒纸', desc: '' },
+    { name: '恐吓信', desc: '' },
+  ],
+});
+assert(typeof nodes.ch4_revisit_zhou.onPresent !== 'function', '夜访商务印书馆不应再使用通用出示按钮');
+assert(has('ch4_revisit_zhou', '拿出翡翠镯'), '夜访商务印书馆应显示翡翠镯显式举证');
+assert(has('ch4_revisit_zhou', '陈明远那封未寄出的信'), '夜访商务印书馆应显示陈明远信显式举证');
+assert(has('ch4_revisit_zhou', '疑似苏晚亭留下的遗书'), '夜访商务印书馆应显示苏晚亭遗书显式举证');
+assert(has('ch4_revisit_zhou', '半张烟盒纸'), '夜访商务印书馆应显示王巡官纸条显式举证');
+assert(has('ch4_revisit_zhou', '恐吓信'), '夜访商务印书馆应显示恐吓信显式举证');
 
 reset();
 assert(has('ch2_building_stakeout', '进永兴贸易商行看看'), '放弃观察跟踪时应写成进永兴贸易商行看看');
