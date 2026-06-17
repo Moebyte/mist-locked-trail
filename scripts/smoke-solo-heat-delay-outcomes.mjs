@@ -80,7 +80,7 @@ reset({
 });
 tier = E.soloDockOutcomeTier();
 assert(tier.key === 'partial_evidence_one_rescue', `只拿清场指令应进入一方救出，实际 ${tier.key}`);
-assert(tier.score >= 4 && tier.score < 6, `只拿清场指令总分应为中风险 [4,6)，实际 ${tier.score}`);
+assert(tier.score >= 4 && tier.score < 7, `只拿清场指令总分应为中风险 [4,7)，实际 ${tier.score}`);
 assert(E.routeSoloDockDeepByHeatDelay() === 'ch4_dock_deep_trace', '只拿清场指令应路由到只剩一方/苏晚亭被转走');
 
 reset({
@@ -95,10 +95,10 @@ reset({
 });
 tier = E.soloDockOutcomeTier();
 assert(tier.key === 'partial_evidence_one_rescue', `只拿货运单应进入一方救出，实际 ${tier.key}`);
-assert(tier.score >= 4 && tier.score < 6, `只拿货运单总分应为中风险 [4,6)，实际 ${tier.score}`);
+assert(tier.score >= 4 && tier.score < 7, `只拿货运单总分应为中风险 [4,7)，实际 ${tier.score}`);
 assert(E.routeSoloDockDeepByHeatDelay() === 'ch4_dock_deep_trace', '只拿货运单应路由到只剩一方/苏晚亭被转走');
 
-// 3) 全证据 + 高 delay => 一个都没救出；之后只能带证据逃出码头，不能进医院。
+// 3) 全证据但没有额外冒进时，score=6 应仍是中风险，不能过早空暗室。
 reset({
   ...baseSolo,
   flags: {
@@ -118,16 +118,41 @@ reset({
   ],
 });
 tier = E.soloDockOutcomeTier();
-assert(tier.key === 'full_evidence_no_rescue', `全证据应错过救人窗口，实际 ${tier.key}`);
-assert(tier.score >= 6, `全证据总分应为高风险 >= 6，实际 ${tier.score}`);
-assert(E.routeSoloDockDeepByHeatDelay() === 'ch4_dock_deep_empty_heat', '全证据应路由到空暗室');
-let texts = choiceTexts('ch4_dock_deep_empty_heat');
-assert(has(texts, '逃出码头') || has(texts, '撤出福生仓'), '全证据空暗室后应推进逃出码头/撤出福生仓');
-texts = choiceTexts('ch4_dock_escape_evidence_only');
-assert(!has(texts, '医院'), '全证据但无人救出后，不应触发医院线');
-assert(has(texts, '带证据撤出福生仓') || has(texts, '整理证据'), '全证据但无人救出后，应进入证据收束');
+assert(tier.score === 6, `全证据基础路线预期总分为 6，实际 ${tier.score}`);
+assert(tier.key === 'partial_evidence_one_rescue', `全证据但操作稳时应仍救出一方，实际 ${tier.key}`);
+assert(E.routeSoloDockDeepByHeatDelay() === 'ch4_dock_deep_trace', '全证据但操作稳时不应路由到空暗室');
 
-// 4) 真实入口页只展示叙事取舍，不暴露 heat / delay / 总分等内部实现。
+// 4) 全证据 + 额外冒进 heat，score>=7 才一个都没救出；之后不能进医院。
+reset({
+  ...baseSolo,
+  flags: {
+    ...baseSolo.flags,
+    dock_solo_full_evidence_sweep: true,
+    dock_solo_search_committed: true,
+    dock_shelf_shortcut: true,
+  },
+  clues: [
+    ...baseSolo.clues,
+    { name: '公董局公文纸', desc: '' },
+    { name: '教具箱走私', desc: '' },
+  ],
+  items: [
+    ...baseSolo.items,
+    { name: '清场指令', desc: '' },
+    { name: '光华货运单', desc: '' },
+  ],
+});
+tier = E.soloDockOutcomeTier();
+assert(tier.key === 'full_evidence_no_rescue', `score>=7 应错过救人窗口，实际 ${tier.key}`);
+assert(tier.score >= 7, `高风险总分应 >= 7，实际 ${tier.score}`);
+assert(E.routeSoloDockDeepByHeatDelay() === 'ch4_dock_deep_empty_heat', 'score>=7 应路由到空暗室');
+let texts = choiceTexts('ch4_dock_deep_empty_heat');
+assert(has(texts, '逃出码头') || has(texts, '撤出福生仓'), '高风险空暗室后应推进逃出码头/撤出福生仓');
+texts = choiceTexts('ch4_dock_escape_evidence_only');
+assert(!has(texts, '医院'), '高风险无人救出后，不应触发医院线');
+assert(has(texts, '带证据撤出福生仓') || has(texts, '整理证据'), '高风险无人救出后，应进入证据收束');
+
+// 5) 真实入口页只展示叙事取舍，不暴露 heat / delay / 总分等内部实现。
 reset(baseSolo);
 texts = choiceTexts('ch4_dock_solo_search_choice');
 const visibleChoiceText = joined(texts);
