@@ -2,7 +2,7 @@
 // 目标：玩家过早从光华小学回到线索整理时，不再用“正常破案”口吻误导。
 // 1) 光华小学后若证据链断裂，不允许倒回大学 / 苏家 / 巡捕房补课，坏路线成立。
 // 2) 证据链不足时，结案页明确这是“证据不足的归档 / 冒然指认”，而不是正常收束。
-// 3) 周怀安线可通过“陈明远的信 + 殉情误报”触发情感彩蛋结局，补足找人案件的委托人回响。
+// 3) 周怀安线通过“陈明远的信 + 苏晚亭的伪造遗书”触发情感彩蛋结局，补足找人案件的委托人回响。
 (function installPrematureConclusionPolish() {
   function applyPrematureConclusionPolish() {
     if (typeof E === 'undefined' || typeof nodes === 'undefined') return;
@@ -44,6 +44,30 @@
       if (!hasLandlordFushengLead()) return '你没有查清薛华立路地图标记背后的仓库名。';
       if (!hasWangNote()) return '你没有拿到王巡官留下的半张烟盒纸，福生仓线索仍然接不上。';
       return '你没有推明白福生仓与光华小学、公董局之间的关系。';
+    }
+
+    function zhouHasBothLetters() {
+      return E.getFlag('presented_chen_letter_to_zhou') && E.getFlag('presented_su_forged_note_to_zhou');
+    }
+
+    function zhouLetterReturnChoices() {
+      if (zhouHasBothLetters()) return [{ text: '🕯️ 把两封信并在一起，听周怀安说完', goto: 'end_zhou_chen_letter' }];
+      return [{ text: '📨 继续出示另一封信', goto: 'ch4_revisit_zhou' }];
+    }
+
+    if (nodes.ch3_chen_letter && !nodes.ch3_chen_letter.__suForgedNotePatched) {
+      const oldEffect = nodes.ch3_chen_letter.effect;
+      const oldText = nodes.ch3_chen_letter.text;
+      nodes.ch3_chen_letter.effect = function (state) {
+        if (typeof oldEffect === 'function') oldEffect(state);
+        E.addItem('苏晚亭的伪造遗书', '夹在陈明远信封里的另一张纸，仿着苏晚亭字迹写成，内容把她的失踪伪装成殉情。');
+        E.addClue('苏晚亭伪造遗书', '有人仿照苏晚亭字迹写下“为情而去”的遗书，试图替她的失踪安排一个错误结局。');
+      };
+      nodes.ch3_chen_letter.text = function (state) {
+        const base = typeof oldText === 'function' ? oldText(state) : oldText;
+        return `${base}<br><br>你把信纸重新折好时，发现信封内层还有一道很浅的夹缝。里面藏着另一张纸。<br><br>纸上的字迹像苏晚亭，却又有一点不自然：收笔太稳，像是有人照着她的字一笔一笔描出来的。<br><br><span class="sys">“我自知愧对明远，也无颜再见周先生。此身既已入雾，愿随他而去。”</span><br><br>这不是苏晚亭的声音。<br><br>它太干净，太顺从，像有人提前替她写好了一个“殉情”的结局。`;
+      };
+      nodes.ch3_chen_letter.__suForgedNotePatched = true;
     }
 
     if (nodes.ch3_wrapup && !nodes.ch3_wrapup.__prematureWrapupPatched) {
@@ -92,28 +116,19 @@
     }
 
     if (nodes.ch4_pawnshop && !nodes.ch4_pawnshop.__prematurePawnshopPatched) {
-      const oldEffect = nodes.ch4_pawnshop.effect;
       const oldText = nodes.ch4_pawnshop.text;
       const oldChoices = nodes.ch4_pawnshop.choices;
-
-      nodes.ch4_pawnshop.effect = function (state) {
-        if (typeof oldEffect === 'function') oldEffect(state);
-        if (isPrematureConclusion()) {
-          E.addItem('小报剪报', '包着翡翠镯的旧小报剪角，标题写着“苏姓女学生疑为情殉身”。');
-          E.addClue('殉情误报', '小报把苏晚亭的失踪写成“为情殉身”，替她编了一个错误结局。');
-        }
-      };
 
       nodes.ch4_pawnshop.text = function (state) {
         const base = typeof oldText === 'function' ? oldText(state) : oldText;
         if (!isPrematureConclusion()) return base;
-        return `${base}<br><br>掌柜重新包好镯子时，用的是一张旧小报。你本想随手扔掉，却在纸角看到一行刺眼的标题：<br><br><span class="sys">“苏姓女学生疑为情殉身，陈姓教员旧信曝光。”</span><br><br>报道写得含糊又轻佻，把苏晚亭写成一个为情赴死的影子。没有福生仓，没有光华小学，没有沈玉芳，甚至没有“失踪”两个字。<br><br>你忽然意识到，如果你查不到她在哪里，别人会替她写完结局。`;
+        return `${base}<br><br>翡翠镯能证明“陆念”这个名字不是空穴来风，却仍然回答不了这个案子最要紧的问题：苏晚亭去了哪里，她是不是还活着。<br><br>你想到陈明远那封未寄出的信，也想到信封夹层里那张伪造遗书。它们也许比这只镯子更应该先给周怀安看。`;
       };
 
       nodes.ch4_pawnshop.choices = function (state) {
         return choicesOf(oldChoices, state).map(choice => {
           if (isPrematureConclusion() && choice.goto === 'ch4_revisit_zhou') {
-            return { ...choice, text: '🏮 回访周怀安——带去翡翠镯和那张小报剪报' };
+            return { ...choice, text: '🏮 回访周怀安——带去翡翠镯和两封信' };
           }
           return choice;
         });
@@ -133,18 +148,19 @@
         }
         if (item.name === '陈明远的信' && !E.getFlag('presented_chen_letter_to_zhou')) {
           E.setFlag('presented_chen_letter_to_zhou', true);
-          return { goto: 'end_zhou_chen_letter' };
+          return { goto: E.getFlag('presented_su_forged_note_to_zhou') ? 'end_zhou_chen_letter' : 'ch4_zhou_present_chen_letter' };
+        }
+        if (item.name === '苏晚亭的伪造遗书' && !E.getFlag('presented_su_forged_note_to_zhou')) {
+          E.setFlag('presented_su_forged_note_to_zhou', true);
+          return { goto: E.getFlag('presented_chen_letter_to_zhou') ? 'end_zhou_chen_letter' : 'ch4_zhou_present_su_forged_note' };
         }
         return typeof oldOnPresent === 'function' ? oldOnPresent(item, state) : null;
       };
 
       nodes.ch4_revisit_zhou.text = function (state) {
         const base = typeof oldText === 'function' ? oldText(state) : oldText;
-        if (E.hasItem('陈明远的信') && isPrematureConclusion()) {
-          const clipping = E.hasItem('小报剪报')
-            ? '你怀里还有那张小报剪报。它已经替苏晚亭写好了“殉情”的死因。'
-            : '你怀里没有足够的证据，只有陈明远那封没有寄出的信。';
-          return `${base}<br><br><span class="sys">${clipping} 陈明远的信开头是“晚亭吾爱”。它未必能帮你找到苏晚亭，却足以让周怀安明白：这个案子若就此收束，苏晚亭会被永远写进一个错误故事里。</span>`;
+        if (isPrematureConclusion() && E.hasItem('陈明远的信') && E.hasItem('苏晚亭的伪造遗书')) {
+          return `${base}<br><br><span class="sys">你怀里有两封互相撕扯的信：一封写着“晚亭吾爱”，让苏晚亭重新成为一个会爱、会怕、会选择的人；另一封仿着她的字迹，把她压成一句“为情而去”的遗言。周怀安必须看见它们并在一起的样子。</span>`;
         }
         return base;
       };
@@ -152,7 +168,31 @@
       nodes.ch4_revisit_zhou.__chenLetterEasterEggPatched = true;
     }
 
-    if (!nodes.ch4_zhou_present_jade_premature) {
+    if (!nodes.ch4_zhou_present_chen_letter) {
+      nodes.ch4_zhou_present_chen_letter = {
+        title: '举证 · 晚亭吾爱',
+        weather: 5,
+        effect: () => {
+          E.addClue('周怀安读到陈明远的信', '周怀安读到“晚亭吾爱”，明白苏晚亭与陈明远之间有一段自己从未真正触及的关系。');
+        },
+        text: () => `你把陈明远那封未寄出的信放在周怀安面前。<br><br>他看到开头四个字时，手指停住了。<br><br><span class="sys">“晚亭吾爱。”</span><br><br>办公室里安静得只剩铅字碰撞的声音。周怀安读得很慢，读到陈明远写“别替我原谅我”的时候，他把信纸放回桌上，像忽然老了几岁。<br><br><span class="sys">“原来我连她真正走进哪一场雾里，都不知道。”</span><br><br>但这还不是全部。你还需要让他看见另一封信——那封有人替苏晚亭写好的“结局”。`,
+        choices: zhouLetterReturnChoices
+      };
+    }
+
+    if (!nodes.ch4_zhou_present_su_forged_note) {
+      nodes.ch4_zhou_present_su_forged_note = {
+        title: '举证 · 伪造遗书',
+        weather: 5,
+        effect: () => {
+          E.addClue('周怀安读到伪造遗书', '周怀安读到苏晚亭的伪造遗书，意识到有人正试图把她的失踪改写成殉情。');
+        },
+        text: () => `你把那张仿着苏晚亭字迹写成的遗书推过去。<br><br>周怀安只看了两行，就抬起头。<br><br><span class="sys">“这不是她。”</span><br><br>他的声音很轻，却没有犹豫。<br><br><span class="sys">“晚亭写信从不这样收尾。她不会说‘此身既已入雾’，她会说‘我还没想完’。”</span><br><br>这封遗书太顺从了，顺从得像一张盖好章的死亡证明。<br><br>但这还不是全部。你还需要让他看见陈明远那封信——那封让苏晚亭不再只是一个被伪造结局的人。`,
+        choices: zhouLetterReturnChoices
+      };
+    }
+
+    if (nodes.ch4_zhou_present_jade_premature || !nodes.ch4_zhou_present_jade_premature) {
       nodes.ch4_zhou_present_jade_premature = {
         title: '举证 · 翡翠镯',
         weather: 5,
@@ -161,7 +201,7 @@
         },
         text: () => `你把翡翠镯放在周怀安面前。<br><br>他看到内侧刻着的“陆念”时，脸色变了一下。<br><br><span class="sys">“晚亭提过这个名字。”</span><br><br>他告诉你，苏晚亭失踪前确实说过“陆念”这个名字，也说过一个人换了名字，过去犯过的错是不是也能一笔勾销。<br><br>这能证明陆小姐不是普通过客，却仍然回答不了最要紧的问题：苏晚亭在哪里？她是否还活着？<br><br>周怀安看向你，声音比刚才更低：<span class="sys">“沈先生，还有别的吗？有她自己的消息吗？”</span>`,
         choices: [
-          { text: '📨 如果还有陈明远的信，就拿出来', goto: 'ch4_revisit_zhou' },
+          { text: '📨 如果还有两封信，就拿出来', goto: 'ch4_revisit_zhou' },
           { text: '🔙 暂时回去整理现有证据', goto: 'ch4_conclusion' }
         ]
       };
@@ -172,15 +212,10 @@
         title: '结局 · 吾爱晚亭',
         weather: 5,
         effect: () => {
-          E.addClue('周怀安读到陈明远的信', '周怀安读到“晚亭吾爱”，又看到小报“殉情”误报，终于明白苏晚亭正在被写进一个错误结局。');
+          E.addClue('周怀安读到两封信', '周怀安同时读到陈明远的“晚亭吾爱”和苏晚亭的伪造遗书，确认有人要把她的失踪写成殉情。');
           E.setFlag('zhou_chen_letter_easter_egg', true);
         },
-        text: () => {
-          const clipping = E.hasItem('小报剪报')
-            ? `你先把那张小报剪报放在桌上。标题很轻佻：<br><br><span class="sys">“苏姓女学生疑为情殉身。”</span><br><br>周怀安看了很久，像没有读懂，又像太早读懂了。`
-            : `你没有找到苏晚亭，也没有拿到能证明她去向的关键线索。你只剩下一封没有寄出的信。`;
-          return `${clipping}<br><br>然后你把陈明远那封未寄出的信放在剪报旁边。<br><br>周怀安看到开头四个字时，手指停住了。<br><br><span class="sys">“晚亭吾爱。”</span><br><br>办公室里很安静，只有排字房远处传来铅字碰撞的声音。周怀安读得很慢。读到陈明远写“别替我原谅我”的时候，他把信纸放回桌上，像忽然老了几岁。<br><br><span class="sys">“他们说她殉情。”</span><br><br>他说。<br><br><span class="sys">“可这封信里，她不是去死。她是在找人，也是在救人。”</span><br><br>这不是背叛带来的滑稽，也不是谁输给了谁。只是一个爱着苏晚亭的人，终于看见：苏晚亭不是任何人的附属，也不是小报上的“情死女学生”。她曾经选择、隐瞒、害怕，也曾经爱过别人。<br><br>周怀安把剪报折起来，压在信下面。<br><br><span class="sys">“沈先生，案子可以归档，报纸可以乱写。但请你记住，她不是这样结束的。”</span><br><br>你走出商务印书馆时，雨又落了下来。你知道这条路已经断了几处，真相也许再也拼不完整。可至少有一件事被照亮了：苏晚亭不是谜面，她是活过的人。<br><br><div style="color:#666;font-style:italic;margin-top:20px">—— 结局 · 吾爱晚亭（彩蛋）——</div>`;
-        },
+        text: () => `你把两封信并排放在周怀安面前。<br><br>一封开头是：<span class="sys">“晚亭吾爱。”</span><br><br>另一封仿着苏晚亭的字迹，写着：<span class="sys">“此身既已入雾，愿随他而去。”</span><br><br>周怀安看了很久。先看陈明远的信，再看那封遗书，最后又回到第一封。<br><br><span class="sys">“这不是殉情。”</span><br><br>他说。<br><br><span class="sys">“如果她真的要随谁而去，就不会还想着沈老师，不会还想着陆念薇，也不会把光华小学那些事藏到最后。”</span><br><br>你没有找到苏晚亭。你没有拿到福生仓那半截最关键的线。可这两封信至少证明了一件事：有人正在替她写死因，有人要把一个找人案改成一桩情死案。<br><br>这不是背叛带来的滑稽，也不是谁输给了谁。只是一个爱着苏晚亭的人，终于看见：苏晚亭不是任何人的附属，也不是等待营救的影子。她曾经选择、隐瞒、害怕，也曾经爱过别人。<br><br>周怀安把伪造遗书折起来，压在陈明远的信下面。<br><br><span class="sys">“沈先生，案子可以归档。可请你记住，她不是这样结束的。”</span><br><br>你走出商务印书馆时，雨又落了下来。你知道这条路已经断了几处，真相也许再也拼不完整。可至少有一件事被照亮了：苏晚亭不是谜面，她是活过的人。<br><br><div style="color:#666;font-style:italic;margin-top:20px">—— 结局 · 吾爱晚亭（彩蛋）——</div>`,
         type: 'end'
       };
     }
