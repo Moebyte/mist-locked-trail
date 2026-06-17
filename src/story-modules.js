@@ -26,6 +26,7 @@
     'src/story-modules/fusheng-progress-polish.js',
     'src/story-modules/player-perspective-polish.js',
     'src/story-modules/opening-intake-polish.js',
+    'src/story-modules/guanghua-school-flow-polish.js',
     'src/story-modules/status-polish.js'
   ];
 
