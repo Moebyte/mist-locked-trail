@@ -12,8 +12,28 @@
     }
 
     function zhouLetterReturnChoices() {
-      if (zhouHasBothLetters()) return [{ text: '🕯️ 把两封信并在一起，听周怀安说完', goto: 'end_zhou_chen_letter' }];
-      return [{ text: '📨 继续出示另一封信', goto: 'ch4_revisit_zhou' }];
+      if (zhouHasBothLetters()) {
+        return [{ text: '🕯️ 把两封信并在一起，听他说完', goto: 'end_zhou_chen_letter' }];
+      }
+      if (E.getFlag('presented_chen_letter_to_zhou') && !E.getFlag('presented_su_last_letter_to_zhou')) {
+        return [{
+          text: '📨 把那封疑似遗书也推过去',
+          effect: () => E.setFlag('presented_su_last_letter_to_zhou', true),
+          goto: 'ch4_zhou_present_su_last_letter'
+        }];
+      }
+      if (E.getFlag('presented_su_last_letter_to_zhou') && !E.getFlag('presented_chen_letter_to_zhou')) {
+        return [{
+          text: '📨 再把陈明远的信递过去',
+          effect: () => E.setFlag('presented_chen_letter_to_zhou', true),
+          goto: 'ch4_zhou_present_chen_letter'
+        }];
+      }
+      return [{ text: '📨 再想想该先拿出哪封信', goto: 'ch4_revisit_zhou' }];
+    }
+
+    if (nodes.ch4_zhou_present_chen_letter) {
+      nodes.ch4_zhou_present_chen_letter.choices = zhouLetterReturnChoices;
     }
 
     if (nodes.ch4_zhou_present_su_last_letter) {
