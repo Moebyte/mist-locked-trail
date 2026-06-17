@@ -1,5 +1,5 @@
 // ===== 调查顺序提示 =====
-// 目标：在玩家拿到大学线索后，明确提示巡捕房卷宗是完美线必经拼图，但不强制锁死其他选择。
+// 目标：在玩家拿到大学线索后，明确提示巡捕房卷宗是关键拼图，但不提前剧透福生仓。
 (function installInvestigationGuidance() {
   function applyInvestigationGuidance() {
     if (typeof E === 'undefined' || typeof nodes === 'undefined') return;
@@ -23,7 +23,7 @@
       nodes.ch2_leave_univ.text = function (state) {
         const base = typeof oldText === 'function' ? oldText(state) : oldText;
         if (hasUniversityXuehuaLead() && !hasPoliceCaseFile()) {
-          return `${base}<br><br><span class="sys">薛华立路 22 号已经浮出水面，但这只是地址，不是证据链。巡捕房的卷宗里可能藏着苏晚亭案与光华小学之间的正式连接；如果漏掉这一步，后面即使摸到福生仓，也可能缺少最关键的王巡官线索。</span>`;
+          return `${base}<br><br><span class="sys">薛华立路 22 号已经浮出水面，但这只是地址，不是证据链。巡捕房的卷宗里也许藏着苏晚亭案与光华小学之间的正式连接；先把案卷补上，后面的判断才不至于只靠猜测。</span>`;
         }
         return base;
       };
