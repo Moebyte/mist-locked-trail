@@ -120,8 +120,6 @@
         opts = Array.isArray(opts) ? opts.slice() : [];
         if (E.getFlag('school_wu_confront_closed') && !E.getFlag('school_wu_three_proofs')) {
           opts = opts.filter(c => choiceTarget(c, state) !== 'ch3_school_confront_wu' && choiceTarget(c, state) !== 'end_conspiracy_detail');
-          const hasSchoolDoneNote = opts.some(c => (c.text || '').includes('光华小学质询已经结束'));
-          if (!hasSchoolDoneNote) opts.unshift({ text: '🏫 光华小学质询已经结束，继续整理其他线索', goto: 'ch3_wrapup' });
         }
         return opts;
       };
