@@ -15,6 +15,7 @@
     'src/story-modules/fusheng-choice-polish.js',
     'src/story-modules/route-prereq-gates.js',
     'src/story-modules/xuehua-choice-polish.js',
+    'src/story-modules/xuehua-source-gate.js',
     'src/story-modules/status-polish.js'
   ];
 
