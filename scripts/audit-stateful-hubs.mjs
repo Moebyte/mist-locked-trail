@@ -88,7 +88,10 @@ expectTarget('ch2_building_enter', landlord, false, () => flag('asked_landlord')
 expectTarget('ch2_building_enter', roomDoor, false, () => item('三人合影'), '永兴贸易商行：搜完203后，不应再次显示进入203入口');
 expectTarget(roomDoor, roomSearch, true, null, '203室：进屋但未仔细搜查时，应显示仔细搜查房间');
 expectTarget(roomDoor, roomSearch, false, () => item('三人合影'), '203室：搜完房间后，不应再次显示仔细搜查房间');
-expectTarget(roomDoor, school, true, () => item('三人合影'), '203室：搜完房间后，应引导去光华小学');
+expectText(roomDoor, '出示地图', true, () => { clue('法租界地图'); item('三人合影'); }, '203室：搜完房间但未查清福生仓标记时，应回老头处核对地图');
+expectTarget(roomSearch, policeAlt, true, () => { flag('shown_map_to_landlord'); clue('福生仓标识'); item('三人合影'); }, '203搜完且老头认出福生仓后，应回巡捕房追问仓库线索');
+expectTarget(roomSearch, school, false, () => { flag('shown_map_to_landlord'); clue('福生仓标识'); item('三人合影'); }, '203搜完但未拿王纸条时，不应直接去光华小学');
+expectTarget(roomSearch, school, true, () => { flag('shown_map_to_landlord'); flag('got_wang_note'); clue('福生仓标识'); clue('王巡官遗留纸条'); item('三人合影'); item('半张烟盒纸'); }, '拿到王巡官纸条后，203线应引导去光华小学');
 
 const teacher = 'ch3_school_teacher';
 const yufang = 'ch3_school_yufang';
