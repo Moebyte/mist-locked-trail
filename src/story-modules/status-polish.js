@@ -5,7 +5,7 @@
     if (typeof E === 'undefined' || typeof nodes === 'undefined') return;
     if (E.__statusPolishPatched) return;
 
-    const TOTAL_ENDINGS = 11;
+    const TOTAL_ENDINGS = 12;
 
     E.deriveChapterLabel = function (sceneId = this.state?.currentScene) {
       const id = sceneId || '';
