@@ -4,7 +4,7 @@
 // 拖延 delay：过度观察、过度搜证、过度谨慎会增加。
 // 最终风险 = heat + delay；低：两人都在；中：只剩沈玉芳；高：两人都不在。
 // 守卫/声响不是一票否决，过度谨慎也不是免费最优解。
-// 同时区分“一个便衣低调潜入”和“老孙带队压阵”的仓库进入流程。
+// 老孙带队默认风险很高，但可以通过“外围低调卡车道”把风险压回中档。
 
 (function installDockHeatSystemPolish() {
   function applyDockHeatSystemPolish() {
@@ -34,13 +34,13 @@
     }
 
     function baseExposure() {
-      if (fullSupportMode()) return 1; // 人手强，但码头已被看见巡捕房影子。
+      if (fullSupportMode()) return 2; // 老孙带队天然动静大。
       if (fastSupportMode()) return 0;
       return 1;
     }
 
     function baseDelay() {
-      if (fullSupportMode()) return 2; // 调人压阵本身会慢一拍，默认足以把路线推到中风险。
+      if (fullSupportMode()) return 3; // 等人、布点、封外围都会拖慢窗口。
       return 0;
     }
 
@@ -74,6 +74,10 @@
       const globalHeat = this.state?.pressure?.heat || 0;
       score += Math.min(4, globalHeat);
 
+      if (this.getFlag('dock_sun_outer_quiet')) score -= 2;
+      if (this.getFlag('dock_sun_close_pressure')) score += 2;
+      if (this.getFlag('dock_sun_lit_uniforms')) score += 1;
+
       if (this.getFlag('dock_shelf_shortcut')) score += 1;
       if (this.getFlag('dock_inner_office_rushed')) score += 1;
       if (this.getFlag('dock_reached_crate_area_fast')) score += 1;
@@ -90,6 +94,9 @@
       if (this.getFlag('missed_both_due_to_return_tool') || this.getFlag('missed_both_at_dock')) return 5;
 
       let score = baseDelay();
+      if (this.getFlag('dock_sun_block_truck_lane')) score -= 1;
+      if (this.getFlag('dock_sun_close_pressure')) score += 1;
+
       if (this.getFlag('dock_observed')) score += 1;
       if (this.getFlag('heard_fu_lu')) score += 1;
       if (this.getFlag('dock_moved_slowly')) score += 1;
@@ -164,8 +171,35 @@
         E.setFlag('dock_full_support_tradeoff', true);
         E.addClue('老孙压住码头外围', '老孙带人压住福生仓外围，能保住码头封锁线，但行动动静也更大。');
       },
-      text: () => `老孙没有只派一个便衣。<br><br>他带了两名信得过的巡捕，分在巷口和码头车道两侧。正门没有被冲开，但傅启元的人已经看见巡捕房的影子。<br><br><span class="sys">“我能压住外面。”</span>老孙低声说，<span class="sys">“但里面你要快。人手一多，对方也知道时间不在他们那边了。”</span><br><br>这条路稳，也硬。代价是，仓库里的人会更早察觉风声。${heatBadge()}`,
-      choices: [{ text: '🚶 趁老孙压住外线，从侧窗进入仓库', goto: () => E.routeDockSearchByTime() }]
+      text: () => `老孙没有只派一个便衣。<br><br>他带了两名信得过的巡捕，分在巷口和码头车道两侧。人手一到，码头外围就不再是普通夜班的样子。<br><br>这条路能压住傅启元，也能留下封锁记录；但它天然会提高暴露和拖延。<br><br>现在关键不是“有没有人”，而是怎么让这批人别把仓库里的人提前吓走。${heatBadge()}`,
+      choices: [
+        { text: '🚧 让老孙只卡外围车道，不靠近仓门', goto: 'ch4_dock_full_support_outer_lane' },
+        { text: '🚓 让老孙贴近仓门，随时破门接应', goto: 'ch4_dock_full_support_close_pressure' }
+      ]
+    };
+
+    nodes.ch4_dock_full_support_outer_lane = {
+      title: '福生仓 · 外围卡车道',
+      weather: 3,
+      effect: () => {
+        E.setFlag('dock_sun_outer_quiet', true);
+        E.setFlag('dock_sun_block_truck_lane', true);
+        E.addClue('老孙低调卡住车道', '老孙把人压在外围车道，不靠仓门，不亮明巡捕房阵势，尽量把老孙带队的动静压低。');
+      },
+      text: () => `你压低声音告诉老孙：<span class="sys">“别靠仓门。卡住车道，别让车走，但别让里面知道巡捕已经到了。”</span><br><br>老孙看了你一眼，点点头。<br><br>两个巡捕退到雾里，一个守巷口，一个拦车道。码头外围被压住了，但仓门口还像什么都没发生。<br><br>这不能把风险降到一个便衣那种程度。人手毕竟已经来了。<br><br>但至少，仓库里的人还没有被正面惊动。${heatBadge()}`,
+      choices: [{ text: '🚶 从侧窗进入仓库', goto: () => E.routeDockSearchByTime() }]
+    };
+
+    nodes.ch4_dock_full_support_close_pressure = {
+      title: '福生仓 · 贴近仓门',
+      weather: 5,
+      effect: () => {
+        E.setFlag('dock_sun_close_pressure', true);
+        E.addDockHeat(2, '老孙的人靠近仓门，仓库里立刻有人察觉外面的巡捕房气息。');
+        E.addClue('老孙贴近仓门', '老孙带人贴近福生仓正门，接应更强，但仓库内部更早察觉风声。');
+      },
+      text: () => `老孙带人压到仓门附近。<br><br>巡捕的皮鞋踩过码头木板，声音不大，却和脚夫完全不同。仓库里有人低声骂了一句，紧接着，里面的灯灭了一盏。<br><br>这条路安全感很强：只要你一喊，老孙就能带人冲进来。<br><br>但它也几乎等于告诉仓库里的人——外面已经不是普通夜色了。${heatBadge()}`,
+      choices: [{ text: '🚶 趁老孙压住仓门，从侧窗进入仓库', goto: () => E.routeDockSearchByTime() }]
     };
 
     nodes.ch4_dock_wait = nodes.ch4_dock_full_support_infiltration;
