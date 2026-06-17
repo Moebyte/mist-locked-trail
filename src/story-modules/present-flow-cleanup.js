@@ -135,6 +135,22 @@
       nodes.ch3_wrapup.__hidePawnAfterVisitedPatched = true;
     }
 
+    if (nodes.ch4_pawnshop && !nodes.ch4_pawnshop.__presentFlowChoicesPatched) {
+      const oldChoices = nodes.ch4_pawnshop.choices;
+      nodes.ch4_pawnshop.choices = function (state) {
+        const base = choicesOf(oldChoices, state);
+        if (!Array.isArray(base)) return base;
+        return base.map(choice => {
+          const text = choice.text || '';
+          if (choice.goto === 'ch4_conclusion' || text.includes('带着翡翠镯回去整理') || text.includes('所有的线索都齐了')) {
+            return { ...choice, text: '🔙 带着翡翠镯回去整理下一步', goto: 'ch3_wrapup' };
+          }
+          return choice;
+        });
+      };
+      nodes.ch4_pawnshop.__presentFlowChoicesPatched = true;
+    }
+
     if (nodes.ch4_revisit_zhou) {
       delete nodes.ch4_revisit_zhou.onPresent;
       nodes.ch4_revisit_zhou.presentFilter = () => false;
