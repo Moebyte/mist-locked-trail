@@ -1,5 +1,6 @@
 // ===== 薛华立路选项收口 =====
 // 目标：让 22 号门口 / 永兴贸易商行 / 看门老头 / 203 室形成清晰顺序，避免回到门口造成循环。
+// 地图只在 203 证据后用于核对福生仓标记，不在入口处作为通用出示项。
 (function installXuehuaChoicePolish() {
   function applyXuehuaChoicePolish() {
     if (typeof E === 'undefined' || typeof nodes === 'undefined') return;
@@ -68,7 +69,11 @@
     }
 
     if (nodes.ch2_frenchtown) nodes.ch2_frenchtown.choices = baseXuehuaChoices;
-    if (nodes.ch2_building_enter) nodes.ch2_building_enter.choices = baseXuehuaChoices;
+    if (nodes.ch2_building_enter) {
+      delete nodes.ch2_building_enter.onPresent;
+      nodes.ch2_building_enter.presentFilter = () => false;
+      nodes.ch2_building_enter.choices = baseXuehuaChoices;
+    }
     if (nodes.ch2_ask_landlord) nodes.ch2_ask_landlord.choices = afterLandlordChoices;
     if (nodes.ch2_landlord_map) nodes.ch2_landlord_map.choices = afterLandlordChoices;
     if (nodes.ch2_203_door) nodes.ch2_203_door.choices = room203Choices;
