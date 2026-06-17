@@ -5,6 +5,7 @@
 // 最终风险 = heat + delay；低：两人都在；中：只剩沈玉芳；高：两人都不在。
 // 守卫/声响不是一票否决，过度谨慎也不是免费最优解。
 // 老孙带队默认风险很高，但可以通过“外围低调卡车道”把风险压回中档。
+// 调整：dock 风险只按潜入事件 flag 计分，不再把 addDockHeat 写入的全局 pressure.heat 二次叠加。
 
 (function installDockHeatSystemPolish() {
   function applyDockHeatSystemPolish() {
@@ -58,6 +59,7 @@
     E.routeDockSearchByTime = routeDockSearchByTime;
 
     E.addDockHeat = function (n, reason, flag) {
+      // 全局 heat 用于状态栏压力感；dock 暗室结果只按下面的潜入 flag 权重计算，避免“加 heat + 计 flag”双重扣分。
       this.state.pressure.heat = Math.max(0, (this.state.pressure.heat || 0) + n);
       if (flag) this.setFlag(flag, true);
       if (reason) this.toast(reason);
@@ -71,8 +73,6 @@
 
     E.dockExposureScore = function () {
       let score = baseExposure();
-      const globalHeat = this.state?.pressure?.heat || 0;
-      score += Math.min(4, globalHeat);
 
       if (this.getFlag('dock_sun_outer_quiet')) score -= 2;
       if (this.getFlag('dock_sun_close_pressure')) score += 2;
@@ -85,13 +85,13 @@
       if (this.getFlag('skipped_crates_for_sound')) score += 1;
       if (this.getFlag('skipped_dock_hide')) score += 1;
       if (this.getFlag('dock_guard_chase_no_hide')) score += 1;
-      if (this.getFlag('dock_broke_lock_no_tool')) score += 1;
+      if (this.getFlag('dock_broke_lock_no_tool')) score += 2;
 
       return Math.max(0, Math.min(8, score));
     };
 
     E.dockDelayScore = function () {
-      if (this.getFlag('missed_both_due_to_return_tool') || this.getFlag('missed_both_at_dock')) return 5;
+      if (this.getFlag('missed_both_due_to_return_tool') || this.getFlag('missed_both_at_dock')) return 6;
 
       let score = baseDelay();
       if (this.getFlag('dock_sun_block_truck_lane')) score -= 1;
@@ -116,8 +116,9 @@
       const exposure = this.dockExposureScore();
       const delay = this.dockDelayScore();
       const score = exposure + delay;
-      if (score >= 5) return { level: 3, key: 'high', label: '高', score, exposure, delay };
-      if (score >= 3) return { level: 2, key: 'mid', label: '中', score, exposure, delay };
+      if (score >= 6) return { level: 3, key: 'high', label: '高', score, exposure, delay };
+      if (score >= 4) return { level: 2, key: 'mid', label: '中', score, exposure, delay };
+      if (fullSupportMode() && score >= 3) return { level: 2, key: 'mid', label: '中', score, exposure, delay };
       return { level: 1, key: 'low', label: '低', score, exposure, delay };
     };
 
