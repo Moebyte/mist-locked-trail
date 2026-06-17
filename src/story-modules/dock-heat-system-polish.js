@@ -125,6 +125,7 @@
       if (this.getFlag('heard_fu_lu')) score += 1;
       if (this.getFlag('dock_moved_slowly')) score += 1;
       if (this.getFlag('dock_clearance_seen_inside')) score += 1;
+      if (fastSupportMode() && (this.getFlag('found_door_tool') || this.hasItem?.('光华货运单') || this.hasClue?.('教具箱走私'))) score += 1;
       if (this.getFlag('dock_hid_in_crate') || this.getFlag('avoided_guard')) score += 1;
       if (this.getFlag('returned_for_door_tool')) score += 3;
       if (this.getFlag('dock_full_support_tradeoff')) score += 1;
