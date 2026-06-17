@@ -5,7 +5,7 @@
     if (typeof E === 'undefined' || typeof nodes === 'undefined') return;
     if (E.__statusPolishPatched) return;
 
-    const TOTAL_ENDINGS = 10;
+    const TOTAL_ENDINGS = 11;
 
     E.deriveChapterLabel = function (sceneId = this.state?.currentScene) {
       const id = sceneId || '';
@@ -40,7 +40,7 @@
         oldRenderPanel();
         const panel = document.getElementById('panel-content');
         if (panel && typeof panel.innerHTML === 'string') {
-          panel.innerHTML = panel.innerHTML.replace(/结局记录（(\d+)\/8）/g, `结局记录（$1/${TOTAL_ENDINGS}）`);
+          panel.innerHTML = panel.innerHTML.replace(/结局记录（(\d+)\/\d+）/g, `结局记录（$1/${TOTAL_ENDINGS}）`);
         }
       };
       E.__endingTotalPanelPatched = true;
