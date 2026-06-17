@@ -1,6 +1,7 @@
 // ===== 推理链提示收束 =====
 // 目标：推理不是一次性三连问；后续推理条件不足时，不再凭空消失，而是显示锁定提示。
 // 修正：推理放行不再依赖原始 requiredClues 的单一精确名，避免玩家已拿到等价线索却被卡死。
+// 修正：推理入口使用 safe opener，避免 wrapup 选项点击后没有任何反馈。
 
 (function installDeductionFlowGuidance() {
   function applyDeductionFlowGuidance() {
@@ -31,10 +32,10 @@
       ],
       deduce_fusheng: [
         { names: ['王巡官遗留纸条', '半张烟盒纸'], label: '王巡官遗留纸条' },
-        { names: ['陈明远的信'], label: '陈明远的信' },
+        { names: ['陈明远的信', '陈老师给苏晚亭的信'], label: '陈明远的信' },
         { names: ['恐吓信'], label: '203 室恐吓信' },
-        { names: ['公董局公文纸', '清场指令'], label: '福生仓公董局公文纸' },
-        { names: ['教具箱走私', '管制药品走私', '傅启元夜运教具箱'], label: '福生仓教具箱走私证据' }
+        { names: ['公董局公文纸', '清场指令', '暗室刚被清空'], label: '福生仓公董局公文纸' },
+        { names: ['教具箱走私', '管制药品走私', '傅启元夜运教具箱', '光华货运单'], label: '福生仓教具箱走私证据' }
       ]
     };
 
@@ -50,7 +51,7 @@
 
     function deductionSolved(id) {
       const d = Array.isArray(E.deductions) ? E.deductions.find(x => x.id === id) : null;
-      return !!d?.solved;
+      return !!d?.solved || (id === 'deduce_chen' && E.getFlag('deduced_chen')) || (id === 'deduce_lu_zhao' && E.getFlag('deduced_lu_zhao')) || (id === 'deduce_fusheng' && E.getFlag('deduced_fusheng'));
     }
 
     function canDeduceByState(id) {
@@ -64,6 +65,34 @@
         return oldCanDeduce(id);
       };
       E.__deductionCanDeduceRelaxed = true;
+    }
+
+    if (typeof E.openDeduction === 'function' && !E.__safeOpenDeductionPatched) {
+      const oldOpenDeduction = E.openDeduction.bind(E);
+      E.openDeductionSafe = function (id) {
+        const d = Array.isArray(this.deductions) ? this.deductions.find(x => x.id === id) : null;
+        if (!d) {
+          this.toast('推理题尚未登记，请刷新页面后重试。');
+          return false;
+        }
+        const missing = missingFor(id);
+        if (DEDUCTION_REQUIREMENTS[id] && missing.length) {
+          this.toast(`这段推理还差：${missing.join('、')}。`);
+          return false;
+        }
+        oldOpenDeduction(id);
+        const opened = !!(this.deducEl && this.deducEl.style && this.deducEl.style.display === 'flex');
+        if (!opened) this.toast('推理面板没有打开，请刷新页面后重试。');
+        return opened;
+      };
+      E.__safeOpenDeductionPatched = true;
+    }
+
+    function openDeductionEffect(id) {
+      return () => {
+        if (typeof E.openDeductionSafe === 'function') E.openDeductionSafe(id);
+        else E.openDeduction(id);
+      };
     }
 
     function hasDeductionChoice(choices, id) {
@@ -94,7 +123,7 @@
 
         if (!E.getFlag('deduced_chen') && !E.getFlag('deduced_wrong') && !hasDeductionChoice(opts, 'deduce_chen')) {
           if (E.canDeduce('deduce_chen')) {
-            opts.push({ text: '🧩 拼合线索——推理陈明远之死', effect: () => E.openDeduction('deduce_chen') });
+            opts.push({ text: '🧩 拼合线索——推理陈明远之死', effect: openDeductionEffect('deduce_chen') });
           } else {
             opts.push(lockedDeduction('🧩 拼合线索——推理陈明远之死', 'deduce_chen', '陈明远之死还不能推'));
           }
@@ -102,7 +131,7 @@
 
         if (E.getFlag('deduced_chen') && !E.getFlag('deduced_lu_zhao') && !E.getFlag('deduced_lu_zhao_fail') && !hasDeductionChoice(opts, 'deduce_lu_zhao')) {
           if (E.canDeduce('deduce_lu_zhao')) {
-            opts.push({ text: '🧩 推理——黑衣男人与陆小姐的关系', effect: () => E.openDeduction('deduce_lu_zhao') });
+            opts.push({ text: '🧩 推理——黑衣男人与陆小姐的关系', effect: openDeductionEffect('deduce_lu_zhao') });
           } else {
             opts.push(lockedDeduction('🧩 推理——黑衣男人与陆小姐的关系', 'deduce_lu_zhao', '第二段推理还不能开'));
           }
@@ -110,7 +139,7 @@
 
         if (E.getFlag('deduced_lu_zhao') && !E.getFlag('deduced_fusheng') && !E.getFlag('deduced_fusheng_fail') && !hasDeductionChoice(opts, 'deduce_fusheng')) {
           if (E.canDeduce('deduce_fusheng')) {
-            opts.push({ text: '🧩 推理——福生仓与公董局的真相', effect: () => E.openDeduction('deduce_fusheng') });
+            opts.push({ text: '🧩 推理——福生仓与公董局的真相', effect: openDeductionEffect('deduce_fusheng') });
           } else {
             opts.push(lockedDeduction('🧩 推理——福生仓与公董局的真相', 'deduce_fusheng', '第三段推理要等福生仓现场证据'));
           }
