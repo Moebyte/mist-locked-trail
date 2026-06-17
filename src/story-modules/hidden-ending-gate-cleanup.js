@@ -24,21 +24,17 @@
       return 'end_archive';
     }
 
-    function targetOf(choice, state) {
-      return typeof choice.goto === 'function' ? choice.goto(state) : choice.goto;
-    }
-
     function guardChoice(choice) {
       const rawGoto = choice.goto;
       const rawWhen = choice.when;
+      const isStaticHiddenEntry = rawGoto === 'end_conspiracy_detail';
 
       return {
         ...choice,
         when: function (state) {
           const ok = typeof rawWhen === 'function' ? rawWhen(state) : rawWhen;
           if (rawWhen !== undefined && !ok) return false;
-          const target = typeof rawGoto === 'function' ? rawGoto(state) : rawGoto;
-          if (target === 'end_conspiracy_detail' && !schoolGatePassed()) return false;
+          if (isStaticHiddenEntry && !schoolGatePassed()) return false;
           return true;
         },
         goto: function (state) {
