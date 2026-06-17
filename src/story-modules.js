@@ -19,6 +19,7 @@
     'src/story-modules/wang-note-prereq.js',
     'src/story-modules/investigation-guidance.js',
     'src/story-modules/home-route-polish.js',
+    'src/story-modules/su-home-trust-gate.js',
     'src/story-modules/status-polish.js'
   ];
 
