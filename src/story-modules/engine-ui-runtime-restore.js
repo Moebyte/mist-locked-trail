@@ -6,6 +6,14 @@
     if (typeof E === 'undefined') return;
     if (E.__engineUiRuntimeRestorePatched) return;
 
+    const style = document.createElement('style');
+    style.textContent = `
+      .clue-wall{position:relative;padding:8px 4px}
+      .clue-wall-node{display:inline-block;background:var(--surface2);border:1px solid var(--gold);border-radius:2px;padding:7px 10px;margin:3px 2px;font-size:12px;color:var(--text2);box-shadow:0 4px 12px rgba(0,0,0,.08)}
+      .clue-wall-edges{margin-top:8px;border-top:1px solid var(--line);padding-top:8px;font-size:11px;color:var(--muted);line-height:1.7}
+    `;
+    document.head.appendChild(style);
+
     if (typeof E.caseStrength !== 'function') {
       E.caseStrength = function () {
         const n = this.state?.clues?.length || 0;
