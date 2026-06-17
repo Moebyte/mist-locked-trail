@@ -1,6 +1,9 @@
-// ===== Solo 入口文案显性化 =====
+// ===== Solo 入口文案与路由显性化 =====
 // 目标：solo 线已经存在，但入口原文“趁换班从东侧窗户潜入”不够明显。
-// 调整：在没有选择老孙/便衣支援前，把福生仓外的直接潜入选项标成“独自潜入”。
+// 调整：
+// 1) 线索整理页/码头外显示“独自潜入”文案。
+// 2) 玩家选择 solo 后设置 dock_force_solo_entry，并清理便衣/老孙支援 flag。
+// 3) routeDockByPressure 优先识别 dock_force_solo_entry，避免误入“低调潜入”。
 
 (function installSoloEntryChoiceLabelPolish() {
   function applySoloEntryChoiceLabelPolish() {
@@ -12,6 +15,29 @@
       return typeof source === 'function' ? source(state) : source;
     }
 
+    function clearSupportFlagsForSolo() {
+      E.setFlag('dock_force_solo_entry', true);
+      E.setFlag('dock_solo_entry_requested', true);
+
+      // 这些 flag 一旦残留，routeDockByPressure 会把玩家误判成便衣/老孙线。
+      for (const flag of [
+        'sun_fast_support',
+        'sun_fast_support_active',
+        'sun_fast_cover_escape',
+        'dock_fast_support_entry',
+        'sun_full_support',
+        'sun_wait_support',
+        'sun_support_in_action',
+        'dock_full_support_entry',
+        'dock_full_support_tradeoff',
+        'dock_blockade_record'
+      ]) {
+        E.setFlag(flag, false);
+      }
+    }
+
+    E.forceSoloDockEntry = clearSupportFlagsForSolo;
+
     function hasSupportCommitted() {
       return E.getFlag('sun_fast_support')
         || E.getFlag('sun_fast_support_active')
@@ -22,15 +48,25 @@
         || E.getFlag('sun_support_in_action');
     }
 
+    function wrapSoloEffect(choice) {
+      const oldEffect = choice?.effect;
+      return function (state) {
+        clearSupportFlagsForSolo();
+        if (typeof oldEffect === 'function') oldEffect(state);
+      };
+    }
+
     function polishSoloChoice(choice) {
       if (!choice) return choice;
       const text = choice.text || '';
-      const looksLikeDirectDockEntry = text.includes('东侧窗户潜入') || text.includes('东侧窗户翻进去');
+      const looksLikeDirectDockEntry = text.includes('东侧窗户潜入') || text.includes('东侧窗户翻进去') || text.includes('独自从东侧窗户潜入');
       if (!looksLikeDirectDockEntry) return choice;
-      if (hasSupportCommitted()) return choice;
+      if (hasSupportCommitted() && !E.getFlag('dock_force_solo_entry')) return choice;
       return {
         ...choice,
-        text: '🔦 不找支援，独自从东侧窗户潜入'
+        text: '🔦 不找支援，独自从东侧窗户潜入',
+        effect: wrapSoloEffect(choice),
+        goto: () => E.routeDockByPressure()
       };
     }
 
@@ -44,6 +80,18 @@
         return base.map(polishSoloChoice);
       };
       node.__soloEntryChoiceLabelPatched = true;
+    }
+
+    if (typeof E.routeDockByPressure === 'function' && !E.__soloForceRouteDockPatched) {
+      const oldRouteDockByPressure = E.routeDockByPressure.bind(E);
+      E.routeDockByPressure = function () {
+        if (this.getFlag('dock_force_solo_entry') && !this.getFlag('dock_entry_committed')) {
+          clearSupportFlagsForSolo();
+          return 'ch4_dock_solo_infiltration';
+        }
+        return oldRouteDockByPressure();
+      };
+      E.__soloForceRouteDockPatched = true;
     }
 
     E.__soloEntryChoiceLabelPolishPatched = true;
