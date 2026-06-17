@@ -10,6 +10,16 @@
     if (E.__dockFastSupportDualBalancePolishPatched) return;
     if (typeof E.dockDelayScore !== 'function') return;
 
+    if (typeof nodes !== 'undefined' && nodes.ch4_dock_hide && !nodes.ch4_dock_hide.__crateHideFlagPatched) {
+      const oldEffect = nodes.ch4_dock_hide.effect;
+      nodes.ch4_dock_hide.effect = function (state) {
+        if (typeof oldEffect === 'function') oldEffect(state);
+        E.setFlag('dock_hid_in_crate', true);
+        E.setFlag('avoided_guard', true);
+      };
+      nodes.ch4_dock_hide.__crateHideFlagPatched = true;
+    }
+
     function fastSupportMode() {
       return E.getFlag('sun_fast_support')
         || E.getFlag('sun_fast_support_active')
