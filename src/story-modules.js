@@ -56,7 +56,8 @@
     'src/story-modules/yufang-testimony-polish.js',
     'src/story-modules/conclusion-summary-polish.js',
     'src/story-modules/status-polish.js',
-    'src/story-modules/ending-layout-polish.js'
+    'src/story-modules/ending-layout-polish.js',
+    'src/story-modules/runtime-bugfixes.js'
   ];
 
   window.MLT_STORY_MODULES = modules.slice();
