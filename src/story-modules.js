@@ -43,6 +43,7 @@
     'src/story-modules/dock-infiltration-depth-polish.js',
     'src/story-modules/dock-heat-system-polish.js',
     'src/story-modules/dock-escape-choice-polish.js',
+    'src/story-modules/dock-exit-hospital-tension-polish.js',
     'src/story-modules/hidden-ending-gate-cleanup.js',
     'src/story-modules/hospital-flow-polish.js',
     'src/story-modules/conclusion-summary-polish.js',
