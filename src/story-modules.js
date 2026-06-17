@@ -40,6 +40,7 @@
     'src/story-modules/true-ending-route-polish.js',
     'src/story-modules/sun-fast-support-polish.js',
     'src/story-modules/hidden-ending-gate-cleanup.js',
+    'src/story-modules/hospital-flow-polish.js',
     'src/story-modules/conclusion-summary-polish.js',
     'src/story-modules/status-polish.js',
     'src/story-modules/ending-layout-polish.js'
