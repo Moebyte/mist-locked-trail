@@ -56,7 +56,8 @@ reset({
 });
 rt.renderNode('ch4_dock_hide');
 assert(E.getFlag('dock_hid_in_crate'), '躲进木箱应记录谨慎拖延标记');
-assert(E.routeDockDeepByPressure() === 'ch4_dock_deep_trace', '躲进木箱会增加拖延；若已选择快速支援但又谨慎等待，暗室应降为只剩一人');
+assert(E.dockDelayScore() > 0, '躲进木箱应增加拖延分，而不是完全免费');
+assert(E.routeDockDeepByPressure() === 'ch4_dock_deep_dual', '单次躲藏不应直接惩罚为错失苏晚亭，仍由累计风险决定');
 
 reset({
   pressure: { heat: 1, deadline: { day: 2, hour: 23, minute: 0 } },
