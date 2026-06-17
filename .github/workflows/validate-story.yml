@@ -106,6 +106,9 @@ jobs:
       - name: Smoke test deadline deprecation
         run: node scripts/smoke-deadline-deprecation.mjs
 
+      - name: Smoke test Fusheng entry unblock
+        run: node scripts/smoke-fusheng-entry-unblock.mjs
+
       - name: Smoke test dock exit hospital crisis
         run: node scripts/smoke-dock-exit-hospital-crisis.mjs
 
