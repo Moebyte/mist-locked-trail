@@ -61,10 +61,16 @@
     };
 
     if (nodes.ch4_dock_who_dual && !nodes.ch4_dock_who_dual.__suDockPresentWhitelistPatched) {
-      nodes.ch4_dock_who_dual.onPresent = function (item) {
+      const oldOnPresent = nodes.ch4_dock_who_dual.onPresent;
+      nodes.ch4_dock_who_dual.onPresent = function (item, state) {
         if (presentOnce(item, '苏晚亭的银发夹', 'presented_su_keepsake')) return { goto: 'ch4_su_present_keepsake' };
+        const oldResult = typeof oldOnPresent === 'function' ? oldOnPresent(item, state) : null;
+        if (oldResult) return oldResult;
         if (presentOnce(item, '三人合影', 'presented_photo_to_yufang_dual')) return { goto: 'ch4_yufang_present_photo_dual' };
         if (presentOnce(item, '陈明远的信', 'presented_letter_to_yufang_dual')) return { goto: 'ch4_yufang_present_letter_dual' };
+        if (presentOnce(item, '未寄出的信', 'presented_unsent_letter_to_yufang_dual')) return { goto: 'ch4_yufang_present_letter_dual' };
+        if (presentOnce(item, '日记残页', 'presented_diary_to_yufang_dual')) return { goto: 'ch4_yufang_present_diary_dual' };
+        if (presentOnce(item, '苏晚亭日记残页', 'presented_diary_to_yufang_dual')) return { goto: 'ch4_yufang_present_diary_dual' };
         return null;
       };
       nodes.ch4_dock_who_dual.__suDockPresentWhitelistPatched = true;
