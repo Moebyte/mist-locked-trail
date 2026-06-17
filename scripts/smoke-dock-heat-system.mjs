@@ -28,7 +28,7 @@ const preparedItems = [{ name: '苏晚亭的银发夹', desc: '' }];
 
 reset({
   pressure: { heat: 0, deadline: { day: 2, hour: 23, minute: 0 } },
-  flags: { ...preparedFlags, sun_fast_support: true, dock_fast_support_entry: true, dock_entry_committed: true },
+  flags: { ...preparedFlags, sun_fast_support: true, dock_fast_support_entry: true, dock_entry_committed: true, dock_moved_slowly: true, dock_observed: true },
   clues: preparedClues,
   items: preparedItems,
 });
@@ -52,7 +52,25 @@ reset({
   clues: preparedClues,
   items: preparedItems,
 });
-assert(E.dockHeatTier().key === 'high', `一个便衣但触发追击后应为高 heat，实际 ${JSON.stringify(E.dockHeatTier())}`);
+assert(E.dockHeatTier().key === 'mid', `单次触发守卫不应一票否决，应只是中 heat，实际 ${JSON.stringify(E.dockHeatTier())}`);
+assert(E.routeDockDeepByPressure() === 'ch4_dock_deep_trace', '单次触发守卫后应由累计 heat 判定为只剩一人');
+
+reset({
+  pressure: { heat: 0, deadline: { day: 2, hour: 23, minute: 0 } },
+  flags: {
+    ...preparedFlags,
+    sun_fast_support: true,
+    dock_fast_support_entry: true,
+    dock_entry_committed: true,
+    dock_shelf_shortcut: true,
+    skipped_crates_for_sound: true,
+    skipped_dock_hide: true,
+    dock_guard_chase_no_hide: true,
+  },
+  clues: preparedClues,
+  items: preparedItems,
+});
+assert(E.dockHeatTier().key === 'high', `多个潜入坑叠加后应为高 heat，实际 ${JSON.stringify(E.dockHeatTier())}`);
 assert(E.routeDockDeepByPressure() === 'ch4_dock_deep_empty_heat', '高 heat 应进入两人都不在的空暗室');
 
 reset({
