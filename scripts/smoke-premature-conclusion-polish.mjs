@@ -25,18 +25,26 @@ function conclusionText() {
   return typeof text === 'function' ? text(rt.E.state) : text;
 }
 
+function present(sceneId, itemName, desc = '') {
+  const scene = rt.renderNode(sceneId);
+  return scene.onPresent?.({ name: itemName, desc }, rt.E.state);
+}
+
 reset({
   flags: { got_case_file: true, asked_about_chen: true, chen_su_link: true, got_chen_evidence: true, read_letter: true },
   clues: [{ name: '光华小学事件', desc: '' }, { name: '陈老师与女子争吵', desc: '' }],
-  items: [{ name: '卷宗摘抄', desc: '' }],
+  items: [{ name: '卷宗摘抄', desc: '' }, { name: '陈明远的信', desc: '信的开头是“晚亭吾爱”。' }],
 });
 assert(!hasChoice('ch3_wrapup', '王巡官的批注'), '直接巡捕房→光华小学后，不应继续显示旧版“追查王巡官批注”入口');
-assert(hasChoice('ch3_wrapup', '回圣约翰大学'), '缺大学线时，线索整理应引导回大学补查');
+assert(!hasChoice('ch3_wrapup', '回圣约翰大学'), '坏路线成立后，线索整理不应允许回大学补课');
+assert(!hasChoice('ch3_wrapup', '回薛华立路'), '坏路线成立后，线索整理不应允许回薛华补课');
+assert(!hasChoice('ch3_wrapup', '回巡捕房'), '坏路线成立后，线索整理不应允许回巡捕房补王纸条');
+assert(hasChoice('ch3_wrapup', '去当铺'), '坏路线仍应允许去当铺查翡翠镯');
 assert(hasChoice('ch3_wrapup', '证据链仍不完整'), '过早整理线索时，结案入口应提示证据链仍不完整');
 
 rt.renderNode('ch4_conclusion');
 assert(conclusionText().includes('证据链不足'), '坏路线进入结案页时，应明确提示证据链不足');
-assert(hasChoice('ch4_conclusion', '先不结案'), '坏路线结案页应允许返回补查');
+assert(!hasChoice('ch4_conclusion', '先不结案'), '坏路线结案页不应允许倒回补查');
 assert(hasChoice('ch4_conclusion', '证据不足，暂时归档'), '坏路线自然收束应改成证据不足归档');
 assert(hasChoice('ch4_conclusion', '证据不足，仍要冒然指认'), '坏路线指认应改成冒然指认');
 assert(!hasChoice('ch4_conclusion', '按证据链自然收束此案'), '证据不足时不应显示正常自然收束文案');
@@ -46,16 +54,30 @@ reset({
   clues: [{ name: '光华小学事件', desc: '' }, { name: '法租界地图', desc: '' }],
   items: [{ name: '卷宗摘抄', desc: '' }, { name: '法租界地图', desc: '' }],
 });
-assert(hasChoice('ch3_wrapup', '回薛华立路'), '有大学线但未查清仓库标记时，应引导回薛华立路');
+assert(!hasChoice('ch3_wrapup', '回薛华立路'), '有大学线但已从光华小学过早整理时，也不应允许回薛华补课');
 assert(!hasChoice('ch3_wrapup', '王巡官的批注'), '未查清仓库标记时不应显示追查王巡官批注');
+assert(hasChoice('ch3_wrapup', '去当铺'), '坏路线仍应保留当铺彩蛋线');
 
 reset({
   flags: { got_case_file: true, shown_map_to_landlord: true },
   clues: [{ name: '光华小学事件', desc: '' }, { name: '法租界地图', desc: '' }, { name: '福生仓标识', desc: '' }],
   items: [{ name: '卷宗摘抄', desc: '' }, { name: '法租界地图', desc: '' }],
 });
-assert(hasChoice('ch3_wrapup', '回巡捕房'), '查清福生仓标记但未拿王纸条时，才应引导回巡捕房');
-assert(hasChoice('ch3_wrapup', '福生仓与王巡官'), '回巡捕房入口应明确是追问福生仓与王巡官线索');
+assert(!hasChoice('ch3_wrapup', '回巡捕房'), '查清福生仓标记但已过早整理时，也不应允许回巡捕房补王纸条');
+assert(hasChoice('ch3_wrapup', '证据链仍不完整'), '查清标记但没拿王纸条时，应仍提示证据链不完整');
+
+reset({
+  flags: { got_case_file: true, asked_about_chen: true, chen_su_link: true, got_chen_evidence: true, read_letter: true },
+  clues: [{ name: '光华小学事件', desc: '' }, { name: '陈明远的信', desc: '' }],
+  items: [{ name: '陈明远的信', desc: '信的开头是“晚亭吾爱”。' }],
+});
+const zhouText = typeof rt.nodes.ch4_revisit_zhou.text === 'function' ? rt.nodes.ch4_revisit_zhou.text(rt.E.state) : rt.nodes.ch4_revisit_zhou.text;
+assert(zhouText.includes('晚亭吾爱'), '坏路线周怀安回访应提示可出示陈明远的信');
+const letterResult = present('ch4_revisit_zhou', '陈明远的信');
+assert(letterResult?.goto === 'end_zhou_chen_letter', '向周怀安出示陈明远的信应触发“吾爱晚亭”彩蛋');
+rt.renderNode('end_zhou_chen_letter');
+assert(rt.E.getFlag('zhou_chen_letter_easter_egg'), '吾爱晚亭彩蛋应设置对应 flag');
+assert(rt.E.hasClue('周怀安读到陈明远的信'), '吾爱晚亭彩蛋应记录周怀安读信线索');
 
 reset({
   flags: { got_wang_note: true, deduced_fusheng: true, rescued_yufang: true, rescued_su: true },
