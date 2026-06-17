@@ -69,12 +69,12 @@ opts = choices('ch4_dock_locked_door');
 texts = opts.map(choice => choice.text || choice.fogText || '');
 assert(texts.includes('⚠️ 没有工具，强行砸锁开门'), '没有铁钎时应显示强行砸锁风险选项');
 assert(opts.find(choice => (choice.text || '').includes('砸锁'))?.goto === 'ch4_dock_break_lock_chase', '没有工具砸锁应进入砸锁追击节点');
-assert(opts.find(choice => (choice.text || '').includes('回头检查教具箱'))?.goto === 'ch4_dock_return_for_tool', '没有工具时回头找工具应进入带成本的补救节点');
+assert(opts.find(choice => (choice.text || '').includes('回头检查教具箱'))?.goto === 'ch4_dock_return_for_tool', '没有工具时回头找工具应进入错失双人质节点');
 
 opts = choices('ch4_dock_return_for_tool');
 texts = opts.map(choice => choice.text || choice.fogText || '');
-assert(texts.includes('📦 翻查教具箱，找能撬锁的东西'), '回头找工具节点应再进入教具箱检查');
-assert(opts[0]?.goto === 'ch4_dock_crates', '回头找工具节点最终应通往教具箱');
+assert(texts.includes('🚪 带着铁钎赶回暗门'), '回头找工具后应赶回暗门');
+assert(opts[0]?.goto === 'ch4_dock_empty_after_return', '回头找工具后应进入空暗室，错失两名人质');
 
 reset({
   flags: { ...preparedFlags, dock_broke_lock_no_tool: true },
@@ -82,6 +82,13 @@ reset({
   items: [{ name: '苏晚亭的银发夹', desc: '' }],
 });
 assert(E.routeDockDeepByPressure() === 'ch4_dock_deep_trace', '不检查教具箱砸锁后，应错失苏晚亭，进入线索暗室');
+
+reset({
+  flags: { ...preparedFlags, missed_both_due_to_return_tool: true },
+  clues: preparedClues,
+  items: [{ name: '苏晚亭的银发夹', desc: '' }],
+});
+assert(E.routeDockDeepByPressure() === 'ch4_dock_empty_after_return', '回头找工具后，应错失沈玉芳和苏晚亭，进入空暗室');
 
 if (errors.length) {
   console.error('Dock hide consequence smoke failed:');
