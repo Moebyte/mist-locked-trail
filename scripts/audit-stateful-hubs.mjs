@@ -10,6 +10,21 @@ function clue(name, desc = '') { E.addClue(name, desc); }
 function item(name, desc = '') { E.addItem(name, desc); }
 function flag(name, value = true) { E.setFlag(name, value); }
 function heat(value) { E.addHeat(value); }
+function seedDockPrereqs() {
+  flag('got_wang_note');
+  flag('sister_case');
+  item('半张烟盒纸');
+  clue('王巡官遗留纸条');
+  clue('沈玉芳');
+  clue('沈玉兰的妹妹');
+  clue('沈玉芳与陈明远');
+}
+function dockSetup(setup) {
+  return () => {
+    seedDockPrereqs();
+    setup?.();
+  };
+}
 function choices(id) { rt.renderNode(id); return rt.choicesOf(id); }
 function hasTarget(list, target) { return list.some(choice => choice.goto === target); }
 function hasText(list, fragment) { return list.some(choice => choice.text && choice.text.includes(fragment)); }
@@ -96,12 +111,12 @@ expectTarget('ch3_wu_present_photo', wrapup, false, () => { flag('asked_about_ch
 expectTarget(wrapup, school, true, () => flag('asked_about_chen'), '光华小学：未完成时误入整理线索，应引导返回学校继续调查');
 
 const dockEscape = 'ch4_dock_escape';
-expectRoute('routeDockByPressure', 'ch4_dock_full_search', null, '福生仓 heat：低风险且时间充裕时，应进入完整搜查');
-expectRoute('routeDockByPressure', 'ch4_dock_limited_search', () => heat(4), '福生仓 heat：heat>=4 应让仓库入口结果下降一档');
-expectRoute('routeDockByPressure', 'ch4_dock_rescue_only', () => heat(6), '福生仓 heat：heat>=6 应让仓库入口结果下降两档');
-expectRoute('routeDockDeepByPressure', 'ch4_dock_deep_trace', () => heat(4), '福生仓 heat：heat>=4 应让暗室结果下降一档');
-expectRoute('routeDockDeepByPressure', 'ch4_dock_deep_rescue_only', () => heat(6), '福生仓 heat：heat>=6 应让暗室结果下降两档');
-expectRoute('routeDockByPressure', 'ch4_dock_full_search', () => { heat(4); flag('sun_support_in_action'); }, '福生仓 heat：老孙实际到场时，应抵消一档 heat 压力');
+expectRoute('routeDockByPressure', 'ch4_dock_full_search', dockSetup(), '福生仓 heat：低风险且时间充裕时，应进入完整搜查');
+expectRoute('routeDockByPressure', 'ch4_dock_limited_search', dockSetup(() => heat(4)), '福生仓 heat：heat>=4 应让仓库入口结果下降一档');
+expectRoute('routeDockByPressure', 'ch4_dock_rescue_only', dockSetup(() => heat(6)), '福生仓 heat：heat>=6 应让仓库入口结果下降两档');
+expectRoute('routeDockDeepByPressure', 'ch4_dock_deep_trace', dockSetup(() => heat(4)), '福生仓 heat：heat>=4 应让暗室结果下降一档');
+expectRoute('routeDockDeepByPressure', 'ch4_dock_deep_rescue_only', dockSetup(() => heat(6)), '福生仓 heat：heat>=6 应让暗室结果下降两档');
+expectRoute('routeDockByPressure', 'ch4_dock_full_search', dockSetup(() => { heat(4); flag('sun_support_in_action'); }), '福生仓 heat：老孙实际到场时，应抵消一档 heat 压力');
 expectText(dockEscape, '老孙的人', false, () => flag('sun_support_available'), '福生仓：老孙只是答应支援但未随行时，不应出现老孙的人亮明身份');
 expectText(dockEscape, '老孙的人', true, () => flag('sun_support_in_action'), '福生仓：老孙的人实际到场时，应在码头可用');
 expectText(dockEscape, '当场质问傅启元', true, () => flag('sun_support_available'), '福生仓：heat 未升高时，即使老孙未随行，也应保留独自质问傅启元的选项');
