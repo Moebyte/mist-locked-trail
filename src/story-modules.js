@@ -34,6 +34,7 @@
     'src/story-modules/location-hub-detail-text-polish.js',
     'src/story-modules/present-flow-cleanup.js',
     'src/story-modules/deduction-flow-guidance.js',
+    'src/story-modules/wrapup-priority-guidance.js',
     'src/story-modules/pressure-quality-ending-polish.js',
     'src/story-modules/narrative-clock-polish.js',
     'src/story-modules/true-ending-route-polish.js',
