@@ -34,6 +34,12 @@
       return [{ text: '📚 去光华小学——查沈玉芳和陈老师的线索', goto: 'ch3_school' }];
     }
 
+    function yulanEchoChoices() {
+      const opts = [{ text: '🔎 回永兴贸易商行——继续查陆小姐住处', goto: 'ch2_building_enter' }];
+      if (hasWangNote()) opts.push({ text: '📚 去光华小学——查沈玉芳和陈老师的线索', goto: 'ch3_school' });
+      return opts;
+    }
+
     function baseXuehuaChoices() {
       const opts = [];
       if (!E.getFlag('saw_man')) opts.push({ text: '🔍 先在周围观察一下', goto: 'ch2_building_stakeout' });
@@ -96,19 +102,8 @@
       ];
     }
 
-    if (nodes.ch2_yulan_promise_echo) {
-      nodes.ch2_yulan_promise_echo.choices = [
-        { text: '🔎 回永兴贸易商行——继续查陆小姐住处', goto: 'ch2_building_enter' },
-        { text: '📚 去光华小学——查沈玉芳和陈老师的线索', goto: 'ch3_school' }
-      ];
-    }
-
-    if (nodes.ch2_yulan_distance_echo) {
-      nodes.ch2_yulan_distance_echo.choices = [
-        { text: '🔎 回永兴贸易商行——继续查陆小姐住处', goto: 'ch2_building_enter' },
-        { text: '📚 去光华小学——查沈玉芳和陈老师的线索', goto: 'ch3_school' }
-      ];
-    }
+    if (nodes.ch2_yulan_promise_echo) nodes.ch2_yulan_promise_echo.choices = yulanEchoChoices;
+    if (nodes.ch2_yulan_distance_echo) nodes.ch2_yulan_distance_echo.choices = yulanEchoChoices;
 
     E.__xuehuaChoicePolishPatched = true;
   }
