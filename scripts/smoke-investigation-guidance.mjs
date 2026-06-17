@@ -25,7 +25,9 @@ reset({ clues: [{ name: '法租界地图', desc: '' }, { name: '铅笔清单', d
 const guidedText = textOf('ch2_leave_univ');
 const guidedChoices = choiceTexts('ch2_leave_univ');
 assert(guidedText.includes('地址，不是证据链'), '大学后未查巡捕房时，应提示薛华立路只是地址，不是证据链');
-assert(guidedText.includes('王巡官线索'), '大学后未查巡捕房时，应提示王巡官线索重要');
+assert(guidedText.includes('正式连接'), '大学后未查巡捕房时，应提示巡捕房卷宗能补正式连接');
+assert(!guidedText.includes('福生仓'), '大学后提示不应提前剧透福生仓');
+assert(!guidedText.includes('王巡官线索'), '大学后提示不应提前剧透王巡官线索');
 assert(guidedChoices.some(text => text.includes('先去巡捕房查卷宗')), '大学后未查巡捕房时，应强化巡捕房选项文案');
 
 reset({
