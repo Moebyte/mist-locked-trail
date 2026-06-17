@@ -28,6 +28,21 @@ const preparedItems = [{ name: '苏晚亭的银发夹', desc: '' }];
 
 reset({
   pressure: { heat: 0, deadline: { day: 2, hour: 23, minute: 0 } },
+  flags: {},
+});
+assert(E.dockSupportMode() === 'solo', `无支援应识别为 solo，实际 ${E.dockSupportMode()}`);
+assert(E.routeDockByPressure() === 'ch4_dock_solo_infiltration', `无支援进入码头应先进入孤身潜入节点，实际 ${E.routeDockByPressure()}`);
+rt.renderNode('ch4_dock_solo_infiltration');
+const soloChoices = rt.choicesOf('ch4_dock_solo_infiltration');
+assert(soloChoices.some(choice => (choice.text || '').includes('独自从东侧窗户')), '孤身潜入节点应提供独自翻窗选项');
+E.setFlag('dock_solo_entry', true);
+E.setFlag('dock_entry_committed', true);
+assert(E.dockExposureScore() === 1, `孤身潜入基础暴露应为 1，实际 ${E.dockExposureScore()}`);
+assert(E.dockDelayScore() === 0, `孤身潜入基础拖延应为 0，实际 ${E.dockDelayScore()}`);
+assert(E.dockHeatTier().key === 'low', `孤身潜入基础应仍可低风险，实际 ${JSON.stringify(E.dockHeatTier())}`);
+
+reset({
+  pressure: { heat: 0, deadline: { day: 2, hour: 23, minute: 0 } },
   flags: { ...preparedFlags, sun_fast_support: true, dock_fast_support_entry: true, dock_entry_committed: true, dock_moved_slowly: true, dock_observed: true },
   clues: preparedClues,
   items: preparedItems,
