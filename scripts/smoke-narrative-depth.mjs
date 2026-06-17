@@ -20,6 +20,17 @@ function rescueReadyFlags(extra = {}) {
   };
 }
 
+function hiddenReadyFlags(extra = {}) {
+  return rescueReadyFlags({
+    presented_threat_to_wu: true,
+    presented_photo_to_wu: true,
+    presented_university_to_wu: true,
+    school_wu_three_proofs: true,
+    school_wu_full_confront: true,
+    ...extra,
+  });
+}
+
 function testHospitalConflict() {
   h.resetState({ flags: rescueReadyFlags({ deduced_fusheng: true }) });
   h.renderNode('ch4_dock_escape_finish');
@@ -37,7 +48,7 @@ function testHospitalConflict() {
 }
 
 function testHighQualityNaturalEnding() {
-  h.resetState({ flags: rescueReadyFlags({ deduced_fusheng: true, fu_waybill_exposed: true, fu_clearance_exposed: true }) });
+  h.resetState({ flags: hiddenReadyFlags({ deduced_fusheng: true, fu_waybill_exposed: true, fu_clearance_exposed: true }) });
   h.renderNode('ch4_dock_escape_finish');
   h.goByTarget('ch4_hospital_conflict');
   h.goByTarget('ch4_hospital_protect_witnesses');
@@ -54,6 +65,13 @@ function testHighQualityNaturalEnding() {
   const ending = E.v07ResolveEnding();
   if (ending !== 'end_conspiracy_detail') throw new Error(`高质量路线预期隐藏结局，实际 ${ending}`);
   reports.push(`PASS 高质量路线自然分流到 ${ending}，score=${quality.score}`);
+}
+
+function testHiddenEndingRequiresSchoolThreeProofs() {
+  h.resetState({ flags: rescueReadyFlags({ deduced_fusheng: true, fu_waybill_exposed: true, fu_clearance_exposed: true, v07_witnesses_protected: true, v07_lu_confronted: true, v07_rejected_fu_deal: true }) });
+  const ending = E.v07ResolveEnding();
+  if (ending === 'end_conspiracy_detail') throw new Error('未完成校长三证物质询时，不应进入隐藏结局');
+  reports.push(`PASS 隐藏结局需要校长三证物闭环，未完成时分流到 ${ending}`);
 }
 
 function testLateNaturalEnding() {
@@ -77,6 +95,7 @@ try {
   assertChoiceTarget('ch4_conclusion', 'end_archive');
   testHospitalConflict();
   testHighQualityNaturalEnding();
+  testHiddenEndingRequiresSchoolThreeProofs();
   testLateNaturalEnding();
   testFuOfferBranches();
 } catch (err) {
