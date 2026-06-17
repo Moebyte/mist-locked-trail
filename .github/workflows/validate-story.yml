@@ -103,6 +103,9 @@ jobs:
       - name: Smoke test dynamic endings
         run: node scripts/smoke-dynamic-endings.mjs
 
+      - name: Smoke test deadline deprecation
+        run: node scripts/smoke-deadline-deprecation.mjs
+
       - name: Smoke test dock exit hospital crisis
         run: node scripts/smoke-dock-exit-hospital-crisis.mjs
 
