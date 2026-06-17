@@ -1,6 +1,7 @@
 // ===== 线索整理页阶段引导 =====
 // 目标：ch3_wrapup 不再同时抛出推理、当铺、老孙、码头等多个主线入口。
 // 同一阶段只突出一个推荐下一步，降低玩家迷路感。
+// 推理入口使用 safe opener，避免“下一步推理”点击无反应。
 
 (function installWrapupPriorityGuidance() {
   function applyWrapupPriorityGuidance() {
@@ -67,7 +68,15 @@
     }
 
     function hasDockEvidence() {
-      return hasThing('公董局公文纸') || hasThing('教具箱走私') || hasThing('光华货运单') || hasThing('清场指令') || E.getFlag('rescued_yufang') || E.getFlag('found_su_at_dock');
+      return hasThing('公董局公文纸')
+        || hasThing('暗室刚被清空')
+        || hasThing('教具箱走私')
+        || hasThing('管制药品走私')
+        || hasThing('光华货运单')
+        || hasThing('清场指令')
+        || E.getFlag('rescued_yufang')
+        || E.getFlag('found_su_at_dock')
+        || E.getFlag('missed_both_at_dock');
     }
 
     function fallbackReview() {
@@ -76,6 +85,19 @@
 
     function recommendText(stage) {
       return `<br><br><span class="sys"><b>建议下一步：</b>${stage}</span>`;
+    }
+
+    function openDeductionEffect(id) {
+      return () => {
+        if (typeof E.openDeductionSafe === 'function') E.openDeductionSafe(id);
+        else E.openDeduction(id);
+      };
+    }
+
+    function deduceChoice(id, text, base) {
+      const locked = textOf(base).startsWith('🔒');
+      if (locked) return { ...base, text: textOf(base) };
+      return { ...(base || {}), text, effect: openDeductionEffect(id), goto: undefined };
     }
 
     function stageHint() {
@@ -105,7 +127,7 @@
 
       if (!E.getFlag('deduced_chen')) {
         const deduce = firstMatching(choices, isDeduceChen, null);
-        if (deduce) return [{ ...deduce, text: '🧩 下一步：拼合线索——推理陈明远之死' }, review];
+        if (deduce) return [deduceChoice('deduce_chen', '🧩 下一步：拼合线索——推理陈明远之死', deduce), review];
       }
 
       if (E.getFlag('deduced_chen') && !hasThing('翡翠镯')) {
@@ -115,7 +137,7 @@
 
       if (hasThing('翡翠镯') && !E.getFlag('deduced_lu_zhao')) {
         const deduce = firstMatching(choices, isDeduceLu, null);
-        if (deduce) return [{ ...deduce, text: textOf(deduce).startsWith('🔒') ? textOf(deduce) : '🧩 下一步：推理黑衣男人与陆小姐的关系' }, review];
+        if (deduce) return [deduceChoice('deduce_lu_zhao', '🧩 下一步：推理黑衣男人与陆小姐的关系', deduce), review];
       }
 
       if (E.getFlag('deduced_lu_zhao') && !hasSunSupport()) {
@@ -130,7 +152,7 @@
 
       if (hasDockEvidence() && !E.getFlag('deduced_fusheng')) {
         const deduce = firstMatching(choices, isDeduceFusheng, null);
-        if (deduce) return [{ ...deduce, text: textOf(deduce).startsWith('🔒') ? textOf(deduce) : '🧩 下一步：推理福生仓与公董局的真相' }, review];
+        if (deduce) return [deduceChoice('deduce_fusheng', '🧩 下一步：推理福生仓与公董局的真相', deduce), review];
       }
 
       return choices;
