@@ -1,9 +1,9 @@
 // ===== Solo 福生仓 heat / delay 结果分流 =====
 // 目标：solo 线仍遵守 heat / delay 制度，而不是硬编码剧情捷径。
-// 取证会抬高 delay；冒进会抬高 heat。最终形成三档：
-// 1) 全证据：清场指令 + 货运单 / 教具箱证据齐，但救人窗口错过。
-// 2) 部分证据：指令或运单只拿到一类，至少救出沈玉芳 / 找到苏晚亭被转走的痕迹。
-// 3) 无硬证据：低 heat + 低 delay，双救机会最大。
+// 取证只改变 delay；冒进只改变 heat。最终只由 heat + delay 三档决定：
+// 1) score >= 6：高风险，证据完整但救人窗口错过。
+// 2) score >= 4：中风险，部分证据并救出一方。
+// 3) score < 4：低风险，无硬证据但双救机会最大。
 
 (function installSoloHeatDelayOutcomes() {
   function applySoloHeatDelayOutcomes() {
@@ -59,6 +59,7 @@
       E.dockDelayScore = function () {
         let score = oldDelayScore();
         if (soloMode()) {
+          // 取证动作只改变 delay floor，结果仍由 heat + delay 统一阈值决定。
           if (this.getFlag('dock_solo_full_evidence_sweep') || soloHardEvidenceCount() >= 2) score = Math.max(score, 5);
           else if (this.getFlag('dock_solo_partial_evidence_sweep') || soloHardEvidenceCount() === 1) score = Math.max(score, 3);
           else if (this.getFlag('dock_solo_no_evidence_rush')) score = Math.min(score, 1);
@@ -74,13 +75,13 @@
       const hardEvidence = soloHardEvidenceCount();
       const score = exposure + delay;
 
-      if (hardEvidence >= 2 || this.getFlag('dock_solo_full_evidence_sweep') || delay >= 5 || score >= 7) {
-        return { key: 'full_evidence_no_rescue', label: '全证据 / 救人窗口错过', exposure, delay, score, hardEvidence };
+      if (score >= 6) {
+        return { key: 'full_evidence_no_rescue', label: '高风险：全证据 / 救人窗口错过', exposure, delay, score, hardEvidence };
       }
-      if (hardEvidence === 1 || this.getFlag('dock_solo_partial_evidence_sweep') || delay >= 3 || score >= 4) {
-        return { key: 'partial_evidence_one_rescue', label: '部分证据 / 救出一方', exposure, delay, score, hardEvidence };
+      if (score >= 4) {
+        return { key: 'partial_evidence_one_rescue', label: '中风险：部分证据 / 救出一方', exposure, delay, score, hardEvidence };
       }
-      return { key: 'no_evidence_dual_rescue', label: '无硬证据 / 双救', exposure, delay, score, hardEvidence };
+      return { key: 'no_evidence_dual_rescue', label: '低风险：无硬证据 / 双救', exposure, delay, score, hardEvidence };
     };
 
     E.routeSoloDockDeepByHeatDelay = function () {
@@ -115,16 +116,16 @@
     function outcomeBadge() {
       if (typeof E.soloDockOutcomeTier !== 'function') return '';
       const t = E.soloDockOutcomeTier();
-      return `<br><br><span class="sys">Solo 风险：${t.label} · heat ${t.exposure} / delay ${t.delay}</span>`;
+      return `<br><br><span class="sys">Solo 风险：${t.label} · heat ${t.exposure} / delay ${t.delay} / 总分 ${t.score}</span>`;
     }
 
     nodes.ch4_dock_solo_search_choice = {
       title: '福生仓 · 取证还是救人',
       weather: 3,
-      text: () => `你翻进东窗，落在一排木箱后面。<br><br>仓库深处传来很轻的敲击声。另一边的桌上压着蓝封公文，木箱夹层里也许还有货运单。<br><br>一个人行动没有后手。你在这里多拿一件证据，delay 就多一分；脚步越急，heat 也会升。最后能不能救到人，就看你把时间花在哪里。${outcomeBadge()}`,
+      text: () => `你翻进东窗，落在一排木箱后面。<br><br>仓库深处传来很轻的敲击声。另一边的桌上压着蓝封公文，木箱夹层里也许还有货运单。<br><br>一个人行动没有后手。你在这里多拿一件证据，delay 就多一分；脚步越急，heat 也会升。最后能不能救到人，只看 heat + delay 的总分。${outcomeBadge()}`,
       choices: [
         {
-          text: '🔦 不碰公文和货箱，直奔敲击声开暗门',
+          text: '🔦 不碰公文和货箱，直奔敲击声开暗门（delay 0）',
           effect: () => {
             E.setFlag('dock_solo_search_committed', true);
             E.setFlag('dock_solo_no_evidence_rush', true);
@@ -133,7 +134,7 @@
           goto: () => E.routeSoloDockDeepByHeatDelay()
         },
         {
-          text: '📄 只拿蓝封清场指令，马上去暗门',
+          text: '📄 只拿蓝封清场指令，马上去暗门（delay 至少 3）',
           effect: () => {
             E.setFlag('dock_solo_search_committed', true);
             E.setFlag('dock_solo_partial_evidence_sweep', true);
@@ -142,7 +143,7 @@
           goto: () => E.routeSoloDockDeepByHeatDelay()
         },
         {
-          text: '📦 只翻教具箱货运单，马上去暗门',
+          text: '📦 只翻教具箱货运单，马上去暗门（delay 至少 3）',
           effect: () => {
             E.setFlag('dock_solo_search_committed', true);
             E.setFlag('dock_solo_partial_evidence_sweep', true);
@@ -151,7 +152,7 @@
           goto: () => E.routeSoloDockDeepByHeatDelay()
         },
         {
-          text: '📚 清场指令和教具箱货运单都查清，再去暗门',
+          text: '📚 清场指令和教具箱货运单都查清，再去暗门（delay 至少 5）',
           effect: () => {
             E.setFlag('dock_solo_search_committed', true);
             E.setFlag('dock_solo_full_evidence_sweep', true);
