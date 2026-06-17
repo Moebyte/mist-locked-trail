@@ -46,6 +46,7 @@
     'src/story-modules/dock-exit-hospital-tension-polish.js',
     'src/story-modules/hidden-ending-gate-cleanup.js',
     'src/story-modules/hospital-flow-polish.js',
+    'src/story-modules/hospital-pressure-witness-polish.js',
     'src/story-modules/conclusion-summary-polish.js',
     'src/story-modules/status-polish.js',
     'src/story-modules/ending-layout-polish.js'
