@@ -29,16 +29,16 @@
           opts.push({ text: '📎 追问王巡官调离前留下的仓库线索', goto: 'ch2_police_wang' });
         } else {
           opts.push({
-            text: '🔒 王巡官纸条线索未浮出（先查清薛华立路地图上的仓库标记）',
+            text: '🌫️ 这行铅笔字暂时问不下去',
             goto: 'ch2_police_wang_missing',
             when: () => false,
-            fogText: '🔒 王巡官纸条线索未浮出',
-            fogHint: '先去薛华立路 22 号，向看门老头出示法租界地图，让“福生仓”这个仓库名浮出水面。'
+            fogText: '🌫️ 这行铅笔字暂时问不下去',
+            fogHint: '你还缺少能让老孙开口的具体地点线索。先从大学地图指向的地方查起。'
           });
         }
       }
       if (hasUniversityXuehuaLead() && !hasLandlordFushengLead()) {
-        opts.push({ text: '🏛️ 回薛华立路 22 号——查清地图上的仓库标记', goto: 'ch2_frenchtown' });
+        opts.push({ text: '🏛️ 回薛华立路 22 号——查清地图上的标记', goto: 'ch2_frenchtown' });
       }
       if (!E.hasClue('母亲证词') || !E.getFlag('asked_photo')) opts.push({ text: '🏠 去苏家', goto: 'ch2_home' });
       opts.push({ text: '📚 去光华小学', goto: 'ch3_school' });
@@ -54,9 +54,9 @@
 
     if (!nodes.ch2_police_wang_missing) {
       nodes.ch2_police_wang_missing = {
-        title: '巡捕房 · 线索未接上',
+        title: '巡捕房 · 雾未散',
         weather: 1,
-        text: () => `你把卷宗边角那行铅笔批注推到老孙面前。<br><br><span class="sys">“这个王巡官，为什么会觉得苏晚亭的案子和光华小学有关？”</span><br><br>老孙看着那行字，沉默了一会儿，却没有立刻去翻档案柜。<br><br><span class="sys">“老王疑心重，他查过的地方很多。你现在只拿着一行批注来问，我没法判断你问的是哪一条线。”</span><br><br>他把卷宗合上。<br><br><span class="sys">“先把薛华立路那张地图上的标记查清楚。查到具体仓库名，再来问我王巡官留下了什么。”</span>`,
+        text: () => `你把卷宗边角那行铅笔批注推到老孙面前。<br><br><span class="sys">“这个王巡官，为什么会觉得苏晚亭的案子和光华小学有关？”</span><br><br>老孙看着那行字，沉默了一会儿，却没有立刻回答。<br><br><span class="sys">“老王疑心重，他查过的地方很多。你现在只拿着一行批注来问，我没法判断你问的是哪一条线。”</span><br><br>他把卷宗合上。<br><br><span class="sys">“先把地图上那个被圈出的地方查清楚。拿着具体地点再来问，我才知道你问的是哪件事。”</span>`,
         choices: () => {
           const opts = [];
           if (hasUniversityXuehuaLead()) opts.push({ text: '🏛️ 去薛华立路 22 号——查清地图标记', goto: 'ch2_frenchtown' });
@@ -76,7 +76,7 @@
       nodes.ch2_police_wang.effect = function (state) {
         if (!hasLandlordFushengLead()) {
           E.setFlag('wang_note_blocked_without_fusheng', true);
-          E.addClue('王巡官线索未接上', '老孙要求先查清薛华立路地图上的仓库标记，再追问王巡官留下的东西。');
+          E.addClue('铅笔批注暂时问不下去', '老孙要求你先查清地图上被圈出的具体地点，再追问王巡官那行铅笔字。');
           return;
         }
         if (typeof oldEffect === 'function') oldEffect(state);
