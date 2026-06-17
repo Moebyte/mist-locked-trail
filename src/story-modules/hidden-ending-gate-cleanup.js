@@ -1,5 +1,5 @@
 // ===== 隐藏结局门槛兜底 =====
-// 目标：真·隐藏结局仍可触发，但必须完成光华小学三证物质询，并且救出苏晚亭本人。
+// 目标：隐藏结局需要光华小学三证物质询 + 救出沈玉芳；真·隐藏结局额外要求救出苏晚亭。
 
 (function installHiddenEndingGateCleanup() {
   function applyHiddenEndingGateCleanup() {
@@ -11,8 +11,12 @@
       return typeof source === 'function' ? source(state) : source;
     }
 
+    function hiddenGatePassed() {
+      return E.getFlag('school_wu_three_proofs') && E.getFlag('rescued_yufang');
+    }
+
     function trueHiddenGatePassed() {
-      return E.getFlag('school_wu_three_proofs') && E.getFlag('rescued_su');
+      return hiddenGatePassed() && E.getFlag('rescued_su');
     }
 
     function fallbackEnding() {
@@ -28,18 +32,24 @@
       const rawGoto = choice.goto;
       const rawWhen = choice.when;
       const isStaticHiddenEntry = rawGoto === 'end_conspiracy_detail';
+      const isStaticTrueHiddenEntry = rawGoto === 'end_true_hidden';
 
       return {
         ...choice,
         when: function (state) {
           const ok = typeof rawWhen === 'function' ? rawWhen(state) : rawWhen;
           if (rawWhen !== undefined && !ok) return false;
-          if (isStaticHiddenEntry && !trueHiddenGatePassed()) return false;
+          if (isStaticHiddenEntry && !hiddenGatePassed()) return false;
+          if (isStaticTrueHiddenEntry && !trueHiddenGatePassed()) return false;
           return true;
         },
         goto: function (state) {
           const target = typeof rawGoto === 'function' ? rawGoto(state) : rawGoto;
-          if (target === 'end_conspiracy_detail' && !trueHiddenGatePassed()) return fallbackEnding();
+          if (target === 'end_true_hidden' && !trueHiddenGatePassed()) return hiddenGatePassed() ? 'end_conspiracy_detail' : fallbackEnding();
+          if (target === 'end_conspiracy_detail') {
+            if (trueHiddenGatePassed()) return 'end_true_hidden';
+            if (!hiddenGatePassed()) return fallbackEnding();
+          }
           return target;
         }
       };
