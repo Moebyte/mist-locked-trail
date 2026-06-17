@@ -33,8 +33,10 @@ reset({
   items: preparedItems,
 });
 assert(E.dockSupportMode() === 'fast', `一个便衣应识别为 fast，实际 ${E.dockSupportMode()}`);
-assert(E.dockHeatTier().key === 'low', `一个便衣谨慎潜入应为低 heat，实际 ${JSON.stringify(E.dockHeatTier())}`);
-assert(E.routeDockDeepByPressure() === 'ch4_dock_deep_dual', '低 heat 应进入双人暗室');
+assert(E.dockExposureScore() === 0, `谨慎低调路线暴露应为 0，实际 ${E.dockExposureScore()}`);
+assert(E.dockDelayScore() === 2, `观察+慢行应产生拖延 2，实际 ${E.dockDelayScore()}`);
+assert(E.dockHeatTier().key === 'low', `一个便衣谨慎但不拖太久应为低风险，实际 ${JSON.stringify(E.dockHeatTier())}`);
+assert(E.routeDockDeepByPressure() === 'ch4_dock_deep_dual', '低风险应进入双人暗室');
 
 reset({
   pressure: { heat: 0, deadline: { day: 2, hour: 23, minute: 0 } },
@@ -43,20 +45,40 @@ reset({
   items: preparedItems,
 });
 assert(E.dockSupportMode() === 'full', `老孙带队应识别为 full，实际 ${E.dockSupportMode()}`);
-assert(E.dockHeatTier().key === 'mid', `老孙带队默认应为中 heat，实际 ${JSON.stringify(E.dockHeatTier())}`);
-assert(E.routeDockDeepByPressure() === 'ch4_dock_deep_trace', '中 heat 应进入只剩一人的暗室');
+assert(E.dockHeatTier().key === 'mid', `老孙带队默认应为中风险，实际 ${JSON.stringify(E.dockHeatTier())}`);
+assert(E.routeDockDeepByPressure() === 'ch4_dock_deep_trace', '中风险应进入只剩一人的暗室');
 
 reset({
-  pressure: { heat: 0, deadline: { day: 2, hour: 23, minute: 0 } },
+  pressure: { heat: 1, deadline: { day: 2, hour: 23, minute: 0 } },
   flags: { ...preparedFlags, sun_fast_support: true, dock_fast_support_entry: true, dock_entry_committed: true, skipped_dock_hide: true, dock_guard_chase_no_hide: true },
   clues: preparedClues,
   items: preparedItems,
 });
-assert(E.dockHeatTier().key === 'mid', `单次触发守卫不应一票否决，应只是中 heat，实际 ${JSON.stringify(E.dockHeatTier())}`);
-assert(E.routeDockDeepByPressure() === 'ch4_dock_deep_trace', '单次触发守卫后应由累计 heat 判定为只剩一人');
+assert(E.dockHeatTier().key === 'mid', `单次触发守卫不应一票否决，应只是中风险，实际 ${JSON.stringify(E.dockHeatTier())}`);
+assert(E.routeDockDeepByPressure() === 'ch4_dock_deep_trace', '单次触发守卫后应由累计风险判定为只剩一人');
 
 reset({
   pressure: { heat: 0, deadline: { day: 2, hour: 23, minute: 0 } },
+  flags: {
+    ...preparedFlags,
+    sun_fast_support: true,
+    dock_fast_support_entry: true,
+    dock_entry_committed: true,
+    dock_observed: true,
+    dock_moved_slowly: true,
+    dock_clearance_seen_inside: true,
+    dock_hid_in_crate: true,
+  },
+  clues: preparedClues,
+  items: preparedItems,
+});
+assert(E.dockExposureScore() === 0, `全程谨慎路线暴露应很低，实际 ${E.dockExposureScore()}`);
+assert(E.dockDelayScore() >= 4, `过度谨慎应累计拖延，实际 ${E.dockDelayScore()}`);
+assert(E.dockHeatTier().key === 'mid', `过度谨慎不能免费，应至少变成中风险，实际 ${JSON.stringify(E.dockHeatTier())}`);
+assert(E.routeDockDeepByPressure() === 'ch4_dock_deep_trace', '过度谨慎应可能错过苏晚亭，只剩沈玉芳');
+
+reset({
+  pressure: { heat: 3, deadline: { day: 2, hour: 23, minute: 0 } },
   flags: {
     ...preparedFlags,
     sun_fast_support: true,
@@ -70,8 +92,8 @@ reset({
   clues: preparedClues,
   items: preparedItems,
 });
-assert(E.dockHeatTier().key === 'high', `多个潜入坑叠加后应为高 heat，实际 ${JSON.stringify(E.dockHeatTier())}`);
-assert(E.routeDockDeepByPressure() === 'ch4_dock_deep_empty_heat', '高 heat 应进入两人都不在的空暗室');
+assert(E.dockHeatTier().key === 'high', `多个潜入坑叠加后应为高风险，实际 ${JSON.stringify(E.dockHeatTier())}`);
+assert(E.routeDockDeepByPressure() === 'ch4_dock_deep_empty_heat', '高风险应进入两人都不在的空暗室');
 
 reset({
   pressure: { heat: 0, deadline: { day: 2, hour: 23, minute: 0 } },
@@ -79,7 +101,7 @@ reset({
   clues: preparedClues,
   items: preparedItems,
 });
-assert(E.dockHeatTier().key === 'high', '折回找工具错过窗口应直接视为高 heat');
+assert(E.dockHeatTier().key === 'high', '折回找工具错过窗口应直接视为高风险');
 assert(E.routeDockDeepByPressure() === 'ch4_dock_empty_after_return', '折回找工具应进入专属空暗室节点');
 
 if (errors.length) {
