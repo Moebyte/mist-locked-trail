@@ -21,25 +21,29 @@ function hasChoice(id, fragment) {
 }
 
 reset({ clues: [{ name: '法租界地图', desc: '' }], items: [{ name: '法租界地图', desc: '' }] });
-assert(hasChoice('ch2_police_file', '王巡官纸条线索未浮出'), '没有老头认出福生仓时，应提示王巡官纸条线索未浮出');
-assert(!hasChoice('ch2_police_file', '追问王巡官调离前留下的仓库线索'), '没有福生仓标记前，不应允许追问王纸条');
+assert(hasChoice('ch2_police_file', '这行铅笔字暂时问不下去'), '缺少具体地点线索时，应以迷雾形式提示铅笔字暂时问不下去');
+assert(!hasChoice('ch2_police_file', '王巡官纸条线索未浮出'), '锁定提示不应出现旧版答案式文案');
+assert(!hasChoice('ch2_police_file', '福生仓'), '锁定提示不应提前出现仓库名');
+assert(!hasChoice('ch2_police_file', '追问王巡官调离前留下的仓库线索'), '缺少仓库标记前，不应允许追问仓库线索');
 
 const blocked = rt.renderNode('ch2_police_wang');
 const blockedText = typeof blocked.text === 'function' ? blocked.text(rt.E.state) : blocked.text;
-assert(blockedText.includes('先把薛华立路那张地图上的标记查清楚'), '强行进王巡官节点时，应要求先查地图标记');
+assert(blockedText.includes('先把地图上那个被圈出的地方查清楚'), '前置不足时，应要求先查地图标记');
+assert(!blockedText.includes('福生仓'), '前置不足文本不应提前出现仓库名');
+assert(!blockedText.includes('王巡官留下了什么'), '前置不足文本不应提前说明后续物件');
 blocked.effect?.(rt.E.state);
-assert(!rt.E.getFlag('got_wang_note'), '缺少福生仓标记时，不应设置 got_wang_note');
-assert(!rt.E.hasItem('半张烟盒纸'), '缺少福生仓标记时，不应获得半张烟盒纸');
+assert(!rt.E.getFlag('got_wang_note'), '前置不足时，不应设置 got_wang_note');
+assert(!rt.E.hasItem('半张烟盒纸'), '前置不足时，不应获得半张烟盒纸');
 
 reset({
   flags: { shown_map_to_landlord: true },
   clues: [{ name: '法租界地图', desc: '' }, { name: '福生仓标识', desc: '' }],
   items: [{ name: '法租界地图', desc: '' }],
 });
-assert(hasChoice('ch2_police_file', '追问王巡官调离前留下的仓库线索'), '老头认出福生仓后，应允许追问王纸条');
+assert(hasChoice('ch2_police_file', '追问王巡官调离前留下的仓库线索'), '老头认出仓库后，应允许追问仓库线索');
 const wang = rt.renderNode('ch2_police_wang');
 const wangText = typeof wang.text === 'function' ? wang.text(rt.E.state) : wang.text;
-assert(wangText.includes('福生仓。三日清。'), '满足前置后，王巡官节点应给出福生仓纸条内容');
+assert(wangText.includes('福生仓。三日清。'), '满足前置后，王巡官节点应给出纸条内容');
 wang.effect?.(rt.E.state);
 assert(rt.E.getFlag('got_wang_note'), '满足前置后，应设置 got_wang_note');
 assert(rt.E.hasItem('半张烟盒纸'), '满足前置后，应获得半张烟盒纸');
