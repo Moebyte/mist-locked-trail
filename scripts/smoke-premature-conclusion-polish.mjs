@@ -25,6 +25,11 @@ function conclusionText() {
   return typeof text === 'function' ? text(rt.E.state) : text;
 }
 
+function nodeText(id) {
+  const text = rt.nodes[id].text;
+  return typeof text === 'function' ? text(rt.E.state) : text;
+}
+
 function present(sceneId, itemName, desc = '') {
   const scene = rt.renderNode(sceneId);
   return scene.onPresent?.({ name: itemName, desc }, rt.E.state);
@@ -71,13 +76,26 @@ reset({
   clues: [{ name: '光华小学事件', desc: '' }, { name: '陈明远的信', desc: '' }],
   items: [{ name: '陈明远的信', desc: '信的开头是“晚亭吾爱”。' }],
 });
-const zhouText = typeof rt.nodes.ch4_revisit_zhou.text === 'function' ? rt.nodes.ch4_revisit_zhou.text(rt.E.state) : rt.nodes.ch4_revisit_zhou.text;
+rt.renderNode('ch4_pawnshop');
+assert(rt.E.hasItem('小报剪报'), '坏路线当铺应获得小报剪报');
+assert(rt.E.hasClue('殉情误报'), '坏路线当铺应记录殉情误报线索');
+assert(nodeText('ch4_pawnshop').includes('殉身'), '坏路线当铺文本应出现殉情误报标题');
+assert(hasChoice('ch4_pawnshop', '小报剪报'), '坏路线当铺回访周怀安选项应提到小报剪报');
+
+const zhouText = nodeText('ch4_revisit_zhou');
 assert(zhouText.includes('晚亭吾爱'), '坏路线周怀安回访应提示可出示陈明远的信');
+assert(zhouText.includes('小报剪报') || zhouText.includes('殉情'), '坏路线周怀安回访应提示小报误报');
+const jadeResult = present('ch4_revisit_zhou', '翡翠镯');
+assert(jadeResult?.goto === 'ch4_zhou_present_jade_premature', '坏路线向周怀安出示翡翠镯应进入弱证据节点');
+rt.renderNode(jadeResult.goto);
+assert(rt.E.hasClue('周怀安识出陆念'), '坏路线翡翠镯仍应记录陆念旧名线索');
 const letterResult = present('ch4_revisit_zhou', '陈明远的信');
-assert(letterResult?.goto === 'end_zhou_chen_letter', '向周怀安出示陈明远的信应触发“吾爱晚亭”彩蛋');
+assert(letterResult?.goto === 'end_zhou_chen_letter', '向周怀安出示陈明远的信应触发“吾爱晚亭”结局');
 rt.renderNode('end_zhou_chen_letter');
-assert(rt.E.getFlag('zhou_chen_letter_easter_egg'), '吾爱晚亭彩蛋应设置对应 flag');
-assert(rt.E.hasClue('周怀安读到陈明远的信'), '吾爱晚亭彩蛋应记录周怀安读信线索');
+assert(rt.E.getFlag('zhou_chen_letter_easter_egg'), '吾爱晚亭结局应设置对应 flag');
+assert(rt.E.hasClue('周怀安读到陈明远的信'), '吾爱晚亭结局应记录周怀安读信线索');
+assert(nodeText('end_zhou_chen_letter').includes('苏姓女学生疑为情殉身'), '吾爱晚亭结局应并置小报殉情误报');
+assert(nodeText('end_zhou_chen_letter').includes('不是去死。她是在找人，也是在救人'), '吾爱晚亭结局应回到找人主题');
 
 reset({
   flags: { got_wang_note: true, deduced_fusheng: true, rescued_yufang: true, rescued_su: true },
