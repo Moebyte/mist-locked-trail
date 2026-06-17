@@ -49,6 +49,9 @@ jobs:
       - name: Smoke test narrative clock
         run: node scripts/smoke-narrative-clock.mjs
 
+      - name: Smoke test wrapup priority
+        run: node scripts/smoke-wrapup-priority.mjs
+
       - name: Smoke test causal echo
         run: node scripts/smoke-causal-echo.mjs
 
