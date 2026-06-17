@@ -45,3 +45,6 @@ jobs:
 
       - name: Smoke test causal echo
         run: node scripts/smoke-causal-echo.mjs
+
+      - name: Smoke test player perspective
+        run: node scripts/smoke-player-perspective.mjs
