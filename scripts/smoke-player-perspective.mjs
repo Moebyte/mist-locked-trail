@@ -92,6 +92,19 @@ try {
   assert(!teacherChoices.some(t => t.includes('不再绕圈子')), '关于陈老师节点不应混入“拿证据对质”的旧表述');
   assert(teacherChoices.some(t => t.includes('普通问询到此为止，进入正式质询')), '完成普通问询后，应提供独立正式质询入口');
   reports.push('PASS 关于陈老师节点不再混排普通问询与通用出示');
+
+  reset({ flags: { read_letter: true } });
+  const closedChoicesAfterLetter = choiceTexts('ch3_school_after_confront');
+  assert(!closedChoicesAfterLetter.some(t => t.includes('迷雾')), '光华线索合拢后已读信时，不应出现迷雾锁定选项');
+  assert(!closedChoicesAfterLetter.some(t => t.includes('回办公室看完')), '光华线索合拢后已读信时，不应出现补看陈明远信选项');
+  assert(closedChoicesAfterLetter.some(t => t.includes('离开光华小学')), '光华线索合拢后应保留离开整理选项');
+  reports.push('PASS 光华线索合拢后不显示已失效的迷雾选项');
+
+  reset({ flags: { read_letter: false } });
+  const closedChoicesBeforeLetter = choiceTexts('ch3_school_after_confront');
+  assert(closedChoicesBeforeLetter.some(t => t.includes('回办公室看完陈明远留下的信')), '光华线索合拢后未读信时，应显示明确补信选项');
+  assert(!closedChoicesBeforeLetter.some(t => t.includes('迷雾')), '光华线索合拢后未读信时，也不应出现迷雾锁定选项');
+  reports.push('PASS 光华线索合拢后未读信时显示明确补信选项');
 } catch (err) {
   fail(err.message);
 }
