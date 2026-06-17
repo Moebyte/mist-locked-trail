@@ -55,6 +55,9 @@ jobs:
       - name: Smoke test wrapup fusheng deduction opens
         run: node scripts/smoke-wrapup-fusheng-deduction-opens.mjs
 
+      - name: Smoke test deduction prerequisite groups
+        run: node scripts/smoke-deduction-prereq-groups.mjs
+
       - name: Smoke test Sun fast support
         run: node scripts/smoke-sun-fast-support.mjs
 
