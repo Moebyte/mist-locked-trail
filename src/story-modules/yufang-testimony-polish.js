@@ -2,6 +2,7 @@
 // 目标：暗室里向沈玉芳出示证据有价值，但不是救援硬门槛。
 // 做法：把三人合影 / 陈明远的信 / 日记残页汇总成一个“快速确认证词”节点。
 // 结果：提升医院 witness、truthCompleteness、终局质量分；不影响能不能救沈玉芳，也不替代苏晚亭信物。
+// 修正：快速确认后同步旧举证标记，避免返回暗室后仍出现“出示手中物件”。
 
 (function installYufangTestimonyPolish() {
   function applyYufangTestimonyPolish() {
@@ -26,10 +27,21 @@
       return this.getFlag('yufang_testimony_confirmed') || this.getFlag('yufang_testimony_quick_confirmed');
     };
 
+    function syncLegacyPresentFlags(profile) {
+      const p = profile || yufangEvidenceProfile();
+      if (p.photo) E.setFlag('presented_photo_to_yufang_dual', true);
+      if (p.letter) E.setFlag('presented_letter_to_yufang_dual', true);
+      if (p.diary) E.setFlag('presented_diary_to_yufang_dual', true);
+      if (E.getFlag('presented_su_keepsake') || hasThing('苏晚亭认出银发夹')) {
+        E.setFlag('presented_su_keepsake', true);
+      }
+    }
+
     function applyYufangTestimonyBoost() {
       const p = yufangEvidenceProfile();
       E.setFlag('yufang_testimony_quick_confirmed', true);
       E.setFlag('yufang_testimony_confirmed', true);
+      syncLegacyPresentFlags(p);
       if (p.photo) {
         E.setFlag('yufang_confirmed_photo', true);
         E.addClue('沈玉芳确认三人合影', '沈玉芳确认陈明远、苏晚亭与陆念薇在光华小学已有交集。');
@@ -74,6 +86,7 @@
     if (nodes.ch4_dock_who_dual && !nodes.ch4_dock_who_dual.__yufangTestimonyChoicePatched) {
       const oldText = nodes.ch4_dock_who_dual.text;
       const oldChoices = nodes.ch4_dock_who_dual.choices;
+      const oldFilter = nodes.ch4_dock_who_dual.presentFilter;
       nodes.ch4_dock_who_dual.text = function (state) {
         const base = typeof oldText === 'function' ? oldText(state) : oldText;
         if (E.hasYufangTestimonyBoost()) {
@@ -89,6 +102,12 @@
         const add = boostChoice();
         if (add) out.push(add);
         return out.concat(typeof oldChoices === 'function' ? oldChoices(state) : oldChoices);
+      };
+      nodes.ch4_dock_who_dual.presentFilter = function (thing, state) {
+        const name = thing?.name || '';
+        if (E.hasYufangTestimonyBoost() && ['三人合影', '陈明远的信', '未寄出的信', '日记残页', '苏晚亭日记残页'].includes(name)) return false;
+        if ((E.getFlag('presented_su_keepsake') || hasThing('苏晚亭认出银发夹')) && name === '苏晚亭的银发夹') return false;
+        return typeof oldFilter === 'function' ? oldFilter(thing, state) : true;
       };
       nodes.ch4_dock_who_dual.__yufangTestimonyChoicePatched = true;
     }
