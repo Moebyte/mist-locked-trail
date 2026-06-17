@@ -196,9 +196,11 @@ function assertSceneContains(id) {
 }
 
 const basePressure = { heat: 0, deadline: { day: 2, hour: 23, minute: 0 } };
+const suTrust = { presented_su_keepsake: true };
+const suTrustClues = [{ name: '苏晚亭认出银发夹', desc: '' }];
 
 play('早到路线：完整搜证并救出苏晚亭和沈玉芳',
-  { inGameTime: { day: 1, hour: 14, minute: 30 }, pressure: structuredClone(basePressure) },
+  { inGameTime: { day: 1, hour: 14, minute: 30 }, pressure: structuredClone(basePressure), flags: { ...suTrust }, clues: suTrustClues },
   [
     'ch4_suzhou_creek',
     { expectRoute: 'ch4_dock_full_search', label: 'safe routeDockByPressure', fn: () => E.routeDockByPressure() },
@@ -262,7 +264,7 @@ play('超期路线：福生仓清场，只剩残留字条',
 );
 
 play('有老孙支援路线：傅启元对峙不丢失支援逻辑',
-  { inGameTime: { day: 2, hour: 14, minute: 0 }, pressure: structuredClone(basePressure), flags: { sun_support_available: true, sun_fast_support: true, found_su_at_dock: true } },
+  { inGameTime: { day: 2, hour: 14, minute: 0 }, pressure: structuredClone(basePressure), flags: { sun_support_available: true, sun_fast_support: true, found_su_at_dock: true, ...suTrust }, clues: suTrustClues },
   [
     'ch4_dock_escape',
     { goto: 'ch4_fu_confront' },
@@ -274,7 +276,7 @@ play('有老孙支援路线：傅启元对峙不丢失支援逻辑',
 );
 
 play('无老孙支援路线：傅启元对峙后仍可撤走',
-  { inGameTime: { day: 2, hour: 14, minute: 0 }, pressure: structuredClone(basePressure), flags: { found_su_at_dock: true } },
+  { inGameTime: { day: 2, hour: 14, minute: 0 }, pressure: structuredClone(basePressure), flags: { found_su_at_dock: true, ...suTrust }, clues: suTrustClues },
   [
     'ch4_dock_escape',
     { goto: 'ch4_fu_confront' },
