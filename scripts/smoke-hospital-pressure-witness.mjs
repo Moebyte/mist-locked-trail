@@ -26,6 +26,25 @@ const fullTruthFlags = {
 reset({
   flags: {
     sun_fast_support: true,
+    found_su_at_dock: true,
+    found_yufang: true,
+  },
+  items: dockEvidence,
+});
+rt.renderNode('ch4_dock_escape');
+const dockChoices = rt.choicesOf('ch4_dock_escape');
+const hardConfront = dockChoices.find(choice => (choice.text || '').includes('当场质问傅启元'));
+assert(hardConfront, '双救 + 一个便衣时应存在码头高风险质问选项');
+hardConfront?.effect?.(E.state);
+assert(E.dockExitRiskTier().key === 'lethal', `双救 + 一个便衣 + 码头对峙应在码头阶段 lethal，实际 ${JSON.stringify(E.dockExitRiskTier())}`);
+assert(hardConfront?.goto?.(E.state) === 'end_dock_silenced', '双救 + 一个便衣 + 码头对峙不应进入医院，应直接进入码头灭口结局');
+assert(!E.canEnterHospitalLine(), '码头 lethal 后不允许进入医院线');
+rt.renderNode('ch4_dock_escape_finish');
+assert(rt.choicesOf('ch4_dock_escape_finish').some(choice => choice.goto === 'end_dock_silenced'), '若码头已 lethal，逃离完成节点也必须挡回码头灭口');
+
+reset({
+  flags: {
+    sun_fast_support: true,
     sun_fast_cover_escape: true,
     rescued_yufang: true,
     rescued_su: true,
@@ -34,6 +53,7 @@ reset({
   items: dockEvidence,
 });
 assert(E.hospitalWitnessProfile().count === 2, '双救路线应识别为双证人');
+assert(E.canEnterHospitalLine(), '双救 + 借雾撤离才允许进入医院线');
 assert(E.hospitalOutcomeTier().key === 'controlled', `双救 + 一便衣借雾撤离应是可控医院线，实际 ${JSON.stringify(E.hospitalOutcomeTier())}`);
 assert(['solid', 'partial'].includes(E.truthCompletenessTier().key), `未找陆念薇前，双救真相应尚未完整，实际 ${JSON.stringify(E.truthCompletenessTier())}`);
 
@@ -77,7 +97,7 @@ reset({
   },
   items: dockEvidence,
 });
-assert(E.hospitalOutcomeTier().key === 'unstable', `双救但立刻逼苏晚亭指认，应导致医院失控，实际 ${JSON.stringify(E.hospitalOutcomeTier())}`);
+assert(E.hospitalOutcomeTier().key === 'unstable', `双救进入医院后，若立刻逼苏晚亭指认，应导致医院失控，实际 ${JSON.stringify(E.hospitalOutcomeTier())}`);
 assert(!E.hospitalAllowsHidden(), '医院失控应锁住隐藏结局资格');
 assert(!E.hospitalAllowsTrueHidden(), '医院失控应锁住真隐藏结局资格');
 assert(E.v07ResolveEnding() === 'end_rescue', `医院失控但救出证人时，应降级为救援/普通路线，实际 ${E.v07ResolveEnding()}`);
@@ -91,12 +111,13 @@ reset({
     rescued_su: true,
     found_su_at_dock: true,
     hospital_early_lu: true,
-    dock_confront_fu: true,
+    hospital_interrogate_yufang: true,
     v07_lu_to_sun: true,
   },
   items: dockEvidence,
 });
-assert(E.hospitalOutcomeTier().key === 'tense', `双救 + 过早陆念薇 + 码头对峙应为紧张医院线，实际 ${JSON.stringify(E.hospitalOutcomeTier())}`);
+assert(E.canEnterHospitalLine(), '借雾撤离后的医院紧张线应允许成立');
+assert(E.hospitalOutcomeTier().key === 'tense', `双救 + 医院内过早陆念薇 + 追问沈玉芳应为紧张医院线，实际 ${JSON.stringify(E.hospitalOutcomeTier())}`);
 assert(!E.hospitalAllowsTrueHidden(), '紧张医院线应锁住真隐藏资格');
 assert(E.hospitalAllowsHidden(), '紧张医院线若真相完整，仍可保留隐藏结局资格');
 assert(E.v07ResolveEnding() !== 'end_true_hidden', '紧张医院线不应进入真隐藏结局');
