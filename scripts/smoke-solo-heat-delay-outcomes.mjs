@@ -22,8 +22,17 @@ function choiceTexts(id) {
   return renderChoices(id).map(choice => choice.text || choice.fogText || '');
 }
 
+function nodeText(id) {
+  h.renderNode(id);
+  return h.document.querySelector('#text')?.innerHTML || '';
+}
+
 function has(texts, fragment) {
   return texts.some(text => text.includes(fragment));
+}
+
+function joined(texts) {
+  return texts.join('\n');
 }
 
 const baseSolo = {
@@ -55,6 +64,7 @@ reset({
 });
 let tier = E.soloDockOutcomeTier();
 assert(tier.key === 'no_evidence_dual_rescue', `无证据低风险应进入双救，实际 ${tier.key}`);
+assert(tier.score < 4, `无证据低风险总分应小于 4，实际 ${tier.score}`);
 assert(E.routeSoloDockDeepByHeatDelay() === 'ch4_dock_deep_dual', '无证据低风险应路由到双人暗室');
 
 // 2) 只拿一类硬证据：清场指令 or 运单 => 救出一方。
@@ -70,6 +80,7 @@ reset({
 });
 tier = E.soloDockOutcomeTier();
 assert(tier.key === 'partial_evidence_one_rescue', `只拿清场指令应进入一方救出，实际 ${tier.key}`);
+assert(tier.score >= 4 && tier.score < 6, `只拿清场指令总分应为中风险 [4,6)，实际 ${tier.score}`);
 assert(E.routeSoloDockDeepByHeatDelay() === 'ch4_dock_deep_trace', '只拿清场指令应路由到只剩一方/苏晚亭被转走');
 
 reset({
@@ -84,6 +95,7 @@ reset({
 });
 tier = E.soloDockOutcomeTier();
 assert(tier.key === 'partial_evidence_one_rescue', `只拿货运单应进入一方救出，实际 ${tier.key}`);
+assert(tier.score >= 4 && tier.score < 6, `只拿货运单总分应为中风险 [4,6)，实际 ${tier.score}`);
 assert(E.routeSoloDockDeepByHeatDelay() === 'ch4_dock_deep_trace', '只拿货运单应路由到只剩一方/苏晚亭被转走');
 
 // 3) 全证据 + 高 delay => 一个都没救出；之后只能带证据逃出码头，不能进医院。
@@ -107,6 +119,7 @@ reset({
 });
 tier = E.soloDockOutcomeTier();
 assert(tier.key === 'full_evidence_no_rescue', `全证据应错过救人窗口，实际 ${tier.key}`);
+assert(tier.score >= 6, `全证据总分应为高风险 >= 6，实际 ${tier.score}`);
 assert(E.routeSoloDockDeepByHeatDelay() === 'ch4_dock_deep_empty_heat', '全证据应路由到空暗室');
 let texts = choiceTexts('ch4_dock_deep_empty_heat');
 assert(has(texts, '逃出码头') || has(texts, '撤出福生仓'), '全证据空暗室后应推进逃出码头/撤出福生仓');
@@ -114,13 +127,17 @@ texts = choiceTexts('ch4_dock_escape_evidence_only');
 assert(!has(texts, '医院'), '全证据但无人救出后，不应触发医院线');
 assert(has(texts, '带证据撤出福生仓') || has(texts, '整理证据'), '全证据但无人救出后，应进入证据收束');
 
-// 4) 真实入口页必须显式提示 heat / delay，并提供三种取舍。
+// 4) 真实入口页只展示叙事取舍，不暴露 heat / delay / 总分等内部实现。
 reset(baseSolo);
 texts = choiceTexts('ch4_dock_solo_search_choice');
+const visibleChoiceText = joined(texts);
 assert(has(texts, '不碰公文和货箱'), 'solo 搜查页应提供无证据直奔救人选项');
 assert(has(texts, '只拿蓝封清场指令'), 'solo 搜查页应提供只拿指令选项');
 assert(has(texts, '只翻教具箱货运单'), 'solo 搜查页应提供只拿运单选项');
 assert(has(texts, '都查清'), 'solo 搜查页应提供全证据选项');
+assert(!/heat|delay|总分|低风险|中风险|高风险/.test(visibleChoiceText), '玩家选项不应暴露 heat/delay/总分/风险档内部机制');
+const visibleBody = nodeText('ch4_dock_solo_search_choice');
+assert(!/heat|delay|总分|低风险|中风险|高风险/.test(visibleBody), '玩家正文不应暴露 heat/delay/总分/风险档内部机制');
 
 if (errors.length) {
   console.error('Solo heat-delay outcome smoke failed:');
