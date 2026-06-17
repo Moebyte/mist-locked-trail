@@ -55,26 +55,29 @@ function testHospitalConflict() {
   h.renderNode('ch4_dock_escape_finish');
   h.assertFlag('rescued_yufang');
   h.assertFlag('rescued_su');
+  h.goByTarget('ch4_hospital_triage');
   h.goByTarget('ch4_hospital_conflict');
   h.assertFlag('v07_triangle_conflict_seen');
   h.assertClue('医院走廊冲突');
 
   const targets = h.choicesOf('ch4_hospital_conflict').map(c => typeof c.goto === 'function' ? c.goto(E.state) : c.goto);
-  for (const target of ['ch4_hospital_protect_witnesses', 'ch4_hospital_pressure_fu', 'ch4_lu_confrontation']) {
-    if (!targets.includes(target)) throw new Error(`医院冲突缺少分支：${target}`);
-  }
-  reports.push('PASS 医院走廊三方冲突入口与三分支');
+  // 无支援时默认 solo 模式，不包含老孙封码头分支
+  if (!targets.includes('ch4_hospital_protect_witnesses')) throw new Error('医院冲突缺少保护证人分支');
+  if (!targets.includes('ch4_lu_confrontation')) throw new Error('医院冲突缺少逼陆念薇分支');
+  if (targets.includes('ch4_hospital_pressure_fu') && E.dockSupportMode() === 'solo') throw new Error('solo 模式不应包含老孙封码头分支');
+  reports.push('PASS 医院走廊三方冲突入口与分支(' + targets.length + '个分支)');
 }
 
 function testHighQualityNaturalEnding() {
   h.resetState({ flags: hiddenReadyFlags({ deduced_fusheng: true, fu_waybill_exposed: true, fu_clearance_exposed: true }) });
   h.renderNode('ch4_dock_escape_finish');
+  h.goByTarget('ch4_hospital_triage');
   h.goByTarget('ch4_hospital_conflict');
   h.goByTarget('ch4_hospital_protect_witnesses');
   h.assertFlag('v07_witnesses_protected');
   h.goByTarget('ch4_lu_confrontation');
   h.assertFlag('v07_lu_confronted');
-  h.goByTarget('ch4_fu_private_offer');
+  h.goByText('让她写下');
   h.assertFlag('v07_lu_statement');
   h.goByText('拒绝交易');
   h.assertFlag('v07_rejected_fu_deal');
@@ -137,13 +140,18 @@ function testPressureAffectsDockRoute() {
     inGameTime: { day: 2, hour: 12, minute: 0 },
     pressure: { heat: 0, deadline: { day: 2, hour: 23, minute: 0 } },
   });
+  // 新版：进入码头前按支援模式路由（默认 SOLO）
   const safeRoute = E.routeDockByPressure();
-  if (safeRoute !== 'ch4_dock_full_search') throw new Error(`低压力应允许完整搜查，实际 ${safeRoute}`);
+  if (safeRoute !== 'ch4_dock_solo_infiltration') throw new Error(`低压力默认返回 SOLO 模式，实际 ${safeRoute}`);
+  // 进入码头后测试时间压力
+  E.setFlag('dock_entry_committed', true);
+  const deepSearch = E.routeDockByPressure();
+  if (deepSearch !== 'ch4_dock_full_search') throw new Error(`低压力+已进入码头应返回完整搜查，实际 ${deepSearch}`);
   E.addHeat(8, '测试高热度');
   const hotRoute = E.routeDockByPressure();
-  if (hotRoute === 'ch4_dock_full_search') throw new Error('高热度不应仍允许完整搜查');
+  if (['ch4_dock_solo_infiltration', 'ch4_dock_full_search'].includes(hotRoute)) throw new Error(`高热度+已进入码头不应仍允许完整/默认搜查，实际 ${hotRoute}`);
   if (!['ch4_dock_limited_search', 'ch4_dock_rescue_only', 'ch4_dock_cleared'].includes(hotRoute)) throw new Error(`高热度路线异常：${hotRoute}`);
-  reports.push(`PASS 压力热度会影响福生仓路线：低压 ${safeRoute}，高压 ${hotRoute}`);
+  reports.push(`PASS 压力热度影响福生仓路线：未进入 ${safeRoute}，已进入低压 ${deepSearch}，高压 ${hotRoute}`);
 }
 
 function testLateNaturalEnding() {
