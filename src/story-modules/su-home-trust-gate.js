@@ -53,8 +53,11 @@
       effect: () => {
         E.addClue('苏晚亭认出银发夹', '苏晚亭认出母亲托你带来的银发夹，终于确认你确实去过苏家。');
       },
-      text: () => `你把那只银发夹摊在掌心。<br><br>苏晚亭原本涣散的目光忽然停住了。她伸出手，却没有立刻碰它，像是怕一碰就会醒。<br><br><span class="sys">“这是我小时候的东西。”</span><br><br>她的声音很轻，轻得几乎被暗室外的脚步声吞掉。<br><br><span class="sys">“我母亲……她还好吗？”</span><br><br>你告诉她，苏母认出了照片，也把这只发夹交给你。她闭了闭眼，再睁开时，终于不再把你当成又一个来带她走的人。`,
-      choices: [{ text: '🔙 带她们离开暗室', goto: 'ch4_dock_escape' }]
+      text: () => `你把那只银发夹摊在掌心。<br><br>苏晚亭原本涣散的目光忽然停住了。她伸出手，却没有立刻碰它，像是怕一碰就会醒。<br><br><span class="sys">“这是我小时候的东西。”</span><br><br>她的声音很轻，轻得几乎被暗室外的脚步声吞掉。<br><br><span class="sys">“我母亲……她还好吗？”</span><br><br>你告诉她，苏母认出了照片，也把这只发夹交给你。她闭了闭眼，再睁开时，终于不再把你当成又一个来带她走的人。<br><br>沈玉芳还靠在墙边，强撑着没有倒下。你可以趁离开前，再用一两件关键证据确认她知道的事；也可以先把两个人带出去。`,
+      choices: [
+        { text: '🧾 再向沈玉芳核对合影或陈明远的信', goto: 'ch4_dock_who_dual' },
+        { text: '🔙 立刻带她们离开暗室', goto: 'ch4_dock_escape' }
+      ]
     };
 
     if (nodes.ch4_dock_who_dual && !nodes.ch4_dock_who_dual.__suDockPresentWhitelistPatched) {
@@ -105,7 +108,7 @@
         if (!hasSuHomeTrustProof()) {
           return `${base}<br><br><span class="sys">你想起苏母交给你的银发夹。现在把它拿出来，也许能让苏晚亭相信你确实从家里来。</span>`;
         }
-        return `${base}<br><br><span class="sys">苏晚亭把银发夹攥在掌心，像终于从雾里听见了家的声音。</span>`;
+        return `${base}<br><br><span class="sys">苏晚亭把银发夹攥在掌心，像终于从雾里听见了家的声音。沈玉芳仍在等你问完最后几个问题；时间不多，但这两件证据也许能让她更快说清楚。</span>`;
       };
       nodes.ch4_dock_who_dual.__suHomeTrustHintPatched = true;
     }
