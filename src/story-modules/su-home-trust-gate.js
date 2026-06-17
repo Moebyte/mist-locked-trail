@@ -65,7 +65,6 @@
         if (presentOnce(item, '苏晚亭的银发夹', 'presented_su_keepsake')) return { goto: 'ch4_su_present_keepsake' };
         if (presentOnce(item, '三人合影', 'presented_photo_to_yufang_dual')) return { goto: 'ch4_yufang_present_photo_dual' };
         if (presentOnce(item, '陈明远的信', 'presented_letter_to_yufang_dual')) return { goto: 'ch4_yufang_present_letter_dual' };
-        if (presentOnce(item, '未寄出的信', 'presented_unsent_letter_to_yufang_dual')) return { goto: 'ch4_yufang_present_letter_dual' };
         return null;
       };
       nodes.ch4_dock_who_dual.__suDockPresentWhitelistPatched = true;
