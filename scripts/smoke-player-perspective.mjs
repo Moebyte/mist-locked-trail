@@ -25,6 +25,11 @@ function textOf(id) {
   return typeof node.text === 'function' ? node.text(E.state) : (node.text || '');
 }
 
+function choiceTexts(id) {
+  h.renderNode(id);
+  return h.choicesOf(id).map(c => c.text || c.fogText || '');
+}
+
 function assertIncludes(text, fragment, label) {
   assert(text.includes(fragment), `${label} 应包含：${fragment}`);
 }
@@ -64,6 +69,29 @@ try {
   assertNotIncludes(office, '你在茶楼见过', '陈老师办公室三人合影文本');
   assertNotIncludes(office, '沈玉兰', '陈老师办公室三人合影文本');
   reports.push('PASS 陈老师办公室三人合影不再误指沈玉兰或茶楼支线');
+
+  reset({
+    flags: {
+      chen_su_link: true,
+      got_chen_evidence: true,
+    },
+    clues: [
+      { name: '陈老师与女子争吵', desc: '出事前三天；沈玉芳同时请假失踪' },
+      { name: '恐吓信', desc: '' },
+      { name: '三人合影', desc: '' },
+      { name: '苏晚亭日记残页', desc: '' },
+    ],
+    items: [
+      { name: '恐吓信', desc: '' },
+      { name: '三人合影', desc: '' },
+      { name: '日记残页', desc: '' },
+    ],
+  });
+  assert(typeof nodes.ch3_school_teacher.onPresent !== 'function', '关于陈老师节点不应保留 onPresent，避免出现通用出示按钮');
+  const teacherChoices = choiceTexts('ch3_school_teacher');
+  assert(!teacherChoices.some(t => t.includes('不再绕圈子')), '关于陈老师节点不应混入“拿证据对质”的旧表述');
+  assert(teacherChoices.some(t => t.includes('普通问询到此为止，进入正式质询')), '完成普通问询后，应提供独立正式质询入口');
+  reports.push('PASS 关于陈老师节点不再混排普通问询与通用出示');
 } catch (err) {
   fail(err.message);
 }
