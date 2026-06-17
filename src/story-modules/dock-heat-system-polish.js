@@ -7,6 +7,7 @@
 // 老孙带队默认风险很高，但可以通过“外围低调卡车道”把风险压回中档。
 // 调整：dock 风险只按潜入事件 flag 计分，不再把 addDockHeat 写入的全局 pressure.heat 二次叠加。
 // 修正：低调便衣潜入不应在“critical”时被旧时间门控直接打成“只够救人”，至少保留有限搜证窗口。
+// 补充：无支援时不再直接跳入仓库搜索，而是先进入“孤身潜入”节点，让 solo 线路和便衣/老孙线路并列。
 
 (function installDockHeatSystemPolish() {
   function applyDockHeatSystemPolish() {
@@ -29,6 +30,7 @@
 
     function committedDockEntry() {
       return E.getFlag('dock_entry_committed')
+        || E.getFlag('dock_solo_entry')
         || E.getFlag('dock_entered_by_east_window')
         || E.getFlag('dock_full_search')
         || E.getFlag('dock_limited_search')
@@ -38,7 +40,7 @@
     function baseExposure() {
       if (fullSupportMode()) return 2; // 老孙带队天然动静大。
       if (fastSupportMode()) return 0;
-      return 1;
+      return 1; // 孤身潜入没有支援掩护，基础暴露略高。
     }
 
     function baseDelay() {
@@ -152,6 +154,7 @@
       if (!committedDockEntry()) {
         if (fullSupportMode()) return 'ch4_dock_full_support_infiltration';
         if (fastSupportMode()) return 'ch4_dock_fast_infiltration';
+        return 'ch4_dock_solo_infiltration';
       }
       return routeDockSearchByTime();
     };
@@ -169,6 +172,17 @@
       const label = t.key === 'high' ? '警觉与拖延都压上来了' : t.key === 'mid' ? '窗口正在收窄' : '尚未惊动，窗口还在';
       return `<br><br><span class="sys">潜入风险：${t.label} · 暴露 ${t.exposure} / 拖延 ${t.delay} · ${label}</span>`;
     }
+
+    nodes.ch4_dock_solo_infiltration = {
+      title: '福生仓 · 孤身潜入',
+      weather: 3,
+      effect: () => {
+        E.setFlag('dock_solo_entry', true);
+        E.setFlag('dock_entry_committed', true);
+      },
+      text: () => `你没有去找老孙，也没有等任何人。<br><br>福生仓外的雾很低，货车声从码头尽头一阵一阵压过来。你把帽檐往下拉，绕到东侧窗下。<br><br>一个人行动最快，也最干净；但没有人帮你看后路，没有人压码头出口，更没有人能在傅启元面前替你挡住第一枪。<br><br>这条路不是不能救人，只是所有风险都要你自己背。${heatBadge()}`,
+      choices: [{ text: '🔦 独自从东侧窗户翻进去', goto: () => E.routeDockSearchByTime() }]
+    };
 
     nodes.ch4_dock_fast_infiltration = {
       title: '福生仓 · 低调潜入',
