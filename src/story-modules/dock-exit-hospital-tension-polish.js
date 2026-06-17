@@ -2,7 +2,7 @@
 // 目标：潜入结束后，码头不再继续使用 heat/delay，而改用 tension/control。
 // tension：傅启元被逼急、现场火药味、公董局插手。
 // control：老孙人手、封锁线、撤离路线、证据掌控。
-// 规则：一个便衣时当面对峙并亮核心证据，会大幅提高 tension；若 crisis > 5，则由分数机制触发灭口。
+// 规则：人手不足时当面对峙并暴露证人/核心证据，会大幅提高 tension；若 crisis > 5，则由分数机制触发灭口。
 // 节奏：先进入“黑车拦路”判断节点，再选择借雾撤离、老孙压制或硬质问。
 
 (function installDockExitHospitalTensionPolish() {
@@ -35,6 +35,12 @@
         || E.getFlag('fu_clearance_exposed');
     }
 
+    function witnessCount() {
+      const yufang = E.getFlag('rescued_yufang') || E.getFlag('found_yufang');
+      const su = E.getFlag('rescued_su') || E.getFlag('found_su_at_dock');
+      return (yufang ? 1 : 0) + (su ? 1 : 0);
+    }
+
     E.dockExitControlScore = function () {
       let score = 0;
       if (this.getFlag('sun_fast_support') || this.getFlag('sun_fast_cover_escape')) score += 1;
@@ -53,6 +59,9 @@
     E.dockExitTensionScore = function () {
       let score = 0;
       if (this.getFlag('dock_fast_confront_hard_evidence')) score += 8;
+      if (this.getFlag('dock_no_support_confront')) score += 3;
+      if (this.getFlag('dock_no_support_witness_exposed')) score += witnessCount() >= 2 ? 2 : 1;
+      if (this.getFlag('dock_no_support_hard_evidence')) score += 2;
       if (this.getFlag('dock_confront_fu')) score += 3;
       if (this.getFlag('dock_sun_pressed_fu')) score += 2;
       if (this.getFlag('dock_sun_exit_close_pressure')) score += 2;
@@ -86,6 +95,15 @@
       E.addClue('码头硬对峙失败', '只有一个便衣护住后路时，你当场亮出货运单和清场指令，码头危机值超过灭口阈值。');
     }
 
+    function markUnsupportedConfront() {
+      E.setFlag('dock_no_support_confront', true);
+      E.setFlag('dock_no_support_witness_exposed', true);
+      E.setFlag('dock_confront_fu', true);
+      if (hardDockEvidenceReady()) E.setFlag('dock_no_support_hard_evidence', true);
+      E.addHeat(3, '你没有可靠支援，却在车灯前把证人和证据都暴露给傅启元。');
+      E.addClue('无支援码头硬质问', '没有老孙或便衣压住出口时，你在黑车前当面质问傅启元，码头危机值被证人和证据迅速推高。');
+    }
+
     function markFullPressFu() {
       E.setFlag('dock_sun_pressed_fu', true);
       E.setFlag('dock_confront_fu', true);
@@ -94,7 +112,13 @@
 
     function dockExitBadge() {
       const tier = E.dockExitRiskTier();
-      const text = tier.key === 'high' ? '码头已经压不住了。再不走就走不了。' : tier.key === 'mid' ? '局势还能控制，但时间不在你这边。' : '码头暂时安静。你还有机会安全撤离。';
+      const text = tier.key === 'lethal'
+        ? '码头已经压不住了。傅启元被逼到死角，再多一句话都可能引爆枪声。'
+        : tier.key === 'unstable'
+          ? '码头局势正在失控。黑车、证人和证据都挤在同一束车灯里。'
+          : tier.key === 'tense'
+            ? '局势还能控制，但时间不在你这边。'
+            : '码头暂时被压住。你还有机会安全撤离。';
       return `<br><br><span class="sys">${text}</span>`;
     }
 
@@ -143,7 +167,7 @@
             {
               text: '⚠️ 站到车灯前，当场拿出货运单和清场指令',
               effect: markFastHardConfront,
-              goto: () => 'end_dock_silenced'
+              goto: () => E.fuWillSilenceAtDock() ? 'end_dock_silenced' : 'ch4_fu_confront'
             }
           ];
         }
@@ -183,23 +207,12 @@
           { text: '🌫️ 借雾绕开汽车，先把人带走', effect: () => E.setFlag('dock_exit_side_lane', true), goto: 'ch4_dock_escape_finish' },
           {
             text: '⚠️ 当场质问傅启元',
-            effect: () => {
-              E.setFlag('dock_confront_fu', true);
-              E.addHeat(2, '你当场质问傅启元，局势变得危险。');
-            },
-            goto: () => E.fuWillSilenceAtDock() ? 'end_dock_silenced' : (supportPresent() ? 'ch4_fu_confront' : 'end_dock_silenced')
+            effect: markUnsupportedConfront,
+            goto: () => E.fuWillSilenceAtDock() ? 'end_dock_silenced' : 'ch4_fu_confront'
           }
         ];
       }
     };
-
-    function supportPresent() {
-      return E.getFlag('sun_support_available')
-        || E.getFlag('sun_fast_support')
-        || E.getFlag('sun_full_support')
-        || E.getFlag('sun_wait_support')
-        || E.getFlag('sun_support_in_action');
-    }
 
     if (nodes.ch4_fu_confront && !nodes.ch4_fu_confront.__exitTensionTextPatched) {
       const oldEffect = nodes.ch4_fu_confront.effect;
@@ -211,7 +224,7 @@
         if (fullSupportAtDock()) {
           return `你没有绕开那辆黑色汽车。<br><br>老孙带着人从雾里压出来，没拔枪，却把码头两头都封住了。<br><br>你把清场指令、光华货运单和蓝封纸角一件件摆在车灯前。<br><br>傅启元的表情没有变，但你看到他握公文夹的手指收紧了。<br><br><span class="sys">“傅秘书，今晚这两个人，得先跟我们走。”</span>老孙说。<br><br>几名公董局的人很快赶到，试图用“越权办案”压住老孙。但老孙没有退。<br><br>傅启元看了你很久，最后让开半步。<br><br>这不是胜利，只是因为码头两头都有人，他暂时不敢开枪。${dockExitBadge()}`;
         }
-        return `你把清场指令、光华货运单和蓝封纸角一件件摆出来。<br><br>傅启元的表情没有变，但你看到他握公文夹的手指收紧了。<br><br>老孙的人从雾里走出来，枪没有拔，却把路堵住了。<br><br>他让开半步。<br><br>这不是胜利，只是他暂时不愿在码头上开枪。${dockExitBadge()}`;
+        return `你把清场指令、光华货运单和蓝封纸角一件件摆出来。<br><br>傅启元的表情没有变，但你看到他握公文夹的手指收紧了。<br><br>他身后的黑车还没有熄火，车灯把你和证人的影子都钉在仓门前。<br><br>这不是胜利，只是他暂时还没选择开枪。${dockExitBadge()}`;
       };
       nodes.ch4_fu_confront.choices = [{ text: '🚕 趁傅启元让开的半步，立刻送她们离开码头', goto: 'ch4_dock_escape_finish' }];
       nodes.ch4_fu_confront.__exitTensionTextPatched = true;
