@@ -31,11 +31,27 @@ reset({
   items: [{ name: '光华货运单', desc: '' }, { name: '清场指令', desc: '' }],
 });
 let texts = choiceTexts('ch4_dock_escape');
-let choices = renderedChoices('ch4_dock_escape');
-let hardConfront = choices.find(choice => (choice.text || '').includes('当场质问傅启元'));
-assert(texts.includes('🚓 让便衣护住后路，借雾把人先带走'), '只有一个便衣时，应显示便衣护后路选项');
-assert(texts.includes('⚠️ 当场质问傅启元，拿出货运单和清场指令'), '只有一个便衣时，应显示质问高风险选项');
-assert(!texts.some(text => text.includes('正面压制傅启元')), '只有一个便衣时，不应显示正面压制傅启元');
+let t = targets('ch4_dock_escape');
+assert(texts.some(text => text.includes('先判断黑车')), '逃离码头入口应先进入黑车拦路判断节点');
+assert(t.length === 1 && t[0] === 'ch4_dock_exit_assess', `逃离码头入口应导向 ch4_dock_exit_assess，实际 ${t.join(', ')}`);
+
+texts = choiceTexts('ch4_dock_exit_assess');
+let choices = renderedChoices('ch4_dock_exit_assess');
+let hardConfront = choices.find(choice => (choice.text || '').includes('车灯前'));
+let coverEscape = choices.find(choice => (choice.text || '').includes('便衣护住侧巷'));
+assert(texts.some(text => text.includes('便衣护住侧巷')), '只有一个便衣时，应显示侧巷护送撤离选项');
+assert(texts.some(text => text.includes('车灯前')), '只有一个便衣时，应显示亮证据高风险选项');
+assert(!texts.some(text => text.includes('老孙先卡住车道')), '只有一个便衣时，不应显示老孙车道控场');
+assert(typeof coverEscape?.effect === 'function', '单便衣侧巷撤离应带 effect 增加少量 control');
+coverEscape?.effect?.(E.state);
+assert(E.getFlag('sun_fast_cover_escape'), '侧巷撤离应设置 sun_fast_cover_escape');
+assert(E.getFlag('dock_exit_side_lane'), '侧巷撤离应设置 dock_exit_side_lane');
+reset({
+  flags: { sun_fast_support: true, found_su_at_dock: true, found_yufang: true },
+  items: [{ name: '光华货运单', desc: '' }, { name: '清场指令', desc: '' }],
+});
+choices = renderedChoices('ch4_dock_exit_assess');
+hardConfront = choices.find(choice => (choice.text || '').includes('车灯前'));
 assert(typeof hardConfront?.effect === 'function', '单便衣质问应带 effect 计入码头张力');
 hardConfront?.effect?.(E.state);
 assert(E.getFlag('dock_fast_confront_hard_evidence'), '单便衣质问应设置 dock_fast_confront_hard_evidence');
@@ -51,14 +67,20 @@ reset({
   flags: { sun_wait_support: true, sun_support_available: true, found_su_at_dock: true, found_yufang: true, dock_full_support_entry: true },
   items: [{ name: '光华货运单', desc: '' }, { name: '清场指令', desc: '' }],
 });
-texts = choiceTexts('ch4_dock_escape');
-choices = renderedChoices('ch4_dock_escape');
-let t = targets('ch4_dock_escape');
-assert(texts.includes('🚓 让老孙正面压制傅启元，质问并出示证据'), '老孙带队时，应显示正面压制傅启元');
-assert(texts.includes('🌫️ 趁乱带人撤离，不在码头硬碰傅启元'), '老孙带队时，应显示趁乱撤离选项');
+texts = choiceTexts('ch4_dock_exit_assess');
+choices = renderedChoices('ch4_dock_exit_assess');
+t = targets('ch4_dock_exit_assess');
+assert(texts.some(text => text.includes('老孙先卡住车道')), '老孙带队时，应显示先卡车道再压傅启元');
+assert(texts.some(text => text.includes('老孙贴近黑车')), '老孙带队时，应显示贴近黑车高压接应选项');
+assert(texts.some(text => text.includes('趁老孙和公董局纠缠')), '老孙带队时，应显示趁乱撤离选项');
 assert(!t.includes('end_dock_silenced'), '老孙带队时，不应把质问导向码头坏结局');
 assert(t.includes('ch4_fu_confront'), '老孙带队时，正面压制应进入码头对峙');
 assert(t.includes('ch4_dock_escape_finish'), '老孙带队时，趁乱撤离应接回逃离码头完成节点');
+const laneControl = choices.find(choice => (choice.text || '').includes('老孙先卡住车道'));
+laneControl?.effect?.(E.state);
+assert(E.getFlag('dock_sun_exit_lane_control'), '老孙卡车道应增加 dock_sun_exit_lane_control');
+assert(E.getFlag('dock_sun_pressed_fu'), '老孙卡车道后应标记已正面压制傅启元');
+assert(E.dockExitRiskTier().key !== 'lethal', '老孙带队压制傅启元不应触发灭口阈值');
 
 reset({
   flags: { sun_wait_support: true, sun_support_available: true, dock_sun_pressed_fu: true, dock_full_support_entry: true },
