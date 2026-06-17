@@ -1,9 +1,10 @@
 // ===== Solo 福生仓 heat / delay 结果分流 =====
 // 目标：solo 线仍遵守 heat / delay 制度，而不是硬编码剧情捷径。
 // 取证只改变 delay；冒进只改变 heat。最终只由 heat + delay 三档决定：
-// 1) score >= 6：高风险，证据完整但救人窗口错过。
-// 2) score >= 4：中风险，部分证据并救出一方。
-// 3) score < 4：低风险，无硬证据但双救机会最大。
+// 1) score >= 7：高风险，救人窗口错过。
+// 2) score >= 4：中风险，救出一方。
+// 3) score < 4：低风险，双救机会最大。
+// 证据完整度由实际路线决定，不再和救人结果硬绑定。
 
 (function installSoloHeatDelayOutcomes() {
   function applySoloHeatDelayOutcomes() {
@@ -75,13 +76,13 @@
       const hardEvidence = soloHardEvidenceCount();
       const score = exposure + delay;
 
-      if (score >= 6) {
-        return { key: 'full_evidence_no_rescue', label: '高风险：全证据 / 救人窗口错过', exposure, delay, score, hardEvidence };
+      if (score >= 7) {
+        return { key: 'full_evidence_no_rescue', label: '高风险：救人窗口错过', exposure, delay, score, hardEvidence };
       }
       if (score >= 4) {
-        return { key: 'partial_evidence_one_rescue', label: '中风险：部分证据 / 救出一方', exposure, delay, score, hardEvidence };
+        return { key: 'partial_evidence_one_rescue', label: '中风险：救出一方', exposure, delay, score, hardEvidence };
       }
-      return { key: 'no_evidence_dual_rescue', label: '低风险：无硬证据 / 双救', exposure, delay, score, hardEvidence };
+      return { key: 'no_evidence_dual_rescue', label: '低风险：双救', exposure, delay, score, hardEvidence };
     };
 
     E.routeSoloDockDeepByHeatDelay = function () {
