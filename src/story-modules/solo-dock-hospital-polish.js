@@ -26,8 +26,12 @@
     function hospitalBadge() {
       if (typeof E.hospitalOutcomeTier !== 'function') return '';
       const o = E.hospitalOutcomeTier();
-      const t = typeof E.truthCompletenessTier === 'function' ? E.truthCompletenessTier() : { label: '未知', score: 0 };
-      return `<br><br><span class="sys">医院状态：${o.label} · pressure ${E.hospitalPressureScore()} / control ${E.hospitalControlScore()} · witness ${E.witnessStabilityScore()}<br>真相完整度：${t.label} · ${t.score}</span>`;
+      const lines = [];
+      if (o.key === 'stable') lines.push('医院里暂时安静。证人被保护得很好。');
+      else if (o.key === 'tense') lines.push('走廊里的气氛越来越紧。每个人都在等对方先动。');
+      else if (o.key === 'chaotic') lines.push('医院已经失控。有人先动了。');
+      else lines.push('医院还在你的掌控里。可夜还长。');
+      return `<br><br><span class="sys">${lines.join(' ')}</span>`;
     }
 
     if (typeof E.dockExposureScore === 'function' && !E.__soloDockExposurePatched) {

@@ -78,7 +78,7 @@
         if (p.letter) parts.push('你拿出陈明远留下的信。沈玉芳看见字迹后，手指抖了一下：那是陈老师准备求助前留下的最后线索。');
         if (p.diary) parts.push('你提到苏晚亭的日记残页。沈玉芳沉默很久，终于承认：苏晚亭不是被动卷进来，她原本就想把光华小学的秘密揭开。');
         if (!parts.length) parts.push('你没有多余证物能在暗室里让沈玉芳立刻确认。她仍然能跟你走，但这份证词要等医院里慢慢补全。');
-        return `${parts.join('<br><br>')}<br><br>暗室外还有脚步声。沈玉芳没有因此更安全，但她的证词已经不再只是惊恐中的碎片。<br><br><span class="sys">沈玉芳证词已强化：后续医院 witness 与真相完整度提高，但救援成败仍由撤离和苏晚亭信物决定。</span>`;
+        return `${parts.join('<br><br>')}<br><br>暗室外还有脚步声。沈玉芳没有因此更安全，但她的证词已经不再只是惊恐中的碎片。<br><br>这份证词比什么都没有要好——可你能不能把她活着带出去，才是眼下真正的问题。`;
       },
       choices: [{ text: '🔙 不能再耽搁，继续处理撤离', goto: 'ch4_dock_who_dual' }]
     };
@@ -93,7 +93,7 @@
           return `${base}<br><br><span class="sys">沈玉芳已经确认了你手里的关键证据。接下来最要紧的是把人带出暗室。</span>`;
         }
         if (yufangEvidenceProfile().count > 0) {
-          return `${base}<br><br><span class="sys">你手里的部分证据可以帮沈玉芳更快说清关系，但暗室外已经有脚步声。是否在这里多问一句，取决于你愿不愿意用一点时间换更稳的证词。</span>`;
+          return `${base}<br><br><span class="sys">你手里的部分证据可以帮沈玉芳更快说清关系，但暗室外已经有脚步声。多问一句还是先走——你只有几秒决定。</span>`;
         }
         return base;
       };
