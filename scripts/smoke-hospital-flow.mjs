@@ -23,6 +23,11 @@ function texts(id) {
   return rt.choicesOf(id).map(choice => choice.text || choice.fogText || '');
 }
 
+function secondHospitalChoiceText(flags) {
+  reset({ flags: { rescued_yufang: true, rescued_su: true, found_su_at_dock: true, ...flags } });
+  return texts('ch4_hospital_conflict')[1] || '';
+}
+
 reset({ flags: { rescued_yufang: true, rescued_su: true, found_su_at_dock: true } });
 let t = targets('ch4_dock_escape_finish');
 let x = texts('ch4_dock_escape_finish').join('\n');
@@ -44,6 +49,19 @@ t = targets('ch4_fu_private_offer');
 assert(t.includes('ch4_conclusion'), '傅启元后巷交易后应能回事务所结案');
 x = texts('ch4_fu_private_offer').join('\n');
 assert(x.includes('回事务所整理结案材料'), '傅启元后巷交易的结案选项应明确“再回事务所”');
+
+let second = secondHospitalChoiceText({ sun_fast_cover_escape: true, sun_fast_support: true });
+assert(second.includes('连夜补人手去封码头'), `只有一个便衣撤离后，医院第二选项应是补人手封码头，实际：${second}`);
+assert(!second.includes('立刻封码头'), '只有一个便衣撤离后，不应显示“立刻封码头”');
+
+second = secondHospitalChoiceText({ dock_sun_pressed_fu: true, sun_wait_support: true, sun_support_available: true });
+assert(second.includes('守住码头封锁线'), `老孙已正面压过傅启元后，医院第二选项应是守住封锁线，实际：${second}`);
+
+second = secondHospitalChoiceText({ dock_escaped_during_sun_standoff: true, sun_wait_support: true, sun_support_available: true });
+assert(second.includes('公董局已经插手'), `老孙带队但趁乱撤离后，医院第二选项应提示公董局已经插手，实际：${second}`);
+
+second = secondHospitalChoiceText({});
+assert(second.includes('立刻封码头'), `普通状态下仍可显示立刻封码头，实际：${second}`);
 
 if (errors.length) {
   console.error('Hospital flow smoke failed:');
