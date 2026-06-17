@@ -64,6 +64,10 @@
       nodes.ch4_dock_escape_finish.text = function (state) {
         const base = typeof oldText === 'function' ? oldText(state) : oldText;
         if (String(base).includes('车子没有直接回事务所')) return base;
+        const solo = E.getFlag('dock_solo_entry') || E.getFlag('dock_solo_waterline_escape') || E.getFlag('dock_solo_crate_screen') || E.getFlag('dock_solo_decoy_escape');
+        if (solo) {
+          return `${base}<br><br>车子没有直接回事务所，而是先拐进一家教会医院的后门。码头的雾已经远了，可医院走廊里的灯光也救不了谁。没有老孙接手证人，没有便衣守后门。你只能靠自己让这两个女人撑到天亮。`;
+        }
         return `${base}<br><br>车子没有直接回事务所，而是先拐进一家教会医院的后门。老孙的人守在巷口，周怀安站在走廊尽头，脸色白得像墙灰。<br><br>你知道，真正难的不是把人从仓库里带出来，而是决定接下来保护谁、追谁、牺牲什么。`;
       };
       nodes.ch4_dock_escape_finish.choices = [

@@ -180,9 +180,8 @@
       const oldText = nodes.ch4_hospital_triage.text;
       const oldChoices = nodes.ch4_hospital_triage.choices;
       nodes.ch4_hospital_triage.text = function (state) {
-        const base = typeof oldText === 'function' ? oldText(state) : oldText;
-        if (!soloMode()) return base;
-        return `${base}<br><br>你这时才真正感觉到孤身行动的代价：后门没有便衣，巷口没有巡捕，病房外也没有老孙的人。要让证词活到天亮，只能先靠医院本身。${hospitalBadge()}`;
+        if (!soloMode()) return typeof oldText === 'function' ? oldText(state) : oldText;
+        return `医院后门的灯很暗。周怀安站在楼梯口，走廊另一头已经有人听见风声赶来。<br><br>你这时才真正感觉到孤身行动的代价：后门没有便衣，巷口没有巡捕，病房外也没有老孙的人。要让证词活到天亮，只能先靠医院本身。${hospitalBadge()}`;
       };
       nodes.ch4_hospital_triage.choices = function (state) {
         if (!soloMode()) return typeof oldChoices === 'function' ? oldChoices(state) : oldChoices;
@@ -222,6 +221,28 @@
         ];
       };
       nodes.ch4_hospital_triage.__soloTriagePatched = true;
+    }
+
+    // SOLO 路线医院冲突——老孙不在场
+    if (nodes.ch4_hospital_conflict && !nodes.ch4_hospital_conflict.__soloConflictPatched) {
+      const oldConflictText = nodes.ch4_hospital_conflict.text;
+      const oldConflictChoices = nodes.ch4_hospital_conflict.choices;
+      nodes.ch4_hospital_conflict.text = function (state) {
+        if (!soloMode()) return typeof oldConflictText === 'function' ? oldConflictText(state) : oldConflictText;
+        const suLine = E.getFlag('rescued_su')
+          ? '苏晚亭躺在病房里，隔着一扇门，你能听见她很轻的咳声。'
+          : '苏晚亭仍然不在这里，沈玉芳手里攥着那张学生证，像攥着一块会割手的玻璃。';
+        return `医院走廊很窄，消毒水的味道压住了码头带来的潮腥。<br><br>${suLine}<br><br>周怀安第一个开口，声音压得很低：<span class="sys">"先别问了。她们刚逃出来。先让她们睡一觉。"</span><br><br>沈玉芳坐在长椅上，突然抬头：<span class="sys">"你们都在说傅启元，可陆念薇呢？她不是清白的。她知道箱子里是什么，也知道陈老师会死。"</span><br><br>走廊里没有老孙的人。你只能靠自己决定下一步。`;
+      };
+      nodes.ch4_hospital_conflict.choices = function (state) {
+        if (!soloMode()) return typeof oldConflictChoices === 'function' ? oldConflictChoices(state) : (Array.isArray(oldConflictChoices) ? oldConflictChoices : []);
+        return [
+          { text: '🛏️ 先分开保护证人，任何审问等天亮以后', effect: () => E.setFlag('v07_choice_protect_witnesses', true), goto: 'ch4_hospital_protect_witnesses' },
+          { text: '🕯️ 逼陆念薇现身，让三条线当面对质', effect: () => E.setFlag('v07_choice_draw_lu', true), goto: 'ch4_lu_confrontation' },
+          { text: '🔙 带着证词回去整理结案材料', goto: 'ch4_conclusion' }
+        ];
+      };
+      nodes.ch4_hospital_conflict.__soloConflictPatched = true;
     }
 
     E.__soloDockHospitalPolishPatched = true;

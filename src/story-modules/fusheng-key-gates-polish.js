@@ -101,14 +101,14 @@
       nodes.ch4_suzhou_creek.text = function (state) {
         const base = typeof oldText === 'function' ? oldText(state) : oldText;
         const k = E.fushengKeyState();
-        if (!k.entry) return `${base}${keyBadge()}`;
+        if (!k.entry) return `${base}`;
         if (!k.darkroom) {
-          return `${base}<br><br>你能锁定福生仓，却还不知道这里藏着“人”。没有沈玉芳这条线，仓库在你眼里仍像一处转运点，而不是囚室。${keyBadge()}`;
+          return `${base}<br><br>你能锁定福生仓，却还不知道这里藏着“人”。没有沈玉芳这条线，仓库在你眼里仍像一处转运点，而不是囚室。`;
         }
         if (!k.suTrustToken) {
-          return `${base}<br><br>你知道沈玉芳可能就在这里，也知道苏晚亭卷进了同一条线。但如果真在暗室里见到苏晚亭，你手里还缺一样能让她相信你的东西。${keyBadge()}`;
+          return `${base}<br><br>你知道沈玉芳可能就在这里，也知道苏晚亭卷进了同一条线。但如果真在暗室里见到苏晚亭，你手里还缺一样能让她相信你的东西。`;
         }
-        return `${base}${keyBadge()}`;
+        return `${base}`;
       };
       nodes.ch4_suzhou_creek.__fushengKeyTextPatched = true;
     }
@@ -117,7 +117,7 @@
       const oldText = nodes.ch4_dock_no_darkroom.text;
       nodes.ch4_dock_no_darkroom.text = function (state) {
         const base = typeof oldText === 'function' ? oldText(state) : oldText;
-        return `${base}<br><br>你不是不够聪明，而是少了一把钥匙：没有沈玉兰和沈玉芳这条人质线，你不会把福生仓的夹墙当成关人的地方。${keyBadge()}`;
+        return `${base}<br><br>你不是不够聪明，而是少了一把钥匙：没有沈玉兰和沈玉芳这条人质线，你不会把福生仓的夹墙当成关人的地方。`;
       };
       nodes.ch4_dock_no_darkroom.__fushengKeyTextPatched = true;
     }
@@ -128,12 +128,12 @@
         const base = typeof oldText === 'function' ? oldText(state) : oldText;
         const k = E.fushengKeyState();
         if (!k.suTrustToken) {
-          return `${base}<br><br>沈玉芳终于相信了你的证件，可苏晚亭不一样。她太虚弱，也太警惕。你能叫出她的名字，却没有任何东西能证明你真的去过她家。${keyBadge()}`;
+          return `${base}<br><br>沈玉芳终于相信了你的证件，可苏晚亭不一样。她太虚弱，也太警惕。你能叫出她的名字，却没有任何东西能证明你真的去过她家。`;
         }
         if (!k.suTrustProof) {
-          return `${base}<br><br>你想起苏母交给你的银发夹。现在拿出来，才可能让苏晚亭相信你不是又一个来“转移”她的人。${keyBadge()}`;
+          return `${base}<br><br>你想起苏母交给你的银发夹。现在拿出来，才可能让苏晚亭相信你不是又一个来“转移”她的人。`;
         }
-        return `${base}${keyBadge()}`;
+        return `${base}`;
       };
       nodes.ch4_dock_deep_dual.__fushengKeyTextPatched = true;
     }
@@ -185,9 +185,9 @@
         const base = typeof oldText === 'function' ? oldText(state) : oldText;
         const k = E.fushengKeyState();
         if (E.getFlag('found_su_at_dock') && !k.suTrustProof) {
-          return `${base}<br><br>苏晚亭的脚步一直跟不上。她不是不想活，而是不敢再相信任何说“跟我走”的人。没有苏母信物，她会在码头撤退中成为最脆弱的一环。${keyBadge()}`;
+          return `${base}<br><br>苏晚亭的脚步一直跟不上。她不是不想活，而是不敢再相信任何说“跟我走”的人。没有苏母信物，她会在码头撤退中成为最脆弱的一环。`;
         }
-        return `${base}${keyBadge()}`;
+        return `${base}`;
       };
       nodes.ch4_dock_escape.__fushengKeyTextPatched = true;
     }
@@ -210,7 +210,7 @@
           return `黄包车的铃铛在深夜街道上响起。<br><br>沈玉芳蜷在车座一角，手指死死攥着你的衣袖。苏晚亭曾经就在你背后不远处，可码头乱起来的那一刻，她没有跟上来。<br><br>她太虚弱，也太警惕。你说自己是周怀安请来的侦探，可她只是看着你，像隔着一层很厚的雾。<br><br>如果你把苏母托付的银发夹拿给她看，也许她会相信你。<br><br>可你没有。<br><br>傅启元的人趁乱把她重新拖上车。你只来得及抢回沈玉芳，和苏晚亭曾经还活着的证明。<br><br><span class="sys">钥匙缺失：缺少苏母信物确认，苏晚亭救援失败，双救路线关闭。</span>`;
         }
         const base = typeof oldText === 'function' ? oldText(state) : oldText;
-        return `${base}${keyBadge()}`;
+        return `${base}`;
       };
       nodes.ch4_dock_escape_finish.__fushengKeyOutcomePatched = true;
     }
