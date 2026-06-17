@@ -45,7 +45,7 @@
       const opts = [];
 
       if (!isUniversityComplete()) {
-        opts.push({ text: '📚 去圣约翰大学调查——补齐薛华立路来源', goto: 'ch2_university' });
+        opts.push({ text: '📚 回圣约翰大学——再查晚亭失踪前的线索', goto: 'ch2_university' });
       }
 
       if (!hasPoliceCaseFile()) {
