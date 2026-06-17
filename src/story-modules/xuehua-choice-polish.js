@@ -1,5 +1,5 @@
 // ===== 薛华立路选项收口 =====
-// 目标：让 22 号门口 / 永兴贸易商行 / 看门老头形成清晰顺序：观察、问老头、上203、去光华小学。
+// 目标：让 22 号门口 / 永兴贸易商行 / 看门老头 / 203 室形成清晰顺序，避免回到门口造成循环。
 (function installXuehuaChoicePolish() {
   function applyXuehuaChoicePolish() {
     if (typeof E === 'undefined' || typeof nodes === 'undefined') return;
@@ -29,10 +29,18 @@
       return opts;
     }
 
+    function room203Choices() {
+      const opts = [];
+      if (!searched203Evidence()) opts.push({ text: '📖 仔细搜查房间', goto: 'ch2_203_search' });
+      if (searched203Evidence()) opts.push({ text: '📚 去光华小学——那里是这一切的中心', goto: 'ch3_school' });
+      return opts;
+    }
+
     if (nodes.ch2_frenchtown) nodes.ch2_frenchtown.choices = baseXuehuaChoices;
     if (nodes.ch2_building_enter) nodes.ch2_building_enter.choices = baseXuehuaChoices;
     if (nodes.ch2_ask_landlord) nodes.ch2_ask_landlord.choices = afterLandlordChoices;
     if (nodes.ch2_landlord_map) nodes.ch2_landlord_map.choices = afterLandlordChoices;
+    if (nodes.ch2_203_door) nodes.ch2_203_door.choices = room203Choices;
 
     if (nodes.ch2_yulan_promise_echo) {
       nodes.ch2_yulan_promise_echo.choices = [
