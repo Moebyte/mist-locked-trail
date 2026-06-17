@@ -80,47 +80,56 @@ function testHighQualityNaturalEnding() {
   h.assertFlag('v07_rejected_fu_deal');
 
   const quality = E.v07InvestigationQuality();
-  if (quality.score < 10) throw new Error(`高质量路线分数过低：${quality.score}`);
+  if (quality.score < 11) throw new Error(`高质量路线分数过低：${quality.score}`);
   const ending = E.v07ResolveEnding();
-  if (ending !== 'end_conspiracy_detail') throw new Error(`高质量路线预期隐藏结局，实际 ${ending}`);
+  if (ending !== 'end_true_hidden') throw new Error(`高质量路线预期真隐藏结局，实际 ${ending}`);
   reports.push(`PASS 高质量路线自然分流到 ${ending}，score=${quality.score}`);
 }
 
 function testHiddenEndingRequiresSchoolThreeProofs() {
-  h.resetState({ flags: rescueReadyFlags({ deduced_fusheng: true, fu_waybill_exposed: true, fu_clearance_exposed: true, v07_witnesses_protected: true, v07_lu_confronted: true, v07_rejected_fu_deal: true }) });
+  h.resetState({ flags: rescueReadyFlags({ rescued_yufang: true, deduced_fusheng: true, fu_waybill_exposed: true, fu_clearance_exposed: true, v07_witnesses_protected: true, v07_lu_confronted: true, v07_rejected_fu_deal: true }) });
   const ending = E.v07ResolveEnding();
-  if (ending === 'end_conspiracy_detail') throw new Error('未完成校长三证物质询时，不应进入隐藏结局');
+  if (ending === 'end_conspiracy_detail' || ending === 'end_true_hidden') throw new Error('未完成校长三证物质询时，不应进入隐藏/真隐藏结局');
   reports.push(`PASS 隐藏结局需要校长三证物闭环，未完成时分流到 ${ending}`);
 }
 
-function testTrueHiddenRequiresSuRescue() {
+function testHiddenEndingRequiresYufangRescue() {
+  h.resetState({ flags: highQualityFlags({ rescued_yufang: false, rescued_su: false, found_su_at_dock: false, school_wu_three_proofs: true, school_wu_full_confront: true }) });
+  const ending = E.v07ResolveEnding();
+  if (ending === 'end_conspiracy_detail' || ending === 'end_true_hidden') throw new Error(`未救出沈玉芳时，不应进入隐藏/真隐藏结局；实际 ${ending}`);
+  reports.push(`PASS 隐藏结局需要救出沈玉芳，未救出任何人时分流到 ${ending}`);
+}
+
+function testHiddenButNotTrueHiddenWithoutSuRescue() {
   h.resetState({
     flags: highQualityFlags({
       rescued_su: false,
       found_su_at_dock: false,
       su_moved_from_dock: true,
+      rescued_yufang: true,
       school_wu_three_proofs: true,
       school_wu_full_confront: true,
     })
   });
   const quality = E.v07InvestigationQuality();
   const ending = E.v07ResolveEnding();
-  if (ending === 'end_conspiracy_detail') throw new Error(`未救出苏晚亭时，不应进入真隐藏结局；quality=${quality.score}`);
+  if (ending !== 'end_conspiracy_detail') throw new Error(`救出沈玉芳但未救出苏晚亭时，应进入隐藏结局而非真隐藏；实际 ${ending}，quality=${quality.score}`);
   const targets = choiceTargets('ch4_conclusion');
-  if (targets.includes('end_conspiracy_detail')) throw new Error('未救出苏晚亭时，ch4_conclusion 不应出现真隐藏结局入口');
-  reports.push(`PASS 真隐藏结局需要救出苏晚亭，未救出时分流到 ${ending}，score=${quality.score}`);
+  if (!targets.includes('end_conspiracy_detail')) throw new Error('救出沈玉芳但未救出苏晚亭时，ch4_conclusion 应允许隐藏结局入口');
+  if (targets.includes('end_true_hidden')) throw new Error('未救出苏晚亭时，ch4_conclusion 不应出现真隐藏结局入口');
+  reports.push(`PASS 救出沈玉芳但未救出苏晚亭时进入隐藏结局 ${ending}，score=${quality.score}`);
 }
 
 function testConclusionChoicesRespectHiddenGate() {
   h.resetState({ flags: highQualityFlags() });
   let targets = choiceTargets('ch4_conclusion');
-  if (targets.includes('end_conspiracy_detail')) throw new Error('ch4_conclusion 未完成校长三证物时，不应出现或跳往隐藏结局');
+  if (targets.includes('end_conspiracy_detail') || targets.includes('end_true_hidden')) throw new Error('ch4_conclusion 未完成校长三证物时，不应出现或跳往隐藏/真隐藏结局');
   if (!targets.includes('end_rescue') && !targets.includes('end_conspiracy')) throw new Error('ch4_conclusion 未完成校长三证物时，自然结案应降级到普通好结局/普通结局');
 
   h.resetState({ flags: highQualityFlags({ school_wu_three_proofs: true, school_wu_full_confront: true }) });
   targets = choiceTargets('ch4_conclusion');
-  if (!targets.includes('end_conspiracy_detail')) throw new Error('ch4_conclusion 完成校长三证物并救出苏晚亭后，应允许进入真隐藏结局');
-  reports.push('PASS ch4_conclusion 选项层也受光华三证物与苏晚亭获救门槛约束');
+  if (!targets.includes('end_true_hidden')) throw new Error('ch4_conclusion 完成校长三证物并救出苏晚亭后，应允许进入真隐藏结局');
+  reports.push('PASS ch4_conclusion 选项层也受光华三证物、沈玉芳获救、苏晚亭获救门槛约束');
 }
 
 function testPressureAffectsDockRoute() {
@@ -159,7 +168,8 @@ try {
   testHospitalConflict();
   testHighQualityNaturalEnding();
   testHiddenEndingRequiresSchoolThreeProofs();
-  testTrueHiddenRequiresSuRescue();
+  testHiddenEndingRequiresYufangRescue();
+  testHiddenButNotTrueHiddenWithoutSuRescue();
   testConclusionChoicesRespectHiddenGate();
   testPressureAffectsDockRoute();
   testLateNaturalEnding();
