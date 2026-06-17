@@ -12,8 +12,16 @@ function assertChoiceTarget(sceneId, target) {
   if (!ok) throw new Error(`${sceneId} 缺少通往 ${target} 的选择`);
 }
 
+function rescueReadyFlags(extra = {}) {
+  return {
+    found_su_at_dock: true,
+    presented_su_keepsake: true,
+    ...extra,
+  };
+}
+
 function testHospitalConflict() {
-  h.resetState({ flags: { found_su_at_dock: true, deduced_fusheng: true } });
+  h.resetState({ flags: rescueReadyFlags({ deduced_fusheng: true }) });
   h.renderNode('ch4_dock_escape_finish');
   h.assertFlag('rescued_yufang');
   h.assertFlag('rescued_su');
@@ -29,7 +37,7 @@ function testHospitalConflict() {
 }
 
 function testHighQualityNaturalEnding() {
-  h.resetState({ flags: { found_su_at_dock: true, deduced_fusheng: true, fu_waybill_exposed: true, fu_clearance_exposed: true } });
+  h.resetState({ flags: rescueReadyFlags({ deduced_fusheng: true, fu_waybill_exposed: true, fu_clearance_exposed: true }) });
   h.renderNode('ch4_dock_escape_finish');
   h.goByTarget('ch4_hospital_conflict');
   h.goByTarget('ch4_hospital_protect_witnesses');
