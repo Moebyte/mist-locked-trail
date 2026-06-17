@@ -50,6 +50,7 @@
     'src/story-modules/fusheng-key-gates-polish.js',
     'src/story-modules/hospital-triage-polish.js',
     'src/story-modules/solo-dock-hospital-polish.js',
+    'src/story-modules/solo-entry-choice-label-polish.js',
     'src/story-modules/dock-hospital-continuity-polish.js',
     'src/story-modules/hospital-ending-impact-polish.js',
     'src/story-modules/yufang-testimony-polish.js',
