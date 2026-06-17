@@ -58,7 +58,7 @@ reset({
 assert(E.hospitalWitnessProfile().count === 2, '双救路线应识别为双证人');
 assert(E.canEnterHospitalLine(), '双救 + 借雾撤离才允许进入医院线');
 assert(E.hospitalOutcomeTier().key === 'controlled', `双救 + 一便衣借雾撤离应是可控医院线，实际 ${JSON.stringify(E.hospitalOutcomeTier())}`);
-assert(['solid', 'partial'].includes(E.truthCompletenessTier().key), `未找陆念薇前，双救真相应尚未完整，实际 ${JSON.stringify(E.truthCompletenessTier())}`);
+assert(E.truthCompletenessTier().key === 'complete', `双证人 + 全物证应为 10 分真相，实际 ${JSON.stringify(E.truthCompletenessTier())}`);
 rt.renderNode('ch4_dock_escape_finish');
 assert(rt.choicesOf('ch4_dock_escape_finish').some(choice => choice.goto === 'ch4_hospital_triage'), '成功逃离码头后应先进入医院后门安置节点');
 rt.renderNode('ch4_hospital_triage');
@@ -72,7 +72,7 @@ E.setFlag('hospital_doctor_record', true);
 assert(E.hospitalOutcomeTier().key === 'stable', `双救 + 保护证人 + 医生记录应进入稳定医院线，实际 ${JSON.stringify(E.hospitalOutcomeTier())}`);
 
 E.setFlag('v07_lu_to_sun', true);
-assert(E.truthCompletenessTier().key === 'complete', `双救 + 陆念薇正式口供应能真相完整，实际 ${JSON.stringify(E.truthCompletenessTier())}`);
+assert(E.truthCompletenessTier().key === 'complete', `双救 + 陆念薇正式口供应保持真相完整，实际 ${JSON.stringify(E.truthCompletenessTier())}`);
 
 reset({
   flags: {
@@ -90,8 +90,9 @@ reset({
 });
 assert(E.hospitalWitnessProfile().count === 1, '单救路线应识别为单证人');
 assert(['stable', 'controlled'].includes(E.hospitalOutcomeTier().key), `单救 + 老孙控场 + 医院保护可以是稳定/可控医院线，实际 ${JSON.stringify(E.hospitalOutcomeTier())}`);
-assert(E.truthCompletenessTier().key !== 'complete', `单救路线即使医院可控，也不应达到真相完整，实际 ${JSON.stringify(E.truthCompletenessTier())}`);
-assert(E.truthCompletenessTier().score <= 6, `单救路线真相完整度应有上限 6，实际 ${JSON.stringify(E.truthCompletenessTier())}`);
+assert(E.truthCompletenessTier().key !== 'complete', `单救路线即使医院可控，也不应达到 10 分完整真相，实际 ${JSON.stringify(E.truthCompletenessTier())}`);
+assert(E.truthCompletenessTier().score <= 9, `单救路线真相完整度上限应为 9，实际 ${JSON.stringify(E.truthCompletenessTier())}`);
+assert(E.truthBaseScore() === 8, `单证人 + 全物证底分应为 8，实际 ${E.truthBaseScore()}`);
 
 reset({
   flags: {
@@ -128,7 +129,7 @@ reset({
 assert(E.canEnterHospitalLine(), '借雾撤离后的医院紧张线应允许成立');
 assert(E.hospitalOutcomeTier().key === 'tense', `双救 + 医院内过早陆念薇 + 追问沈玉芳应为紧张医院线，实际 ${JSON.stringify(E.hospitalOutcomeTier())}`);
 assert(!E.hospitalAllowsTrueHidden(), '紧张医院线应锁住真隐藏资格');
-assert(E.hospitalAllowsHidden(), '紧张医院线若真相完整，仍可保留隐藏结局资格');
+assert(E.hospitalAllowsHidden(), '紧张医院线若真相分仍较完整，仍可保留隐藏结局资格');
 assert(E.v07ResolveEnding() !== 'end_true_hidden', '紧张医院线不应进入真隐藏结局');
 
 reset({
@@ -147,7 +148,7 @@ reset({
   items: dockEvidence,
 });
 assert(E.hospitalOutcomeTier().key === 'stable', `稳定医院线应保持 stable，实际 ${JSON.stringify(E.hospitalOutcomeTier())}`);
-assert(E.hospitalAllowsTrueHidden(), '稳定医院线 + 真相完整应允许真隐藏');
+assert(E.hospitalAllowsTrueHidden(), '稳定医院线 + 10分真相应允许真隐藏');
 
 reset({
   flags: {
