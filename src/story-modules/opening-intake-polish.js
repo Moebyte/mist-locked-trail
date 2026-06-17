@@ -24,12 +24,8 @@
       nodes.end_refuse.text = () => `你把信封推回去。<br><br><span class="sys">“抱歉。这个案子我接不了。你另请高明吧。”</span><br><br>男人愣了一下。他看着你，像是还想再说几句，最后只是把银元收回怀里。<br><br><span class="sys">“……我明白了。打扰了，沈先生。”</span><br><br>他站起来，鞠了一躬，走进雨里。<br><br>你又叫了一壶茶。窗外的雨没有要停的意思。你看着对面的空椅子，心想：上海每天都有人失踪，你管不过来，也不想管。<br><br>——三个月后。<br><br>你在《申报》的社会版角落里看到一则简短的报道：「圣约翰大学女生苏某失踪案因线索不足，已由巡捕房归档。家属未再提出申诉。」<br><br>报道旁边是一条皮鞋广告。<br><br>你把报纸翻了过去，继续喝你的茶。<br><br>雨还在下。<br><br><div style="color:#666;font-style:italic;margin-top:20px">—— 结局一 · 雨落无声 ——</div>`;
     }
 
-    nodes.end_refuse_named = {
-      title: '结局 · 雨落无声',
-      weather: 0,
-      text: () => `你把信封推回去。<br><br><span class="sys">“周先生，这个案子我接不了。你另请高明吧。”</span><br><br>周怀安愣了一下。他看着你，像是想说什么，最后只是把银元收回怀里。<br><br><span class="sys">“……我明白了。打扰了，沈先生。”</span><br><br>他站起来，鞠了一躬，走进雨里。<br><br>你又叫了一壶茶。窗外的雨没有要停的意思。你看着对面的空椅子，心想：上海每天都有人失踪，你管不过来，也不想管。<br><br>——三个月后。<br><br>你在《申报》的社会版角落里看到一则简短的报道：「圣约翰大学女生苏某失踪案因线索不足，已由巡捕房归档。家属未再提出申诉。」<br><br>报道旁边是一条皮鞋广告。<br><br>你把报纸翻了过去，继续喝你的茶。<br><br>雨还在下。<br><br><div style="color:#666;font-style:italic;margin-top:20px">—— 结局一 · 雨落无声 ——</div>`,
-      type: 'end'
-    };
+    // 只保留一个“雨落无声”结局记录，避免 end_refuse / end_refuse_named 被统计成两个结局。
+    delete nodes.end_refuse_named;
 
     nodes.ch1_ask = {
       title: '听雨茶馆',
@@ -46,7 +42,7 @@
           goto: 'ch1_take'
         },
         { text: '🧾 再问清几个细节', goto: 'ch1_ask_detail' },
-        { text: '🚪 听完了，但这个案子我不接', goto: 'end_refuse_named' }
+        { text: '🚪 听完了，但这个案子我不接', goto: 'end_refuse' }
       ]
     };
 
@@ -64,7 +60,7 @@
           },
           goto: 'ch1_take'
         },
-        { text: '🚪 问清楚了，但这个案子我不接', goto: 'end_refuse_named' }
+        { text: '🚪 问清楚了，但这个案子我不接', goto: 'end_refuse' }
       ]
     };
 
