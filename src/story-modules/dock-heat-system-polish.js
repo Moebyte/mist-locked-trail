@@ -6,6 +6,7 @@
 // 守卫/声响不是一票否决，过度谨慎也不是免费最优解。
 // 老孙带队默认风险很高，但可以通过“外围低调卡车道”把风险压回中档。
 // 调整：dock 风险只按潜入事件 flag 计分，不再把 addDockHeat 写入的全局 pressure.heat 二次叠加。
+// 修正：低调便衣潜入不应在“critical”时被旧时间门控直接打成“只够救人”，至少保留有限搜证窗口。
 
 (function installDockHeatSystemPolish() {
   function applyDockHeatSystemPolish() {
@@ -45,13 +46,33 @@
       return 0;
     }
 
+    function trueFastRescuePrepared() {
+      return typeof E.trueEndingFastRescuePrepared === 'function' && E.trueEndingFastRescuePrepared();
+    }
+
+    function fullSupportTradeoffActive() {
+      return typeof E.fullSupportTradeoffActive === 'function' && E.fullSupportTradeoffActive();
+    }
+
+    function lowProfileRouteReady() {
+      return fastSupportMode() && !E.getFlag('missed_deadline');
+    }
+
     function routeDockSearchByTime() {
       const phase = typeof E.deadlinePhase === 'function' ? E.deadlinePhase() : 'safe';
       if (phase === 'expired') {
         E.setFlag('missed_deadline', true);
         return 'ch4_dock_cleared';
       }
-      if (phase === 'critical') return 'ch4_dock_rescue_only';
+      if (trueFastRescuePrepared()) return 'ch4_dock_full_search';
+      if (fullSupportTradeoffActive()) {
+        E.setFlag('dock_full_support_tradeoff', true);
+        return 'ch4_dock_full_search';
+      }
+      if (phase === 'critical') {
+        if (lowProfileRouteReady()) return 'ch4_dock_limited_search';
+        return 'ch4_dock_rescue_only';
+      }
       if (phase === 'tight') return 'ch4_dock_limited_search';
       return 'ch4_dock_full_search';
     }
