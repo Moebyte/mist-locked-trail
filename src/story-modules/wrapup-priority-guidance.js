@@ -71,12 +71,24 @@
     function hasDockEvidence() {
       return hasThing('公董局公文纸')
         || hasThing('暗室刚被清空')
+        || hasThing('暗室已经转空')
+        || hasThing('仓库暗室')
+        || hasThing('获救者身份')
+        || hasThing('苏晚亭曾在暗室')
+        || hasThing('苏晚亭手表')
+        || hasThing('苏晚亭学生证')
+        || hasThing('沈玉芳曾在暗室')
         || hasThing('教具箱走私')
         || hasThing('管制药品走私')
         || hasThing('光华货运单')
         || hasThing('清场指令')
+        || E.getFlag('dock_entry_committed')
+        || E.getFlag('dock_solo_entry')
+        || E.getFlag('found_yufang')
         || E.getFlag('rescued_yufang')
         || E.getFlag('found_su_at_dock')
+        || E.getFlag('su_moved_from_dock')
+        || E.getFlag('su_trace_only')
         || E.getFlag('missed_both_at_dock');
     }
 
@@ -141,7 +153,7 @@
       if (!E.getFlag('deduced_fusheng')) {
         return E.canDeduce('deduce_fusheng')
           ? '福生仓现场证据已经到手，现在推理公董局与走私链。'
-          : '福生仓真相还差现场证据。';
+          : '你已经进过福生仓，行动入口不会重复出现。现在应整理现场结果，补齐福生仓与公董局的推理或进入结案收束。';
       }
       return '主证据链已经闭合，可以进入终局收束。';
     }
@@ -151,6 +163,7 @@
       if (E.getFlag('deduced_chen')) parts.push('陈明远之死已经推清');
       if (E.getFlag('deduced_lu_zhao')) parts.push('黑衣男人与陆小姐的关系已经推清');
       if (hasThing('王巡官遗留纸条') || hasThing('福生仓位置') || hasThing('福生仓标识')) parts.push('福生仓入口已经锁定');
+      if (hasDockEvidence()) parts.push('福生仓行动已经发生');
       if (hasSunSupport()) parts.push('老孙支援已经接上');
       return parts.length ? parts.join('；') : '主线线索已经串起';
     }
@@ -190,7 +203,8 @@
 
       if (hasDockEvidence() && !E.getFlag('deduced_fusheng')) {
         const deduce = firstMatching(choices, isDeduceFusheng, null);
-        if (deduce) return [deduceChoice('deduce_fusheng', '🧩 下一步：推理福生仓与公董局的真相', deduce), reviewChoice(review)];
+        if (deduce) return [deduceChoice('deduce_fusheng', '🧩 下一步：推理福生仓与公董局的真相', deduce), reviewChoice(review, '🔙 回顾现有证据，准备收束')];
+        return [reviewChoice(review, '🔙 回顾现有证据，准备收束')];
       }
 
       return choices;
