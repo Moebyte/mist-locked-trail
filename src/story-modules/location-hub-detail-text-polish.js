@@ -40,6 +40,15 @@
       return `吴校长办公室里有一股旧纸和粉笔灰的味道。窗外是操场，雨后的旗杆一动不动。<br><br>普通寒暄已经没意义。你要把陈明远、苏晚亭、沈玉芳和陆小姐一条条问清。`;
     }
 
+    if (nodes.ch2_univ_paper && !nodes.ch2_univ_paper.__suPhotoMovedPatched) {
+      const oldPaperText = nodes.ch2_univ_paper.text;
+      nodes.ch2_univ_paper.text = function (state) {
+        const base = typeof oldPaperText === 'function' ? oldPaperText(state) : oldPaperText;
+        return `${base}<br><br>你把字典放回原处时，又从封底夹层里滑出一张小照片。照片边缘有磨损，像是被人反复拿出来看过。照片上是苏晚亭站在光启公园的梧桐树下，背后写着一行小字：<span class="sys">“民国三十七年九月 · 光启公园 · 晚亭”</span>。<br><br>照片没有放在显眼处，却藏得很仔细。你把它收好——这也许比周怀安口中的描述更能让苏家人认出她。`;
+      };
+      nodes.ch2_univ_paper.__suPhotoMovedPatched = true;
+    }
+
     if (nodes.ch2_university) {
       nodes.ch2_university.text = function () {
         const detail = E.getFlag('university_last_detail');
@@ -82,6 +91,8 @@
               E.addItem('法租界地图', '夹在牛津字典里的书签地图，薛华立路 22 号被铅笔圈出。');
               E.addItem('铅笔清单', '写在论文稿背面的轻淡字迹：薛华立路 22 号、周三下午三点、不要告诉任何人。');
               E.addItem('日记残页', '苏晚亭夹在牛津字典里的残页：她决定继续追查光华小学的秘密。');
+              E.addItem('苏晚亭的照片', '从苏晚亭牛津字典封底夹层里找到的光启公园留影，背面写着“民国三十七年九月 · 光启公园 · 晚亭”。');
+              E.addClue('苏晚亭藏起的照片', '照片藏在牛津字典封底夹层里，像是苏晚亭刻意留下的身份凭证。');
               E.setFlag('univ_paper_checked', true);
               setHubDetail('university', 'paper');
             },
