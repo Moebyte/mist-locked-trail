@@ -52,6 +52,9 @@ jobs:
       - name: Smoke test wrapup priority
         run: node scripts/smoke-wrapup-priority.mjs
 
+      - name: Smoke test Sun fast support
+        run: node scripts/smoke-sun-fast-support.mjs
+
       - name: Smoke test causal echo
         run: node scripts/smoke-causal-echo.mjs
 
