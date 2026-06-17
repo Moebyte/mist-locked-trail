@@ -100,6 +100,9 @@ jobs:
       - name: Smoke test Lu procedure truth
         run: node scripts/smoke-lu-procedure-truth.mjs
 
+      - name: Smoke test dynamic endings
+        run: node scripts/smoke-dynamic-endings.mjs
+
       - name: Smoke test dock exit hospital crisis
         run: node scripts/smoke-dock-exit-hospital-crisis.mjs
 
