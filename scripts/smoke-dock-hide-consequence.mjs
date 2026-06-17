@@ -18,6 +18,14 @@ function choices(id) {
   return rt.choicesOf(id);
 }
 
+function assertNoSpoilerChoice(texts, label) {
+  const joined = texts.join('\n');
+  const spoilers = ['苏晚亭', '沈玉芳', '人质', '错过', '转走', '没有工具', '砸锁'];
+  for (const spoiler of spoilers) {
+    assert(!joined.includes(spoiler), `${label} 选项不应剧透“${spoiler}”：${joined}`);
+  }
+}
+
 const preparedFlags = {
   school_wu_three_proofs: true,
   got_wang_note: true,
@@ -37,8 +45,9 @@ reset({
 let opts = choices('ch4_dock_crates');
 let texts = opts.map(choice => choice.text || choice.fogText || '');
 assert(texts.includes('📦 躲进空木箱，等守卫过去'), '教具箱后应提供躲进木箱选项');
-assert(texts.includes('⚠️ 不躲了，拿上铁钎立刻去开暗门'), '教具箱后应提供不躲直接去暗门的风险选项');
-assert(opts.find(choice => (choice.text || '').includes('不躲'))?.goto === 'ch4_dock_guard_chase', '不躲应进入守卫追击节点');
+assert(texts.includes('⚠️ 趁脚步声靠近前，立刻往暗门走'), '教具箱后应提供不躲直接去暗门的风险选项');
+assert(opts.find(choice => (choice.text || '').includes('暗门走'))?.goto === 'ch4_dock_guard_chase', '不躲应进入守卫追击节点');
+assertNoSpoilerChoice(texts, '教具箱后');
 
 reset({
   flags: preparedFlags,
@@ -62,14 +71,17 @@ reset({
 });
 opts = choices('ch4_dock_full_search');
 texts = opts.map(choice => choice.text || choice.fogText || '');
-assert(texts.some(text => text.includes('没有工具，可能只能砸锁')), '完整搜查时直接找人选项应提示没有工具风险');
-assert(opts.find(choice => (choice.text || '').includes('直接顺着声音'))?.goto === 'ch4_dock_locked_door', '直接顺声音应先到暗门节点');
+assert(texts.includes('📦 先检查旁边的教具箱'), '完整搜查时应显示检查教具箱选项');
+assert(texts.includes('🔦 先循着敲击声去仓库深处'), '完整搜查时应显示循声找人选项');
+assert(opts.find(choice => (choice.text || '').includes('敲击声'))?.goto === 'ch4_dock_locked_door', '循声找人应先到暗门节点');
+assertNoSpoilerChoice(texts, '完整搜查');
 
 opts = choices('ch4_dock_locked_door');
 texts = opts.map(choice => choice.text || choice.fogText || '');
-assert(texts.includes('⚠️ 没有工具，强行砸锁开门'), '没有铁钎时应显示强行砸锁风险选项');
-assert(opts.find(choice => (choice.text || '').includes('砸锁'))?.goto === 'ch4_dock_break_lock_chase', '没有工具砸锁应进入砸锁追击节点');
-assert(opts.find(choice => (choice.text || '').includes('回头检查教具箱'))?.goto === 'ch4_dock_return_for_tool', '没有工具时回头找工具应进入错失双人质节点');
+assert(texts.includes('⚠️ 试着强行打开旧锁'), '没有铁钎时应显示强行打开旧锁选项');
+assert(opts.find(choice => (choice.text || '').includes('强行打开'))?.goto === 'ch4_dock_break_lock_chase', '强行打开旧锁应进入追击节点');
+assert(opts.find(choice => (choice.text || '').includes('折回去找'))?.goto === 'ch4_dock_return_for_tool', '折回去找东西应进入错失双人质节点');
+assertNoSpoilerChoice(texts, '暗门无工具');
 
 opts = choices('ch4_dock_return_for_tool');
 texts = opts.map(choice => choice.text || choice.fogText || '');
