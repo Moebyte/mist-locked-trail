@@ -1,6 +1,7 @@
 // ===== 福生仓潜入 heat 系统重构 =====
 // 目标：码头行动不再只靠“时间/压力”粗略路由，而是用潜入 heat 三档决定暗室结果。
 // heat 低：两人都在；heat 中：只剩沈玉芳；heat 高：两人都不在。
+// 守卫/声响不是一票否决，只是累计 heat；最终由总 heat 分档决定暗室结果。
 // 同时区分“一个便衣低调潜入”和“老孙带队压阵”的仓库进入流程。
 
 (function installDockHeatSystemPolish() {
@@ -49,6 +50,12 @@
 
     E.routeDockSearchByTime = routeDockSearchByTime;
 
+    E.addDockHeat = function (n, reason, flag) {
+      this.state.pressure.heat = Math.max(0, (this.state.pressure.heat || 0) + n);
+      if (flag) this.setFlag(flag, true);
+      if (reason) this.toast(reason);
+    };
+
     E.dockSupportMode = function () {
       if (fullSupportMode()) return 'full';
       if (fastSupportMode()) return 'fast';
@@ -60,24 +67,29 @@
 
       let score = baseHeat();
       const globalHeat = this.state?.pressure?.heat || 0;
-      score += Math.min(3, globalHeat);
+      score += Math.min(4, globalHeat);
 
       if (this.getFlag('dock_observed')) score -= 1;
+      if (this.getFlag('dock_moved_slowly')) score -= 1;
+      if (this.getFlag('dock_clearance_seen_inside')) score -= 1;
+      if (this.getFlag('dock_reached_crate_area_fast')) score += 1;
+      if (this.getFlag('dock_inner_office_rushed')) score += 1;
+      if (this.getFlag('dock_shelf_shortcut')) score += 1;
       if (this.getFlag('heard_fu_lu')) score += 1;
       if (this.getFlag('skipped_crates_for_sound')) score += 1;
       if (this.getFlag('returned_for_door_tool')) score += 2;
-      if (this.getFlag('skipped_dock_hide')) score += 2;
-      if (this.getFlag('dock_guard_chase_no_hide')) score += 2;
-      if (this.getFlag('dock_broke_lock_no_tool')) score += 2;
+      if (this.getFlag('skipped_dock_hide')) score += 1;
+      if (this.getFlag('dock_guard_chase_no_hide')) score += 1;
+      if (this.getFlag('dock_broke_lock_no_tool')) score += 1;
       if (this.getFlag('dock_full_support_tradeoff')) score += 1;
 
-      return Math.max(0, Math.min(6, score));
+      return Math.max(0, Math.min(7, score));
     };
 
     E.dockHeatTier = function () {
       const score = this.dockHeatScore();
-      if (score >= 4) return { level: 3, key: 'high', label: '高', score };
-      if (score >= 2) return { level: 2, key: 'mid', label: '中', score };
+      if (score >= 5) return { level: 3, key: 'high', label: '高', score };
+      if (score >= 3) return { level: 2, key: 'mid', label: '中', score };
       return { level: 1, key: 'low', label: '低', score };
     };
 
