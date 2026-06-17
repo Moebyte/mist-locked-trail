@@ -2,7 +2,7 @@
 // 目标：玩家过早从光华小学回到线索整理时，不再用“正常破案”口吻误导。
 // 1) 光华小学后若证据链断裂，不允许倒回大学 / 苏家 / 巡捕房补课，坏路线成立。
 // 2) 证据链不足时，结案页明确这是“证据不足的归档 / 冒然指认”，而不是正常收束。
-// 3) 周怀安线通过“陈明远的信 + 苏晚亭的伪造遗书”触发情感彩蛋结局，补足找人案件的委托人回响。
+// 3) 《吾爱晚亭》只属于证据链断裂后的坏路线；触发条件是向周怀安出示“陈明远的信 + 苏晚亭的伪造遗书”。
 (function installPrematureConclusionPolish() {
   function applyPrematureConclusionPolish() {
     if (typeof E === 'undefined' || typeof nodes === 'undefined') return;
@@ -37,6 +37,10 @@
 
     function isPrematureConclusion() {
       return !hasWangNote() || !hasReachedFushengCore();
+    }
+
+    function hasZhouBadRouteLetters() {
+      return E.hasItem('陈明远的信') && E.hasItem('苏晚亭的伪造遗书');
     }
 
     function missingEvidenceText() {
@@ -74,6 +78,7 @@
       const oldChoices = nodes.ch3_wrapup.choices;
       nodes.ch3_wrapup.choices = function (state) {
         const out = [];
+        let hasZhouChoice = false;
         for (const choice of choicesOf(oldChoices, state)) {
           const text = choice.text || choice.fogText || '';
           const isOldWangShortcut = choice.goto === 'ch2_police_wang' || text.includes('王巡官的批注');
@@ -83,6 +88,10 @@
           if (isPrematureConclusion() && (isOldWangShortcut || isFushengEntry)) continue;
 
           if (isConclusion && isPrematureConclusion()) {
+            if (hasZhouBadRouteLetters() && !hasZhouChoice) {
+              out.push({ text: '🏮 回访周怀安——带去陈明远的信和伪造遗书', goto: 'ch4_revisit_zhou' });
+              hasZhouChoice = true;
+            }
             out.push({ ...choice, text: '🔙 回顾现有证据（证据链仍不完整）' });
             continue;
           }
@@ -122,7 +131,7 @@
       nodes.ch4_pawnshop.text = function (state) {
         const base = typeof oldText === 'function' ? oldText(state) : oldText;
         if (!isPrematureConclusion()) return base;
-        return `${base}<br><br>翡翠镯能证明“陆念”这个名字不是空穴来风，却仍然回答不了这个案子最要紧的问题：苏晚亭去了哪里，她是不是还活着。<br><br>你想到陈明远那封未寄出的信，也想到信封夹层里那张伪造遗书。它们也许比这只镯子更应该先给周怀安看。`;
+        return `${base}<br><br>翡翠镯能证明“陆念”这个名字不是空穴来风，却仍然回答不了这个案子最要紧的问题：苏晚亭去了哪里，她是不是还活着。<br><br>你想到陈明远那封未寄出的信，也想到信封夹层里那张伪造遗书。它们比这只镯子更应该先给周怀安看；当铺只是旁证，不是这条坏路线的前置。`;
       };
 
       nodes.ch4_pawnshop.choices = function (state) {
@@ -146,11 +155,11 @@
           E.setFlag('presented_jade_to_zhou_premature', true);
           return { goto: 'ch4_zhou_present_jade_premature' };
         }
-        if (item.name === '陈明远的信' && !E.getFlag('presented_chen_letter_to_zhou')) {
+        if (isPrematureConclusion() && item.name === '陈明远的信' && !E.getFlag('presented_chen_letter_to_zhou')) {
           E.setFlag('presented_chen_letter_to_zhou', true);
           return { goto: E.getFlag('presented_su_forged_note_to_zhou') ? 'end_zhou_chen_letter' : 'ch4_zhou_present_chen_letter' };
         }
-        if (item.name === '苏晚亭的伪造遗书' && !E.getFlag('presented_su_forged_note_to_zhou')) {
+        if (isPrematureConclusion() && item.name === '苏晚亭的伪造遗书' && !E.getFlag('presented_su_forged_note_to_zhou')) {
           E.setFlag('presented_su_forged_note_to_zhou', true);
           return { goto: E.getFlag('presented_chen_letter_to_zhou') ? 'end_zhou_chen_letter' : 'ch4_zhou_present_su_forged_note' };
         }
@@ -159,7 +168,7 @@
 
       nodes.ch4_revisit_zhou.text = function (state) {
         const base = typeof oldText === 'function' ? oldText(state) : oldText;
-        if (isPrematureConclusion() && E.hasItem('陈明远的信') && E.hasItem('苏晚亭的伪造遗书')) {
+        if (isPrematureConclusion() && hasZhouBadRouteLetters()) {
           return `${base}<br><br><span class="sys">你怀里有两封互相撕扯的信：一封写着“晚亭吾爱”，让苏晚亭重新成为一个会爱、会怕、会选择的人；另一封仿着她的字迹，把她压成一句“为情而去”的遗言。周怀安必须看见它们并在一起的样子。</span>`;
         }
         return base;
@@ -192,20 +201,18 @@
       };
     }
 
-    if (nodes.ch4_zhou_present_jade_premature || !nodes.ch4_zhou_present_jade_premature) {
-      nodes.ch4_zhou_present_jade_premature = {
-        title: '举证 · 翡翠镯',
-        weather: 5,
-        effect: () => {
-          E.addClue('周怀安识出陆念', '周怀安从翡翠镯上确认“陆念”这个名字，但这仍不能回答苏晚亭在哪里。');
-        },
-        text: () => `你把翡翠镯放在周怀安面前。<br><br>他看到内侧刻着的“陆念”时，脸色变了一下。<br><br><span class="sys">“晚亭提过这个名字。”</span><br><br>他告诉你，苏晚亭失踪前确实说过“陆念”这个名字，也说过一个人换了名字，过去犯过的错是不是也能一笔勾销。<br><br>这能证明陆小姐不是普通过客，却仍然回答不了最要紧的问题：苏晚亭在哪里？她是否还活着？<br><br>周怀安看向你，声音比刚才更低：<span class="sys">“沈先生，还有别的吗？有她自己的消息吗？”</span>`,
-        choices: [
-          { text: '📨 如果还有两封信，就拿出来', goto: 'ch4_revisit_zhou' },
-          { text: '🔙 暂时回去整理现有证据', goto: 'ch4_conclusion' }
-        ]
-      };
-    }
+    nodes.ch4_zhou_present_jade_premature = {
+      title: '举证 · 翡翠镯',
+      weather: 5,
+      effect: () => {
+        E.addClue('周怀安识出陆念', '周怀安从翡翠镯上确认“陆念”这个名字，但这仍不能回答苏晚亭在哪里。');
+      },
+      text: () => `你把翡翠镯放在周怀安面前。<br><br>他看到内侧刻着的“陆念”时，脸色变了一下。<br><br><span class="sys">“晚亭提过这个名字。”</span><br><br>他告诉你，苏晚亭失踪前确实说过“陆念”这个名字，也说过一个人换了名字，过去犯过的错是不是也能一笔勾销。<br><br>这能证明陆小姐不是普通过客，却仍然回答不了最要紧的问题：苏晚亭在哪里？她是否还活着？<br><br>周怀安看向你，声音比刚才更低：<span class="sys">“沈先生，还有别的吗？有她自己的消息吗？”</span>`,
+      choices: [
+        { text: '📨 如果还有两封信，就拿出来', goto: 'ch4_revisit_zhou' },
+        { text: '🔙 暂时回去整理现有证据', goto: 'ch4_conclusion' }
+      ]
+    };
 
     if (!nodes.end_zhou_chen_letter) {
       nodes.end_zhou_chen_letter = {
