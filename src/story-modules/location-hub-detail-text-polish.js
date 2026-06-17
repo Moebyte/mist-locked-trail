@@ -274,6 +274,18 @@
       };
     }
 
+
+    if (nodes.ch3_school_chen_su && !nodes.ch3_school_chen_su.__photoConditionPatched) {
+      const oldChenSuText = nodes.ch3_school_chen_su.text;
+      nodes.ch3_school_chen_su.text = function (state) {
+        if (E.hasItem('苏晚亭的照片')) {
+          return `你拿出苏晚亭的照片给吴校长看。<br><br><span class="sys">"这个女孩子，你认识吗？"</span><br><br>吴校长一看照片，表情就变了。<span class="sys">"她……她来过。陈老师出事前一个星期，她来过学校几次，说是陈老师的朋友。"</span><br><br><span class="sys">"她来做什么？"</span><br><br><span class="sys">"说是来借书。陈老师藏书很多，尤其是教育类的。她说她在写论文，需要参考资料。我也没多想。"</span><br><br><span class="sys">"陈老师出事后，她还来过吗？"</span><br><br>吴校长摇了摇头。<span class="sys">"没有。再也没来过。"</span><br><br>你没有告诉他苏晚亭失踪的事。`;
+        }
+        return `你向吴校长描述苏晚亭的外貌——一个二十岁左右的女学生，中等身材，常穿蓝灰色旗袍。你把她的名字告诉他。<br><br><span class="sys">"这个女孩子，你认识吗？"</span><br><br>吴校长想了想，点了点头。<span class="sys">"苏晚亭……这个名字我有印象。陈老师出事前一个星期，她来过学校几次，说是陈老师的朋友。"</span><br><br><span class="sys">"她来做什么？"</span><br><br><span class="sys">"说是来借书。陈老师藏书很多，尤其是教育类的。她说她在写论文，需要参考资料。我也没多想。"</span><br><br><span class="sys">"陈老师出事后，她还来过吗？"</span><br><br>吴校长摇了摇头。<span class="sys">"没有。再也没来过。"</span><br><br>你没有告诉他苏晚亭失踪的事。`;
+      };
+      nodes.ch3_school_chen_su.__photoConditionPatched = true;
+    }
+
     E.__locationHubDetailTextPolishPatched = true;
   }
 
