@@ -45,7 +45,7 @@
       const opts = [];
       if (!E.getFlag('saw_man')) opts.push({ text: '🔍 先在周围观察一下', goto: 'ch2_building_stakeout' });
       if (!E.getFlag('asked_landlord')) {
-        opts.push({ text: '🔍 问看门老头关于陆姓女子的事', goto: 'ch2_ask_landlord' });
+        opts.push({ text: '🔍 问看门老头——二楼住着什么人', goto: 'ch2_ask_landlord' });
       } else if (!searched203Evidence()) {
         opts.push({ text: '⬆️ 上二楼，敲 203 的门', goto: 'ch2_203_door' });
       }

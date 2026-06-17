@@ -71,7 +71,7 @@
     function buildingChoices() {
       const opts = [];
       if (!E.getFlag('saw_man')) opts.push({ text: '🔍 先在周围观察一下', goto: 'ch2_building_stakeout' });
-      if (!E.getFlag('asked_landlord')) opts.push({ text: '🔍 问看门老头更多关于陆姓女子的事', goto: 'ch2_ask_landlord' });
+      if (!E.getFlag('asked_landlord')) opts.push({ text: '🔍 问看门老头——二楼住着什么人', goto: 'ch2_ask_landlord' });
       if (!searched203Evidence()) opts.push({ text: '⬆️ 上二楼，敲 203 的门', goto: 'ch2_203_door' });
       if (searched203Evidence()) opts.push({ text: '📚 去光华小学——那里是这一切的中心', goto: 'ch3_school' });
       return opts;
