@@ -63,8 +63,14 @@
       const oldText = nodes.ch4_dock_escape_finish.text;
       nodes.ch4_dock_escape_finish.text = function (state) {
         const base = typeof oldText === 'function' ? oldText(state) : oldText;
-        if (String(base).includes('车子没有直接回事务所')) return base;
         const solo = E.getFlag('dock_solo_entry') || E.getFlag('dock_solo_waterline_escape') || E.getFlag('dock_solo_crate_screen') || E.getFlag('dock_solo_decoy_escape');
+        const hasHospitalText = String(base).includes('车子没有直接回事务所');
+        if (hasHospitalText && solo && String(base).includes('老孙的人守')) {
+          // SOLO 路线：替换老孙相关描述
+          return String(base).split('车子没有直接回事务所')[0]
+            + '车子没有直接回事务所，而是先拐进一家教会医院的后门。码头的雾已经远了，可医院走廊里的灯光也救不了谁。没有老孙接手证人，没有便衣守后门。你只能靠自己让这两个女人撑到天亮。';
+        }
+        if (hasHospitalText) return base;
         if (solo) {
           return `${base}<br><br>车子没有直接回事务所，而是先拐进一家教会医院的后门。码头的雾已经远了，可医院走廊里的灯光也救不了谁。没有老孙接手证人，没有便衣守后门。你只能靠自己让这两个女人撑到天亮。`;
         }
