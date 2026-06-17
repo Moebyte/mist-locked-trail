@@ -88,14 +88,24 @@ for (const id of ['end_boss_lu', 'end_boss_zhao', 'end_boss_wu']) {
 reports.push('PASS 三个错误指认结局可达');
 
 // 5. 普通真相 / 救人结局。
-reset({ flags: highTruthFlags({ rescued_yufang: false, rescued_su: false, school_wu_three_proofs: false }) });
+reset({ flags: {
+  deduced_fusheng: true,
+  fu_waybill_exposed: true,
+  fu_clearance_exposed: true,
+  v07_lu_confronted: true,
+  v07_rejected_fu_deal: true,
+  rescued_yufang: false,
+  rescued_su: false,
+  v07_witnesses_protected: false,
+  school_wu_three_proofs: false,
+} });
 assert(E.v07ResolveEnding() === 'end_conspiracy', `查明部分真相但无人获救应进入普通真相，实际 ${E.v07ResolveEnding()}`);
 reset({ flags: { rescued_su: true } });
 assert(E.v07ResolveEnding() === 'end_rescue', `救出苏晚亭但真相链不足应进入黎明灯火，实际 ${E.v07ResolveEnding()}`);
 reports.push('PASS 普通真相、救人结局可达');
 
 // 6. 隐藏 / 真隐藏。
-reset({ flags: highTruthFlags({ rescued_yufang: true, rescued_su: false, su_moved_from_dock: true }) });
+reset({ flags: highTruthFlags({ rescued_yufang: true, rescued_su: false, su_moved_from_dock: true, v07_witnesses_protected: false }) });
 assert(E.v07ResolveEnding() === 'end_conspiracy_detail', `救出沈玉芳但未救出苏晚亭应进入隐藏结局，实际 ${E.v07ResolveEnding()}`);
 assert(hasTarget('ch4_conclusion', 'end_conspiracy_detail'), '救出沈玉芳但未救出苏晚亭时，终局选项应能进入隐藏结局');
 
