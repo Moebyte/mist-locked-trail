@@ -33,6 +33,7 @@
     'src/story-modules/location-hub-flow-polish.js',
     'src/story-modules/location-hub-detail-text-polish.js',
     'src/story-modules/present-flow-cleanup.js',
+    'src/story-modules/pressure-quality-ending-polish.js',
     'src/story-modules/hidden-ending-gate-cleanup.js',
     'src/story-modules/status-polish.js',
     'src/story-modules/ending-layout-polish.js'
