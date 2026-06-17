@@ -64,6 +64,9 @@ jobs:
       - name: Smoke test fusheng key gates
         run: node scripts/smoke-fusheng-key-gates.mjs
 
+      - name: Smoke test yufang testimony
+        run: node scripts/smoke-yufang-testimony.mjs
+
       - name: Smoke test solo dock hospital
         run: node scripts/smoke-solo-dock-hospital.mjs
 
