@@ -1,0 +1,53 @@
+#!/usr/bin/env node
+import { loadStoryRuntime } from './story-harness.mjs';
+
+const rt = loadStoryRuntime();
+const errors = [];
+
+function assert(condition, message) {
+  if (!condition) errors.push(message);
+}
+
+function reset(overrides = {}) {
+  rt.resetState(overrides);
+}
+
+function texts(id) {
+  return rt.choicesOf(id).map(choice => choice.text || choice.fogText || '');
+}
+
+function has(id, fragment) {
+  return texts(id).some(text => text.includes(fragment));
+}
+
+reset();
+assert(has('ch2_frenchtown', '先在周围观察'), '薛华立路初到时应显示周围观察');
+assert(has('ch2_frenchtown', '问看门老头关于陆姓女子'), '薛华立路初到时应显示问看门老头');
+assert(!has('ch2_frenchtown', '上二楼，敲 203'), '未问看门老头前不应直接上203');
+
+reset({ flags: { saw_man: true } });
+assert(!has('ch2_frenchtown', '先在周围观察'), '周围观察完成后应隐藏观察选项');
+assert(has('ch2_frenchtown', '问看门老头关于陆姓女子'), '观察完成但未问老头时，应继续显示问老头');
+assert(!has('ch2_frenchtown', '上二楼，敲 203'), '观察完成但未问老头时，仍不应直接上203');
+
+reset({ flags: { saw_man: true, asked_landlord: true } });
+assert(!has('ch2_building_enter', '先在周围观察'), '沈玉兰线后回商行时，已完成观察应隐藏');
+assert(!has('ch2_building_enter', '问看门老头关于陆姓女子'), '问过老头后不应重复显示问老头');
+assert(has('ch2_building_enter', '上二楼，敲 203'), '问过老头后应显示上203');
+
+reset({ flags: { saw_man: true, asked_landlord: true }, items: [{ name: '三人合影', desc: '' }] });
+assert(!has('ch2_building_enter', '上二楼，敲 203'), '203搜完后不应重复上203');
+assert(has('ch2_building_enter', '光华小学'), '203搜完后应引导去光华小学');
+
+reset();
+assert(has('ch2_yulan_promise_echo', '回永兴贸易商行'), '沈玉兰托付后应显示回永兴贸易商行继续搜查');
+assert(!has('ch2_yulan_promise_echo', '去薛华立路 22 号'), '沈玉兰托付后不应再显示去薛华立路22号');
+assert(!has('ch2_yulan_distance_echo', '去薛华立路 22 号'), '沈玉兰边界后不应再显示去薛华立路22号');
+
+if (errors.length) {
+  console.error('Xuehua choice smoke failed:');
+  for (const error of errors) console.error(`- ${error}`);
+  process.exit(1);
+}
+
+console.log('Xuehua choice smoke passed.');
