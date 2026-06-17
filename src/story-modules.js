@@ -47,6 +47,7 @@
     'src/story-modules/hidden-ending-gate-cleanup.js',
     'src/story-modules/hospital-flow-polish.js',
     'src/story-modules/hospital-pressure-witness-polish.js',
+    'src/story-modules/hospital-truth-score-polish.js',
     'src/story-modules/fusheng-key-gates-polish.js',
     'src/story-modules/hospital-triage-polish.js',
     'src/story-modules/solo-dock-hospital-polish.js',
