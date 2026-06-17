@@ -176,22 +176,44 @@ for (const [id, node] of Object.entries(nodes)) {
   }
 }
 
+const legalDockPrereqs = {
+  flags: { got_wang_note: true, sister_case: true },
+  items: [{ name: '半张烟盒纸', desc: '' }],
+  clues: [
+    { name: '王巡官遗留纸条', desc: '' },
+    { name: '沈玉芳', desc: '' },
+    { name: '沈玉兰的妹妹', desc: '' },
+    { name: '沈玉芳与陈明远', desc: '' },
+  ],
+};
+function resetLegalDockState(overrides = {}) {
+  resetState({
+    inGameTime: overrides.inGameTime,
+    pressure: { heat: 0, deadline: { day: 2, hour: 23, minute: 0 } },
+    visitedNodes: {},
+    sceneLog: [],
+    flags: { ...legalDockPrereqs.flags, ...(overrides.flags || {}) },
+    items: legalDockPrereqs.items.map(item => ({ ...item })),
+    clues: legalDockPrereqs.clues.map(clue => ({ ...clue })),
+  });
+}
+
 try {
-  resetState({ inGameTime: { day: 1, hour: 14, minute: 30 }, pressure: { heat: 0, deadline: { day: 2, hour: 23, minute: 0 } }, visitedNodes: {}, sceneLog: [] });
+  resetLegalDockState({ inGameTime: { day: 1, hour: 14, minute: 30 } });
   visit('ch4_suzhou_creek'); expectEqual(E.routeDockByPressure(), 'ch4_dock_full_search', 'safe routeDockByPressure');
   visit('ch4_dock_full_search'); visit('ch4_dock_crates'); visit('ch4_dock_locked_door');
   expectEqual(E.routeDockDeepByPressure(), 'ch4_dock_deep_dual', 'safe routeDockDeepByPressure');
 
-  resetState({ inGameTime: { day: 2, hour: 14, minute: 0 }, pressure: { heat: 0, deadline: { day: 2, hour: 23, minute: 0 } }, visitedNodes: {}, sceneLog: [] });
+  resetLegalDockState({ inGameTime: { day: 2, hour: 14, minute: 0 } });
   visit('ch4_suzhou_creek'); expectEqual(E.routeDockByPressure(), 'ch4_dock_limited_search', 'tight routeDockByPressure');
   visit('ch4_dock_limited_search'); visit('ch4_dock_crates'); visit('ch4_dock_locked_door');
   expectEqual(E.routeDockDeepByPressure(), 'ch4_dock_deep_trace', 'tight routeDockDeepByPressure');
 
-  resetState({ inGameTime: { day: 2, hour: 20, minute: 30 }, pressure: { heat: 0, deadline: { day: 2, hour: 23, minute: 0 } }, visitedNodes: {}, sceneLog: [] });
+  resetLegalDockState({ inGameTime: { day: 2, hour: 20, minute: 30 } });
   visit('ch4_suzhou_creek'); expectEqual(E.routeDockByPressure(), 'ch4_dock_rescue_only', 'critical routeDockByPressure');
   visit('ch4_dock_rescue_only'); expectEqual(E.routeDockDeepByPressure(), 'ch4_dock_deep_rescue_only', 'critical routeDockDeepByPressure');
 
-  resetState({ inGameTime: { day: 2, hour: 23, minute: 30 }, pressure: { heat: 0, deadline: { day: 2, hour: 23, minute: 0 } }, visitedNodes: {}, sceneLog: [] });
+  resetLegalDockState({ inGameTime: { day: 2, hour: 23, minute: 30 } });
   visit('ch4_suzhou_creek'); expectEqual(E.routeDockByPressure(), 'ch4_dock_cleared', 'expired routeDockByPressure');
 } catch (err) { errors.push(`pressure smoke failed: ${err.message}`); }
 
