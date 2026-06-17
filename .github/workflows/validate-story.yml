@@ -46,6 +46,9 @@ jobs:
       - name: Smoke test ending reachability
         run: node scripts/smoke-ending-reachability.mjs
 
+      - name: Smoke test narrative clock
+        run: node scripts/smoke-narrative-clock.mjs
+
       - name: Smoke test causal echo
         run: node scripts/smoke-causal-echo.mjs
 
