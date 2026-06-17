@@ -31,6 +31,7 @@
     'src/story-modules/guanghua-school-flow-polish.js',
     'src/story-modules/guanghua-confront-choice-cleanup.js',
     'src/story-modules/location-hub-flow-polish.js',
+    'src/story-modules/location-hub-detail-text-polish.js',
     'src/story-modules/status-polish.js',
     'src/story-modules/ending-layout-polish.js'
   ];
