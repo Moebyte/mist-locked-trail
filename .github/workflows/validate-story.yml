@@ -61,6 +61,9 @@ jobs:
       - name: Smoke test Sun fast support
         run: node scripts/smoke-sun-fast-support.mjs
 
+      - name: Smoke test fast support heat-delay enumeration
+        run: node scripts/smoke-fast-support-heat-delay-enum.mjs
+
       - name: Smoke test dock heat system
         run: node scripts/smoke-dock-heat-system.mjs
 
