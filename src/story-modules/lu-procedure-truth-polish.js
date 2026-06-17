@@ -40,6 +40,28 @@
       return typeof E.hospitalOutcomeTier === 'function' ? E.hospitalOutcomeTier().key : 'controlled';
     }
 
+    if (typeof E.hospitalPressureScore === 'function' && !E.__zhouHospitalPressurePatched) {
+      const oldPressure = E.hospitalPressureScore.bind(E);
+      E.hospitalPressureScore = function () {
+        let score = oldPressure();
+        if (this.getFlag('hospital_triage_zhou_early')) score += 1;
+        return Math.max(0, Math.min(10, score));
+      };
+      E.__zhouHospitalPressurePatched = true;
+    }
+
+    if (typeof E.witnessStabilityScore === 'function' && !E.__zhouWitnessStabilityPatched) {
+      const oldWitness = E.witnessStabilityScore.bind(E);
+      E.witnessStabilityScore = function () {
+        let score = oldWitness();
+        const wp = witnessProfile();
+        if (this.getFlag('hospital_triage_zhou_early')) score -= 1;
+        if (wp.su && this.getFlag('hospital_protect_witnesses') && this.getFlag('hospital_doctor_record') && !this.getFlag('hospital_triage_zhou_early')) score += 1;
+        return Math.max(0, Math.min(10, score));
+      };
+      E.__zhouWitnessStabilityPatched = true;
+    }
+
     E.luCredibilityScore = function () {
       const wp = witnessProfile();
       let score = 0;
