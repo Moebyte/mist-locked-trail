@@ -6,16 +6,6 @@
     if (typeof E === 'undefined' || typeof nodes === 'undefined') return;
     if (E.__suHomeTrustGatePatched) return;
 
-    function chainPresent(nodeId, handler) {
-      const node = nodes[nodeId];
-      if (!node) return;
-      const oldHandler = node.onPresent;
-      node.onPresent = function (item, state) {
-        const oldResult = typeof oldHandler === 'function' ? oldHandler(item, state) : null;
-        return oldResult || handler(item, state);
-      };
-    }
-
     function presentOnce(item, itemName, flag) {
       if (typeof E.presentOnce === 'function') return E.presentOnce(item, itemName, flag);
       if (item && item.name === itemName && !E.getFlag(flag)) {
@@ -57,11 +47,6 @@
       nodes.ch2_home_ask_photo.__cousinWeakenedPatched = true;
     }
 
-    chainPresent('ch4_dock_who_dual', (item) => {
-      if (presentOnce(item, '苏晚亭的银发夹', 'presented_su_keepsake')) return { goto: 'ch4_su_present_keepsake' };
-      return null;
-    });
-
     nodes.ch4_su_present_keepsake = {
       title: '举证 · 银发夹',
       weather: 2,
@@ -71,6 +56,17 @@
       text: () => `你把那只银发夹摊在掌心。<br><br>苏晚亭原本涣散的目光忽然停住了。她伸出手，却没有立刻碰它，像是怕一碰就会醒。<br><br><span class="sys">“这是我小时候的东西。”</span><br><br>她的声音很轻，轻得几乎被暗室外的脚步声吞掉。<br><br><span class="sys">“我母亲……她还好吗？”</span><br><br>你告诉她，苏母认出了照片，也把这只发夹交给你。她闭了闭眼，再睁开时，终于不再把你当成又一个来带她走的人。`,
       choices: [{ text: '🔙 带她们离开暗室', goto: 'ch4_dock_escape' }]
     };
+
+    if (nodes.ch4_dock_who_dual && !nodes.ch4_dock_who_dual.__suDockPresentWhitelistPatched) {
+      nodes.ch4_dock_who_dual.onPresent = function (item) {
+        if (presentOnce(item, '苏晚亭的银发夹', 'presented_su_keepsake')) return { goto: 'ch4_su_present_keepsake' };
+        if (presentOnce(item, '三人合影', 'presented_photo_to_yufang_dual')) return { goto: 'ch4_yufang_present_photo_dual' };
+        if (presentOnce(item, '陈明远的信', 'presented_letter_to_yufang_dual')) return { goto: 'ch4_yufang_present_letter_dual' };
+        if (presentOnce(item, '未寄出的信', 'presented_unsent_letter_to_yufang_dual')) return { goto: 'ch4_yufang_present_letter_dual' };
+        return null;
+      };
+      nodes.ch4_dock_who_dual.__suDockPresentWhitelistPatched = true;
+    }
 
     if (nodes.ch4_dock_escape_finish && !nodes.ch4_dock_escape_finish.__suHomeTrustGatePatched) {
       const oldEffect = nodes.ch4_dock_escape_finish.effect;
