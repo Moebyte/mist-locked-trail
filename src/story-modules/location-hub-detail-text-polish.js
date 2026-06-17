@@ -37,7 +37,13 @@
     }
 
     function baseSchoolText() {
-      return `吴校长办公室里有一股旧纸和粉笔灰的味道。窗外是操场，雨后的旗杆一动不动。<br><br>普通寒暄已经没意义。你要把陈明远、苏晚亭、沈玉芳和陆小姐一条条问清。`;
+      const knowYuFang = E.hasClue('沈玉芳') || E.hasClue('沈玉芳人质线') || E.getFlag('sister_case') || E.hasClue('沈玉芳与陈明远') || E.hasClue('救助两名女证人');
+      const knowLu = E.hasClue('陆念薇') || E.hasClue('恐吓信') || E.hasClue('三人合影') || E.hasClue('杭州旧案剪报') || E.getFlag('asked_landlord');
+      let targets = '陈明远、苏晚亭';
+      if (knowYuFang) targets += '、沈玉芳';
+      if (knowLu) targets += '和陆小姐';
+      const extra = (!knowYuFang && !knowLu) ? ' 你手里的线索还不算多，但从校长这里应该能问到不少东西。' : '';
+      return `吴校长办公室里有一股旧纸和粉笔灰的味道。窗外是操场，雨后的旗杆一动不动。<br><br>普通寒暄已经没意义。你要把${targets}一条条问清。${extra}`;
     }
 
     if (nodes.ch2_univ_paper && !nodes.ch2_univ_paper.__suPhotoMovedPatched) {
