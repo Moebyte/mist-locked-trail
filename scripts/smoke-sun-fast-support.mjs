@@ -64,7 +64,7 @@ assert(E.routeDockByPressure() === 'ch4_dock_fast_infiltration', '完整准备 +
 E.setFlag('dock_entry_committed', true);
 E.setFlag('dock_fast_support_entry', true);
 assert(E.routeDockSearchByTime() === 'ch4_dock_full_search', '低调潜入后应进入完整搜查');
-assert(E.routeDockDeepByPressure() === 'ch4_dock_deep_dual', '完整准备 + 私下增援 + 低 heat 应能同时找到沈玉芳和苏晚亭');
+assert(E.routeDockDeepByPressure() === 'ch4_dock_deep_dual', '完整准备 + 私下增援 + 低风险应能同时找到沈玉芳和苏晚亭');
 
 reset({
   currentScene: 'ch4_dock_wait',
@@ -84,8 +84,13 @@ assert(E.fullSupportTradeoffActive(), '老孙带队应触发 fullSupportTradeoff
 assert(E.routeDockByPressure() === 'ch4_dock_full_support_infiltration', '老孙带队应先进入老孙压阵流程');
 E.setFlag('dock_entry_committed', true);
 E.setFlag('dock_full_support_entry', true);
+E.setFlag('dock_full_support_tradeoff', true);
 assert(E.routeDockSearchByTime() === 'ch4_dock_full_search', '老孙带队应保留完整搜查/封锁优势');
-assert(E.routeDockDeepByPressure() === 'ch4_dock_deep_trace', '老孙带队默认中 heat，苏晚亭应刚被转走，而不是双人暗室');
+assert(E.routeDockDeepByPressure() === 'ch4_dock_deep_empty_heat', '老孙带队未优化时风险过高，应可能两人都被转走');
+
+E.setFlag('dock_sun_outer_quiet', true);
+E.setFlag('dock_sun_block_truck_lane', true);
+assert(E.routeDockDeepByPressure() === 'ch4_dock_deep_trace', '老孙带队优化外围后，应压到中风险，只剩沈玉芳');
 
 if (errors.length) {
   console.error('Sun fast support smoke failed:');
