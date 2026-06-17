@@ -40,7 +40,7 @@
     }
 
     function baseDelay() {
-      if (fullSupportMode()) return 1; // 调人压阵本身会慢半拍。
+      if (fullSupportMode()) return 2; // 调人压阵本身会慢一拍，默认足以把路线推到中风险。
       return 0;
     }
 
