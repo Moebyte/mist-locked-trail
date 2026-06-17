@@ -1,6 +1,7 @@
 // ===== 真结局路线兜底 =====
-// 目标：玩家完成完整调查准备后，福生仓路线不应被压力路由误挡到“只救沈玉芳/苏晚亭被转走”。
-// 完整准备 = 光华三证物闭环 + 推明福生仓 + 找到王巡官/福生仓入口 + 认识沈玉芳人质线 + 拿到苏母信物。
+// 目标：玩家完成完整救人准备后，福生仓路线不应被压力路由误挡到“只救沈玉芳/苏晚亭被转走”。
+// 说明：福生仓真相推理需要仓库里的公董局公文纸与教具箱证据，不能作为进入福生仓前置条件。
+// 完整救人准备 = 光华三证物闭环 + 找到王巡官/福生仓入口 + 认识沈玉芳人质线 + 拿到苏母信物。
 
 (function installTrueEndingRoutePolish() {
   function applyTrueEndingRoutePolish() {
@@ -28,7 +29,6 @@
 
     E.trueEndingPrepared = function () {
       return this.getFlag('school_wu_three_proofs')
-        && this.getFlag('deduced_fusheng')
         && hasWangFushengLead()
         && knowsYufangForRescue()
         && hasSuTrustToken()
