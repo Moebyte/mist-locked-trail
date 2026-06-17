@@ -1,7 +1,7 @@
 // ===== 福生仓木箱潜伏后果 =====
 // 目标：“检查教具箱 / 躲进木箱”不再只是气氛选项，而是潜入成败关键。
-// 不检查教具箱就没有铁钎，只能砸锁；不躲守卫或砸锁都会触发追击。
-// 砸锁/不躲会错失苏晚亭；摸到暗门后再回头找工具，则会错过两名人质。
+// 选项文案只描述眼前动作，不提前剧透“谁会被转走/谁会错过”。
+// 内部后果：砸锁/不躲会错失苏晚亭；摸到暗门后再回头找工具，则会错过两名人质。
 
 (function installDockHideConsequencePolish() {
   function applyDockHideConsequencePolish() {
@@ -10,9 +10,9 @@
 
     if (nodes.ch4_dock_full_search && !nodes.ch4_dock_full_search.__directSearchWarningPatched) {
       nodes.ch4_dock_full_search.choices = [
-        { text: '📦 先检查教具箱，找能开暗门的工具', goto: 'ch4_dock_crates' },
+        { text: '📦 先检查旁边的教具箱', goto: 'ch4_dock_crates' },
         {
-          text: '🔦 直接顺着声音找人（没有工具，可能只能砸锁）',
+          text: '🔦 先循着敲击声去仓库深处',
           effect: () => E.setFlag('skipped_crates_for_sound', true),
           goto: 'ch4_dock_locked_door'
         }
@@ -22,9 +22,9 @@
 
     if (nodes.ch4_dock_limited_search && !nodes.ch4_dock_limited_search.__directSearchWarningPatched) {
       nodes.ch4_dock_limited_search.choices = [
-        { text: '📦 冒险检查教具箱，找工具和货运证据', goto: 'ch4_dock_crates' },
+        { text: '📦 冒险翻查旁边的教具箱', goto: 'ch4_dock_crates' },
         {
-          text: '🔦 立刻顺着声音找人（没有工具，可能只能砸锁）',
+          text: '🔦 先循着敲击声去仓库深处',
           effect: () => E.setFlag('skipped_crates_for_sound', true),
           goto: 'ch4_dock_locked_door'
         }
@@ -36,7 +36,7 @@
       nodes.ch4_dock_crates.choices = [
         { text: '📦 躲进空木箱，等守卫过去', goto: 'ch4_dock_hide' },
         {
-          text: '⚠️ 不躲了，拿上铁钎立刻去开暗门',
+          text: '⚠️ 趁脚步声靠近前，立刻往暗门走',
           effect: () => {
             E.setFlag('skipped_dock_hide', true);
             E.addHeat(2, '你没有躲避守卫，仓库里的脚步声立刻追了上来。');
@@ -48,7 +48,7 @@
     }
 
     nodes.ch4_dock_return_for_tool = {
-      title: '福生仓 · 回头找工具',
+      title: '福生仓 · 折回教具箱',
       weather: 4,
       cost: { h: 0, m: 12, reason: '你从暗门前折回教具箱，重新寻找能撬锁的工具' },
       effect: () => {
@@ -101,17 +101,17 @@
     };
 
     nodes.ch4_dock_break_lock_chase = {
-      title: '福生仓 · 砸锁惊动守卫',
+      title: '福生仓 · 声响',
       weather: 5,
-      cost: { h: 0, m: 20, reason: '你没有找到工具，只能砸锁并甩开守卫追击' },
+      cost: { h: 0, m: 20, reason: '你没有找到工具，只能强行打开旧锁并甩开守卫追击' },
       effect: () => {
         E.setFlag('dock_broke_lock_no_tool', true);
         E.setFlag('dock_guard_chase_no_hide', true);
         E.setFlag('su_moved_due_to_chase', true);
-        E.addHeat(3, '砸锁声在仓库里炸开，守卫立刻朝暗门方向追来。');
-        E.addClue('砸锁惊动守卫', '你没有检查教具箱找铁钎，只能砸锁。守卫追击耽误了时间，苏晚亭被转走。');
+        E.addHeat(3, '旧锁断开的声响在仓库里炸开，守卫立刻朝暗门方向追来。');
+        E.addClue('强行开锁惊动守卫', '你没有检查教具箱找铁钎，只能强行打开旧锁。守卫追击耽误了时间，苏晚亭被转走。');
       },
-      text: () => `你把肩膀撞上旧锁，铁锈和木屑一起落下来。<br><br>第一下，锁没开。<br><br>第二下，仓库另一头已经传来喊声：<span class="sys">“暗门那边有人！”</span><br><br>你咬牙又砸了一下，锁终于断开。可手电光已经从货架缝隙里扫过来，你只能先拖开一排木箱，绕进黑暗里。<br><br>等你甩开追上来的守卫，再回到暗门前，里面的敲击声已经变了。<br><br>不是两个人求救的声音。<br><br>只剩一个人。`,
+      text: () => `你把肩膀撞上旧锁，铁锈和木屑一起落下来。<br><br>第一下，锁没开。<br><br>第二下，仓库另一头已经传来喊声：<span class="sys">“暗门那边有人！”</span><br><br>你咬牙又撞了一下，锁终于断开。可手电光已经从货架缝隙里扫过来，你只能先拖开一排木箱，绕进黑暗里。<br><br>等你甩开追上来的守卫，再回到暗门前，里面的敲击声已经变了。<br><br>不是两个人求救的声音。<br><br>只剩一个人。`,
       choices: [{ text: '🚪 推开暗门', goto: 'ch4_dock_deep_trace' }]
     };
 
@@ -121,7 +121,7 @@
         const base = typeof oldText === 'function' ? oldText(state) : oldText;
         if (E.hasItem('铁钎')) return base;
         const reason = E.getFlag('skipped_crates_for_sound')
-          ? '<br><br><span class="sys">你刚才直接顺着声音过来，没有检查教具箱。现在门就在眼前，但你手里没有能安静撬锁的工具。</span>'
+          ? '<br><br><span class="sys">你刚才直接顺着声音过来，没有检查旁边的木箱。现在门就在眼前，但手边没有趁手的东西。</span>'
           : '';
         return `${base}${reason}`;
       };
@@ -130,8 +130,8 @@
           return [{ text: '🧰 用铁钎撬开暗门', goto: () => E.routeDockDeepByPressure() }];
         }
         return [
-          { text: '⚠️ 没有工具，强行砸锁开门', goto: 'ch4_dock_break_lock_chase' },
-          { text: '📦 回头检查教具箱找工具（耗时，可能错过两名人质）', goto: 'ch4_dock_return_for_tool' }
+          { text: '⚠️ 试着强行打开旧锁', goto: 'ch4_dock_break_lock_chase' },
+          { text: '📦 折回去找能用的东西', goto: 'ch4_dock_return_for_tool' }
         ];
       };
       nodes.ch4_dock_locked_door.__breakLockConsequencePatched = true;
