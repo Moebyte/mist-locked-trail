@@ -61,6 +61,9 @@ jobs:
       - name: Smoke test hospital flow
         run: node scripts/smoke-hospital-flow.mjs
 
+      - name: Smoke test dock hide consequence
+        run: node scripts/smoke-dock-hide-consequence.mjs
+
       - name: Smoke test dock escape choices
         run: node scripts/smoke-dock-escape-choices.mjs
 
