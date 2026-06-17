@@ -91,13 +91,27 @@
           return 'end_archive';
         }
 
-        if (quality.score >= 10
+        // SOLO 路线缺码头封锁记录和官方证据，最高只能到隐藏结局
+        const soloMode = this.getFlag('dock_solo_entry') || this.getFlag('dock_solo_waterline_escape')
+          || this.getFlag('dock_solo_crate_screen') || this.getFlag('dock_solo_decoy_escape')
+          || this.getFlag('dock_solo_hard_confront');
+
+        if (!soloMode && quality.score >= 10
           && this.getFlag('rescued_yufang')
           && this.getFlag('rescued_su')
           && this.getFlag('deduced_fusheng')
           && this.getFlag('school_wu_three_proofs')
           && (t === 'complete' || t === 'solid')) {
           return 'end_true_hidden';
+        }
+
+        if (soloMode && quality.score >= 10
+          && this.getFlag('rescued_yufang')
+          && this.getFlag('rescued_su')
+          && this.getFlag('deduced_fusheng')
+          && this.getFlag('school_wu_three_proofs')
+          && (t === 'complete' || t === 'solid')) {
+          // SOLO 双救最高只能到隐藏结局
         }
 
         if (quality.score >= 8
