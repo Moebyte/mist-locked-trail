@@ -131,6 +131,15 @@ ${tail}`;
       };
     }
 
+    if (nodes.ch3_school_after_confront) {
+      nodes.ch3_school_after_confront.choices = function () {
+        const opts = [];
+        if (!E.getFlag('read_letter')) opts.push({ text: '📖 回办公室看完陈明远留下的信', goto: 'ch3_school_office' });
+        opts.push({ text: '🔙 离开光华小学，回去整理所有线索', goto: 'ch3_wrapup' });
+        return opts;
+      };
+    }
+
     nodes.ch3_school_confront_incomplete = {
       title: '光华小学 · 质询中止',
       weather: 2,
