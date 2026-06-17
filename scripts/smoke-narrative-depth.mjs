@@ -93,6 +93,24 @@ function testHiddenEndingRequiresSchoolThreeProofs() {
   reports.push(`PASS 隐藏结局需要校长三证物闭环，未完成时分流到 ${ending}`);
 }
 
+function testTrueHiddenRequiresSuRescue() {
+  h.resetState({
+    flags: highQualityFlags({
+      rescued_su: false,
+      found_su_at_dock: false,
+      su_moved_from_dock: true,
+      school_wu_three_proofs: true,
+      school_wu_full_confront: true,
+    })
+  });
+  const quality = E.v07InvestigationQuality();
+  const ending = E.v07ResolveEnding();
+  if (ending === 'end_conspiracy_detail') throw new Error(`未救出苏晚亭时，不应进入真隐藏结局；quality=${quality.score}`);
+  const targets = choiceTargets('ch4_conclusion');
+  if (targets.includes('end_conspiracy_detail')) throw new Error('未救出苏晚亭时，ch4_conclusion 不应出现真隐藏结局入口');
+  reports.push(`PASS 真隐藏结局需要救出苏晚亭，未救出时分流到 ${ending}，score=${quality.score}`);
+}
+
 function testConclusionChoicesRespectHiddenGate() {
   h.resetState({ flags: highQualityFlags() });
   let targets = choiceTargets('ch4_conclusion');
@@ -101,8 +119,22 @@ function testConclusionChoicesRespectHiddenGate() {
 
   h.resetState({ flags: highQualityFlags({ school_wu_three_proofs: true, school_wu_full_confront: true }) });
   targets = choiceTargets('ch4_conclusion');
-  if (!targets.includes('end_conspiracy_detail')) throw new Error('ch4_conclusion 完成校长三证物后，应允许进入隐藏结局');
-  reports.push('PASS ch4_conclusion 选项层也受光华三证物门槛约束');
+  if (!targets.includes('end_conspiracy_detail')) throw new Error('ch4_conclusion 完成校长三证物并救出苏晚亭后，应允许进入真隐藏结局');
+  reports.push('PASS ch4_conclusion 选项层也受光华三证物与苏晚亭获救门槛约束');
+}
+
+function testPressureAffectsDockRoute() {
+  h.resetState({
+    inGameTime: { day: 2, hour: 12, minute: 0 },
+    pressure: { heat: 0, deadline: { day: 2, hour: 23, minute: 0 } },
+  });
+  const safeRoute = E.routeDockByPressure();
+  if (safeRoute !== 'ch4_dock_full_search') throw new Error(`低压力应允许完整搜查，实际 ${safeRoute}`);
+  E.addHeat(8, '测试高热度');
+  const hotRoute = E.routeDockByPressure();
+  if (hotRoute === 'ch4_dock_full_search') throw new Error('高热度不应仍允许完整搜查');
+  if (!['ch4_dock_limited_search', 'ch4_dock_rescue_only', 'ch4_dock_cleared'].includes(hotRoute)) throw new Error(`高热度路线异常：${hotRoute}`);
+  reports.push(`PASS 压力热度会影响福生仓路线：低压 ${safeRoute}，高压 ${hotRoute}`);
 }
 
 function testLateNaturalEnding() {
@@ -127,7 +159,9 @@ try {
   testHospitalConflict();
   testHighQualityNaturalEnding();
   testHiddenEndingRequiresSchoolThreeProofs();
+  testTrueHiddenRequiresSuRescue();
   testConclusionChoicesRespectHiddenGate();
+  testPressureAffectsDockRoute();
   testLateNaturalEnding();
   testFuOfferBranches();
 } catch (err) {
