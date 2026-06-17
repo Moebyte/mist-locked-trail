@@ -24,6 +24,7 @@
     'src/story-modules/present-ui-polish.js',
     'src/story-modules/zhou-ending-polish.js',
     'src/story-modules/fusheng-progress-polish.js',
+    'src/story-modules/player-perspective-polish.js',
     'src/story-modules/status-polish.js'
   ];
 
