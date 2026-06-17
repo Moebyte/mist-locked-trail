@@ -56,6 +56,7 @@
     'src/story-modules/dock-hospital-continuity-polish.js',
     'src/story-modules/hospital-ending-impact-polish.js',
     'src/story-modules/dynamic-ending-polish.js',
+    'src/story-modules/deadline-deprecation-polish.js',
     'src/story-modules/yufang-testimony-polish.js',
     'src/story-modules/conclusion-summary-polish.js',
     'src/story-modules/status-polish.js',
