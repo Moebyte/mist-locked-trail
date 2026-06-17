@@ -88,7 +88,7 @@ test('强行进入苏州河但没有王巡官纸条时，只能回巡捕房', ()
   assert(!texts.some(choice => choice.includes('潜入') || choice.includes('后门')), '没有王巡官纸条时不应出现潜入/后门选项');
 });
 
-test('巡捕房路线可进福生仓，但没走沈玉芳线时无法施救', () => {
+test('巡捕房路线可进福生仓，但没走沈玉芳线时找不到暗室', () => {
   const rt = runtime({
     flags: { got_wang_note: true },
     clues: [{ name: '王巡官遗留纸条', desc: '测试占位' }],
@@ -96,10 +96,17 @@ test('巡捕房路线可进福生仓，但没走沈玉芳线时无法施救', ()
     inGameTime: { day: 2, hour: 12, minute: 0 },
   });
   assert(rt.E.routeDockByPressure() !== 'ch4_fusheng_locked_by_wang', '有王巡官纸条时应能进入福生仓');
-  assert(rt.E.routeDockDeepByPressure() === 'ch4_dock_unknown_yufang', '没有沈玉芳线时暗室应进入身份断线');
-  rt.renderNode('ch4_dock_unknown_yufang');
-  assert(!rt.E.getFlag('rescued_yufang'), '身份断线时不应设置 rescued_yufang');
-  assert(!rt.E.getFlag('found_yufang'), '身份断线时不应设置 found_yufang');
+  assert(rt.E.routeDockDeepByPressure() === 'ch4_dock_no_darkroom', '没有沈玉芳线时不应找到暗室');
+
+  const searchNode = rt.renderNode('ch4_dock_full_search');
+  const searchText = typeof searchNode.text === 'function' ? searchNode.text(rt.E.state) : searchNode.text;
+  const searchChoices = choiceTexts(rt, 'ch4_dock_full_search');
+  assert(searchText.includes('没有听见敲击声'), '没有沈玉芳线时不应听见敲击声');
+  assert(!searchChoices.some(text => text.includes('声音来源') || text.includes('暗门')), '没有沈玉芳线时不应出现声音来源/暗门选项');
+
+  rt.renderNode('ch4_dock_no_darkroom');
+  assert(!rt.E.getFlag('rescued_yufang'), '搜查断线时不应设置 rescued_yufang');
+  assert(!rt.E.getFlag('found_yufang'), '搜查断线时不应设置 found_yufang');
 });
 
 test('大学薛华立路线加巡捕房纸条齐全时，可以正常施救', () => {
