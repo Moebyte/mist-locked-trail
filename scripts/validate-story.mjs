@@ -69,6 +69,7 @@ const E = {
 
 const domReadyHandlers = [];
 const documentStub = {
+  head: { appendChild() {} },
   addEventListener(event, handler) { if (event === 'DOMContentLoaded') domReadyHandlers.push(handler); },
   getElementById() { return { style: {}, innerHTML: '', textContent: '', appendChild() {}, scrollIntoView() {}, addEventListener() {} }; },
   createElement() { return { className: '', textContent: '', title: '', onclick: null, style: {}, appendChild() {} }; },
