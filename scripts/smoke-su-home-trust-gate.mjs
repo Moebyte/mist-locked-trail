@@ -100,6 +100,7 @@ const presentable = runtime({
     { name: '苏晚亭的银发夹', desc: '' },
     { name: '三人合影', desc: '' },
     { name: '陈明远的信', desc: '' },
+    { name: '未寄出的信', desc: '' },
     { name: '日记残页', desc: '' },
     { name: '光华货运单', desc: '' },
   ],
@@ -110,6 +111,7 @@ presentable.E.state.flags = { found_su_at_dock: true, shown_photo_to_mother: tru
 assert(valid.includes('苏晚亭的银发夹'), '暗室应允许出示银发夹');
 assert(valid.includes('三人合影'), '暗室应允许出示三人合影');
 assert(valid.includes('陈明远的信'), '暗室应允许出示陈明远的信');
+assert(!valid.includes('未寄出的信'), '暗室不应再把未寄出的信列为重复可出示物品');
 assert(!valid.includes('日记残页'), '暗室不应再把日记残页列为可出示物品');
 assert(!valid.includes('光华货运单'), '暗室不应列出傅启元对峙用的货运单');
 
