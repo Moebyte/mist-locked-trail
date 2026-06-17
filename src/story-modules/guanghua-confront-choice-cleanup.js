@@ -26,6 +26,10 @@
       return E.getFlag('presented_threat_to_wu') && E.getFlag('presented_photo_to_wu') && E.getFlag('presented_university_to_wu');
     }
 
+    function schoolQuestioningDone() {
+      return E.getFlag('chen_su_link') && E.hasClue('陈老师与女子争吵') && E.getFlag('got_chen_evidence');
+    }
+
     function choiceTarget(choice, state) {
       return typeof choice.goto === 'function' ? choice.goto(state) : choice.goto;
     }
@@ -79,6 +83,22 @@
         return `三件证物都已经摆过。<br><br>吴校长的脸色比刚才灰了许多。他没有再替学校辩解，只是看着桌面上那些东西，像终于承认这间办公室也在雾里。<br><br>现在可以把它们合在一起了。`;
       }
       return `你把该问的都问完了。<br><br>吴校长重新抿紧嘴唇，视线从桌面挪回你脸上。你知道，再空口逼问下去，只会让他退回“巡捕房已经结案”的那套说辞。<br><br>这次质询到此为止。没有摆上桌的证物，已经错过了它该出现的时机。`;
+    }
+
+    if (nodes.ch3_school_teacher) {
+      delete nodes.ch3_school_teacher.onPresent;
+      nodes.ch3_school_teacher.presentFilter = () => false;
+      nodes.ch3_school_teacher.choices = function () {
+        const opts = [];
+        if (!E.getFlag('chen_su_link')) opts.push({ text: '💬 问陈老师跟苏晚亭的关系', goto: 'ch3_school_chen_su' });
+        if (!E.hasClue('陈老师与女子争吵')) opts.push({ text: '💬 问学校最近有没有异常', goto: 'ch3_school_weird' });
+        if (!E.getFlag('got_chen_evidence')) opts.push({ text: '📖 要求看陈老师的办公室', goto: 'ch3_school_office' });
+        if (schoolQuestioningDone() && !E.getFlag('school_wu_confront_done') && !E.getFlag('school_wu_confront_closed')) {
+          opts.push({ text: '🧾 普通问询到此为止，进入正式质询', goto: 'ch3_school_confront_wu' });
+        }
+        opts.push({ text: '🔙 暂时结束这个话题', goto: 'ch3_school' });
+        return opts;
+      };
     }
 
     if (nodes.ch3_school_weird) {
