@@ -42,6 +42,7 @@ let coverEscape = choices.find(choice => (choice.text || '').includes('便衣护
 assert(texts.some(text => text.includes('便衣护住侧巷')), '只有一个便衣时，应显示侧巷护送撤离选项');
 assert(texts.some(text => text.includes('车灯前')), '只有一个便衣时，应显示亮证据高风险选项');
 assert(!texts.some(text => text.includes('老孙先卡住车道')), '只有一个便衣时，不应显示老孙车道控场');
+assert(!texts.some(text => text.includes('老孙的人护住出口')), '只有一个便衣时，不应显示灰区支援护出口选项');
 assert(typeof coverEscape?.effect === 'function', '单便衣侧巷撤离应带 effect 增加少量 control');
 coverEscape?.effect?.(E.state);
 assert(E.getFlag('sun_fast_cover_escape'), '侧巷撤离应设置 sun_fast_cover_escape');
@@ -73,6 +74,7 @@ t = targets('ch4_dock_exit_assess');
 assert(texts.some(text => text.includes('老孙先卡住车道')), '老孙带队时，应显示先卡车道再压傅启元');
 assert(texts.some(text => text.includes('老孙贴近黑车')), '老孙带队时，应显示贴近黑车高压接应选项');
 assert(texts.some(text => text.includes('趁老孙和公董局纠缠')), '老孙带队时，应显示趁乱撤离选项');
+assert(!texts.some(text => text.includes('老孙的人护住出口')), '老孙带队时也不应显示灰区支援护出口选项');
 assert(!t.includes('end_dock_silenced'), '老孙带队时，不应把质问导向码头坏结局');
 assert(t.includes('ch4_fu_confront'), '老孙带队时，正面压制应进入码头对峙');
 assert(t.includes('ch4_dock_escape_finish'), '老孙带队时，趁乱撤离应接回逃离码头完成节点');
@@ -81,6 +83,19 @@ laneControl?.effect?.(E.state);
 assert(E.getFlag('dock_sun_exit_lane_control'), '老孙卡车道应增加 dock_sun_exit_lane_control');
 assert(E.getFlag('dock_sun_pressed_fu'), '老孙卡车道后应标记已正面压制傅启元');
 assert(E.dockExitRiskTier().key !== 'lethal', '老孙带队压制傅启元不应触发灭口阈值');
+
+// “有支援但非便衣/非老孙带队”的灰区不再存在；只按无明确支援处理。
+reset({
+  flags: { sun_support_available: true, found_yufang: true },
+  items: [{ name: '光华货运单', desc: '' }, { name: '清场指令', desc: '' }],
+});
+texts = choiceTexts('ch4_dock_exit_assess');
+t = targets('ch4_dock_exit_assess');
+assert(!texts.some(text => text.includes('老孙的人护住出口')), '灰区支援不应再显示“老孙的人护住出口”');
+assert(!texts.some(text => text.includes('老孙先卡住车道')), '灰区支援不应显示老孙带队控场选项');
+assert(!texts.some(text => text.includes('便衣护住侧巷')), '灰区支援不应显示便衣护送选项');
+assert(texts.some(text => text.includes('借雾绕开汽车')), '灰区支援应退化为无明确支援的借雾撤离');
+assert(texts.some(text => text.includes('当场质问傅启元')), '灰区支援应退化为无明确支援的危机质问');
 
 reset({
   flags: { sun_wait_support: true, sun_support_available: true, dock_sun_pressed_fu: true, dock_full_support_entry: true },
