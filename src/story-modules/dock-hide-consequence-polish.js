@@ -47,6 +47,19 @@
       nodes.ch4_dock_crates.__hideConsequenceChoicesPatched = true;
     }
 
+    nodes.ch4_dock_return_for_tool = {
+      title: '福生仓 · 回头找工具',
+      weather: 4,
+      cost: { h: 0, m: 8, reason: '你从暗门前折回教具箱，重新寻找能撬锁的工具' },
+      effect: () => {
+        E.setFlag('returned_for_door_tool', true);
+        E.addHeat(1, '你从暗门前折回教具箱，脚步和时间都留下了风险。');
+        E.addClue('折回寻找工具', '你先顺着声音找到了暗门，但因为没有工具，只能折回教具箱找铁钎。');
+      },
+      text: () => `你看着那把旧锁，终于忍住了砸门的冲动。<br><br>声音还在门后，很轻，很急。<br><br>你转身往教具箱那边折回。仓库里空得厉害，脚步声踩在木地板上，连你自己都觉得太响。<br><br>这不是失败。<br><br>但你已经把最干净的潜入节奏打乱了。接下来如果再惊动守卫，就不会再有余地。`,
+      choices: [{ text: '📦 翻查教具箱，找能撬锁的东西', goto: 'ch4_dock_crates' }]
+    };
+
     nodes.ch4_dock_guard_chase = {
       title: '福生仓 · 守卫追击',
       weather: 5,
@@ -91,7 +104,7 @@
         }
         return [
           { text: '⚠️ 没有工具，强行砸锁开门', goto: 'ch4_dock_break_lock_chase' },
-          { text: '📦 回头检查教具箱找工具', goto: 'ch4_dock_crates' }
+          { text: '📦 回头检查教具箱找工具（耗时，但不惊动守卫）', goto: 'ch4_dock_return_for_tool' }
         ];
       };
       nodes.ch4_dock_locked_door.__breakLockConsequencePatched = true;
