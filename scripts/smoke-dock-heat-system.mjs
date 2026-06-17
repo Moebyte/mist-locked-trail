@@ -40,13 +40,30 @@ assert(E.routeDockDeepByPressure() === 'ch4_dock_deep_dual', '低风险应进入
 
 reset({
   pressure: { heat: 0, deadline: { day: 2, hour: 23, minute: 0 } },
-  flags: { ...preparedFlags, sun_wait_support: true, dock_full_support_entry: true, dock_entry_committed: true },
+  flags: { ...preparedFlags, sun_wait_support: true, dock_full_support_entry: true, dock_entry_committed: true, dock_full_support_tradeoff: true },
   clues: preparedClues,
   items: preparedItems,
 });
 assert(E.dockSupportMode() === 'full', `老孙带队应识别为 full，实际 ${E.dockSupportMode()}`);
-assert(E.dockHeatTier().key === 'mid', `老孙带队默认应为中风险，实际 ${JSON.stringify(E.dockHeatTier())}`);
-assert(E.routeDockDeepByPressure() === 'ch4_dock_deep_trace', '中风险应进入只剩一人的暗室');
+assert(E.dockHeatTier().key === 'high', `老孙带队未优化应为高风险，实际 ${JSON.stringify(E.dockHeatTier())}`);
+assert(E.routeDockDeepByPressure() === 'ch4_dock_deep_empty_heat', '老孙带队未优化应可能两人都被转走');
+
+reset({
+  pressure: { heat: 0, deadline: { day: 2, hour: 23, minute: 0 } },
+  flags: {
+    ...preparedFlags,
+    sun_wait_support: true,
+    dock_full_support_entry: true,
+    dock_entry_committed: true,
+    dock_full_support_tradeoff: true,
+    dock_sun_outer_quiet: true,
+    dock_sun_block_truck_lane: true,
+  },
+  clues: preparedClues,
+  items: preparedItems,
+});
+assert(E.dockHeatTier().key === 'mid', `老孙带队优化外围后应压到中风险，实际 ${JSON.stringify(E.dockHeatTier())}`);
+assert(E.routeDockDeepByPressure() === 'ch4_dock_deep_trace', '老孙带队优化后应至少能救沈玉芳，但苏晚亭大概率被转走');
 
 reset({
   pressure: { heat: 1, deadline: { day: 2, hour: 23, minute: 0 } },
