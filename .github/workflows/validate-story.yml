@@ -52,6 +52,9 @@ jobs:
       - name: Smoke test wrapup priority
         run: node scripts/smoke-wrapup-priority.mjs
 
+      - name: Smoke test wrapup fusheng deduction opens
+        run: node scripts/smoke-wrapup-fusheng-deduction-opens.mjs
+
       - name: Smoke test Sun fast support
         run: node scripts/smoke-sun-fast-support.mjs
 
