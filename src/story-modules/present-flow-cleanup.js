@@ -161,8 +161,13 @@
         if (hasSuLastLetter() && !E.getFlag('presented_su_last_letter_to_zhou')) hints.push('那封疑似遗书，需要让最熟悉晚亭的人判断真假。');
         if (hasItem('半张烟盒纸') && !E.getFlag('presented_wang_note_to_zhou')) hints.push('王巡官留下的半张烟盒纸，能说明这不是普通失踪案。');
         if (hasThreatLetter() && !E.getFlag('presented_threat_to_zhou')) hints.push('203 室的恐吓信，能证明有人在逼知情者闭嘴。');
+        const shownCount = ['presented_wang_note_to_zhou','presented_threat_to_zhou','presented_chen_letter_to_zhou','presented_jade_to_zhou','presented_su_last_letter_to_zhou'].filter(f => E.getFlag(f)).length;
+        let opener;
+        if (shownCount === 0) opener = '商务印书馆的编辑室还亮着灯。周怀安坐在一堆校样中间，眼睛里全是血丝。看到你进来，他立刻站起身。';
+        else if (shownCount <= 2) opener = '周怀安还在编辑室里。桌上的烟灰缸里多了一根新烟蒂。他抬头看你进来，眼神里多了些期待。';
+        else opener = '你再次走进商务印书馆的编辑室。周怀安把校样往旁边推了推，给你腾出放东西的位置，等你开口。';
         const hintText = hints.length ? `<br><br>${hints.join('<br>')}` : '<br><br>该给他看的东西，你已经基本给过了。';
-        return `商务印书馆的编辑室还亮着灯。<br><br>周怀安坐在一堆校样中间，眼睛里全是血丝。看到你进来，他立刻站起身。<br><br><span class="sys">“沈先生，有晚亭的消息了吗？”</span><br><br>你没有立刻回答。你知道有些东西，比一句“还没有”更有用。${hintText}`;
+        return `${opener}<br><br><span class="sys">“沈先生，有晚亭的消息了吗？”</span><br><br>你没有立刻回答。你知道有些东西，比一句“还没有”更有用。${hintText}`;
       };
       nodes.ch4_revisit_zhou.choices = function () {
         const opts = zhouEvidenceChoices();

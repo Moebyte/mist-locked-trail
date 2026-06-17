@@ -182,6 +182,13 @@
 
       nodes.ch3_wrapup.text = function (state) {
         const base = typeof oldText === 'function' ? oldText(state) : oldText;
+        const visited = E.getFlag('ch3_wrapup_visited');
+        E.setFlag('ch3_wrapup_visited', true);
+        if (visited && base.length > 200) {
+          // 第二次回访时缩短线索清单
+          const summary = base.split('。').slice(0,2).join('。') + '。';
+          return `${summary} 你已经掌握了不少线索，该决定下一步做什么了。${recommendText(stageHint())}`;
+        }
         return `${base}${recommendText(stageHint())}`;
       };
 
