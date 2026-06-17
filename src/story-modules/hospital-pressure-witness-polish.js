@@ -223,7 +223,7 @@
       weather: 3,
       text: () => `医生把病房门关上，先检查沈玉芳手腕上的绳痕，又让护士替苏晚亭换下被雨水泡硬的外衣。<br><br>他没有多问，只在病历纸上写下“长期拘禁”“失温”“外伤”“惊厥后虚脱”。<br><br>这不是口供，却比口供更难被傅启元轻易抹掉。${hospitalBadge()}`,
       choices: [
-        { text: '🛏️ 接着分开保护证人，禁止外人探视', effect: () => { E.setFlag('hospital_protect_witnesses', true); E.setFlag('hospital_separate_witnesses', true); }, goto: 'ch4_hospital_protect_witnesses' },
+        { text: '🚪 离开病房，去医院走廊', effect: () => { E.setFlag('hospital_protect_witnesses', true); E.setFlag('hospital_separate_witnesses', true); }, goto: 'ch4_lu_confrontation' },
         { text: '📝 趁沈玉芳清醒，先问一段福生仓经过', effect: () => E.setFlag('hospital_interrogate_yufang', true), goto: 'ch4_hospital_yufang_statement' },
         { text: '🕯️ 让陆念薇现身补上傅启元下一步', effect: () => E.setFlag('hospital_early_lu', true), goto: 'ch4_lu_confrontation' }
       ]
