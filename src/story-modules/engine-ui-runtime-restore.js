@@ -60,16 +60,29 @@
       };
     }
 
+    E.openPanel = function () {
+      if (typeof this.renderPanel === 'function') this.renderPanel();
+      const panel = document.getElementById('side-panel');
+      if (panel) {
+        panel.classList.add('open');
+        panel.setAttribute('aria-hidden', 'false');
+      }
+    };
+
+    E.closePanel = function () {
+      const panel = document.getElementById('side-panel');
+      if (panel) {
+        panel.classList.remove('open');
+        panel.setAttribute('aria-hidden', 'true');
+      }
+    };
+
     const oldOpenGraph = E.openGraph?.bind(E);
     E.openGraph = function () {
       if (typeof oldOpenGraph === 'function') oldOpenGraph();
       else if (this.graphEl) this.graphEl.style.display = 'flex';
       if (typeof this.renderGraph === 'function') this.renderGraph();
     };
-
-    if (typeof window.applyResponsiveStoryUI === 'function') {
-      window.applyResponsiveStoryUI();
-    }
 
     E.__engineUiRuntimeRestorePatched = true;
   }
