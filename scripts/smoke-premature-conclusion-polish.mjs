@@ -38,7 +38,7 @@ function present(sceneId, itemName, desc = '') {
 reset({
   flags: { got_case_file: true, asked_about_chen: true, chen_su_link: true, got_chen_evidence: true, read_letter: true },
   clues: [{ name: '光华小学事件', desc: '' }, { name: '陈老师与女子争吵', desc: '' }],
-  items: [{ name: '卷宗摘抄', desc: '' }, { name: '陈明远的信', desc: '信的开头是“晚亭吾爱”。' }],
+  items: [{ name: '卷宗摘抄', desc: '' }, { name: '陈明远的信', desc: '信的开头是“晚亭吾爱”。' }, { name: '苏晚亭的伪造遗书', desc: '' }],
 });
 assert(!hasChoice('ch3_wrapup', '王巡官的批注'), '直接巡捕房→光华小学后，不应继续显示旧版“追查王巡官批注”入口');
 assert(!hasChoice('ch3_wrapup', '回圣约翰大学'), '坏路线成立后，线索整理不应允许回大学补课');
@@ -72,30 +72,57 @@ assert(!hasChoice('ch3_wrapup', '回巡捕房'), '查清福生仓标记但已过
 assert(hasChoice('ch3_wrapup', '证据链仍不完整'), '查清标记但没拿王纸条时，应仍提示证据链不完整');
 
 reset({
+  flags: { got_case_file: true, asked_about_chen: true, chen_su_link: true, got_chen_evidence: true },
+  clues: [{ name: '光华小学事件', desc: '' }, { name: '陈老师与女子争吵', desc: '' }],
+  items: [],
+});
+rt.renderNode('ch3_chen_letter');
+assert(rt.E.hasItem('陈明远的信'), '读陈明远的信后，应获得陈明远的信');
+assert(rt.E.hasItem('苏晚亭的伪造遗书'), '读陈明远的信后，应获得苏晚亭的伪造遗书');
+assert(rt.E.hasClue('苏晚亭伪造遗书'), '读陈明远的信后，应记录伪造遗书线索');
+assert(nodeText('ch3_chen_letter').includes('伪造'), '陈明远信节点文本应交代伪造遗书');
+
+reset({
   flags: { got_case_file: true, asked_about_chen: true, chen_su_link: true, got_chen_evidence: true, read_letter: true },
-  clues: [{ name: '光华小学事件', desc: '' }, { name: '陈明远的信', desc: '' }],
-  items: [{ name: '陈明远的信', desc: '信的开头是“晚亭吾爱”。' }],
+  clues: [{ name: '光华小学事件', desc: '' }, { name: '陈明远的信', desc: '' }, { name: '苏晚亭伪造遗书', desc: '' }],
+  items: [{ name: '陈明远的信', desc: '信的开头是“晚亭吾爱”。' }, { name: '苏晚亭的伪造遗书', desc: '' }],
 });
 rt.renderNode('ch4_pawnshop');
-assert(rt.E.hasItem('小报剪报'), '坏路线当铺应获得小报剪报');
-assert(rt.E.hasClue('殉情误报'), '坏路线当铺应记录殉情误报线索');
-assert(nodeText('ch4_pawnshop').includes('殉身'), '坏路线当铺文本应出现殉情误报标题');
-assert(hasChoice('ch4_pawnshop', '小报剪报'), '坏路线当铺回访周怀安选项应提到小报剪报');
+assert(!rt.E.hasItem('小报剪报'), '新版吾爱晚亭不应再依赖小报剪报');
+assert(!rt.E.hasClue('殉情误报'), '新版吾爱晚亭不应再记录小报殉情误报');
+assert(nodeText('ch4_pawnshop').includes('两封信'), '坏路线当铺文本应引导带两封信回访周怀安');
+assert(hasChoice('ch4_pawnshop', '两封信'), '坏路线当铺回访周怀安选项应提到两封信');
 
 const zhouText = nodeText('ch4_revisit_zhou');
-assert(zhouText.includes('晚亭吾爱'), '坏路线周怀安回访应提示可出示陈明远的信');
-assert(zhouText.includes('小报剪报') || zhouText.includes('殉情'), '坏路线周怀安回访应提示小报误报');
+assert(zhouText.includes('晚亭吾爱'), '坏路线周怀安回访应提示陈明远的信');
+assert(zhouText.includes('伪造遗书'), '坏路线周怀安回访应提示苏晚亭的伪造遗书');
 const jadeResult = present('ch4_revisit_zhou', '翡翠镯');
 assert(jadeResult?.goto === 'ch4_zhou_present_jade_premature', '坏路线向周怀安出示翡翠镯应进入弱证据节点');
 rt.renderNode(jadeResult.goto);
 assert(rt.E.hasClue('周怀安识出陆念'), '坏路线翡翠镯仍应记录陆念旧名线索');
-const letterResult = present('ch4_revisit_zhou', '陈明远的信');
-assert(letterResult?.goto === 'end_zhou_chen_letter', '向周怀安出示陈明远的信应触发“吾爱晚亭”结局');
+const chenFirst = present('ch4_revisit_zhou', '陈明远的信');
+assert(chenFirst?.goto === 'ch4_zhou_present_chen_letter', '先出示陈明远的信，应进入晚亭吾爱举证节点');
+rt.renderNode(chenFirst.goto);
+assert(rt.E.getFlag('presented_chen_letter_to_zhou'), '出示陈明远的信后应设置 flag');
+assert(!rt.E.getFlag('zhou_chen_letter_easter_egg'), '只出示陈明远的信不应直接触发结局');
+const forgedSecond = present('ch4_revisit_zhou', '苏晚亭的伪造遗书');
+assert(forgedSecond?.goto === 'end_zhou_chen_letter', '第二封出示伪造遗书后应触发吾爱晚亭结局');
 rt.renderNode('end_zhou_chen_letter');
 assert(rt.E.getFlag('zhou_chen_letter_easter_egg'), '吾爱晚亭结局应设置对应 flag');
-assert(rt.E.hasClue('周怀安读到陈明远的信'), '吾爱晚亭结局应记录周怀安读信线索');
-assert(nodeText('end_zhou_chen_letter').includes('苏姓女学生疑为情殉身'), '吾爱晚亭结局应并置小报殉情误报');
-assert(nodeText('end_zhou_chen_letter').includes('不是去死。她是在找人，也是在救人'), '吾爱晚亭结局应回到找人主题');
+assert(rt.E.hasClue('周怀安读到两封信'), '吾爱晚亭结局应记录周怀安读到两封信');
+assert(nodeText('end_zhou_chen_letter').includes('这不是殉情'), '吾爱晚亭结局应否定伪造的殉情叙事');
+assert(nodeText('end_zhou_chen_letter').includes('找人案改成一桩情死案'), '吾爱晚亭结局应回到找人案件主题');
+
+reset({
+  flags: { got_case_file: true, asked_about_chen: true, chen_su_link: true, got_chen_evidence: true, read_letter: true },
+  clues: [{ name: '光华小学事件', desc: '' }],
+  items: [{ name: '陈明远的信', desc: '' }, { name: '苏晚亭的伪造遗书', desc: '' }],
+});
+const forgedFirst = present('ch4_revisit_zhou', '苏晚亭的伪造遗书');
+assert(forgedFirst?.goto === 'ch4_zhou_present_su_forged_note', '先出示伪造遗书，应进入伪造遗书举证节点');
+rt.renderNode(forgedFirst.goto);
+const chenSecond = present('ch4_revisit_zhou', '陈明远的信');
+assert(chenSecond?.goto === 'end_zhou_chen_letter', '第二封出示陈明远的信后也应触发吾爱晚亭结局');
 
 reset({
   flags: { got_wang_note: true, deduced_fusheng: true, rescued_yufang: true, rescued_su: true },
