@@ -21,9 +21,7 @@
     }
 
     function homeCanLeave() {
-      const coreDone = E.hasClue('母亲证词') && E.getFlag('asked_photo') && E.getFlag('asked_mother_photo');
-      const photoDone = !E.hasItem('苏晚亭的照片') || E.getFlag('shown_photo_to_mother');
-      return coreDone && photoDone;
+      return E.hasClue('母亲证词') && E.getFlag('asked_photo') && E.getFlag('asked_mother_photo');
     }
 
     function setHubDetail(hub, detail) {
