@@ -94,6 +94,9 @@ jobs:
       - name: Smoke test hospital pressure witness
         run: node scripts/smoke-hospital-pressure-witness.mjs
 
+      - name: Smoke test dock exit hospital crisis
+        run: node scripts/smoke-dock-exit-hospital-crisis.mjs
+
       - name: Smoke test dock hide consequence
         run: node scripts/smoke-dock-hide-consequence.mjs
 
