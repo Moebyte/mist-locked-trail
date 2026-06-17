@@ -58,6 +58,9 @@ jobs:
       - name: Smoke test conclusion summary
         run: node scripts/smoke-conclusion-summary.mjs
 
+      - name: Smoke test hospital flow
+        run: node scripts/smoke-hospital-flow.mjs
+
       - name: Smoke test causal echo
         run: node scripts/smoke-causal-echo.mjs
 
