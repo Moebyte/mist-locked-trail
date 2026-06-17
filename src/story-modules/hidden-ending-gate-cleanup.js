@@ -1,5 +1,5 @@
 // ===== 隐藏结局门槛兜底 =====
-// 目标：隐藏结局仍可触发，但必须完成光华小学三证物质询，避免 ch4_conclusion 直达选项绕过校长闭环。
+// 目标：真·隐藏结局仍可触发，但必须完成光华小学三证物质询，并且救出苏晚亭本人。
 
 (function installHiddenEndingGateCleanup() {
   function applyHiddenEndingGateCleanup() {
@@ -11,8 +11,8 @@
       return typeof source === 'function' ? source(state) : source;
     }
 
-    function schoolGatePassed() {
-      return E.getFlag('school_wu_three_proofs');
+    function trueHiddenGatePassed() {
+      return E.getFlag('school_wu_three_proofs') && E.getFlag('rescued_su');
     }
 
     function fallbackEnding() {
@@ -34,12 +34,12 @@
         when: function (state) {
           const ok = typeof rawWhen === 'function' ? rawWhen(state) : rawWhen;
           if (rawWhen !== undefined && !ok) return false;
-          if (isStaticHiddenEntry && !schoolGatePassed()) return false;
+          if (isStaticHiddenEntry && !trueHiddenGatePassed()) return false;
           return true;
         },
         goto: function (state) {
           const target = typeof rawGoto === 'function' ? rawGoto(state) : rawGoto;
-          if (target === 'end_conspiracy_detail' && !schoolGatePassed()) return fallbackEnding();
+          if (target === 'end_conspiracy_detail' && !trueHiddenGatePassed()) return fallbackEnding();
           return target;
         }
       };
