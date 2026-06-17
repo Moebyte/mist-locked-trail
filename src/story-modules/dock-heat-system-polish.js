@@ -170,8 +170,8 @@
 
     function heatBadge() {
       const t = E.dockHeatTier();
-      const label = t.key === 'high' ? '警觉与拖延都压上来了' : t.key === 'mid' ? '窗口正在收窄' : '尚未惊动，窗口还在';
-      return `<br><br><span class="sys">潜入风险：${t.label} · 暴露 ${t.exposure} / 拖延 ${t.delay} · ${label}</span>`;
+      const text = t.key === 'high' ? '风声已经很紧了。每一步都可能惊动仓库里的人。' : t.key === 'mid' ? '窗口正在收窄，但没有时间再犹豫了。' : '仓库里的人还没察觉。你得趁现在进去。';
+      return `<br><br><span class="sys">${text}</span>`;
     }
 
     nodes.ch4_dock_solo_infiltration = {

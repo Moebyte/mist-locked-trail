@@ -20,7 +20,8 @@
     function dockExitBadge() {
       if (typeof E.dockExitRiskTier !== 'function') return '';
       const tier = E.dockExitRiskTier();
-      return `<br><br><span class="sys">码头局势：${tier.label} · tension ${E.dockExitTensionScore()} / control ${E.dockExitControlScore()} · crisis ${E.dockExitCrisisScore()}</span>`;
+      const text = tier.key === 'high' ? '码头已经压不住了。再不走就走不了。' : tier.key === 'mid' ? '局势还能控制，但时间不在你这边。' : '码头暂时安静。你还有机会安全撤离。';
+      return `<br><br><span class="sys">${text}</span>`;
     }
 
     function hospitalBadge() {
