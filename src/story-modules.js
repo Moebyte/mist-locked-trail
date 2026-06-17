@@ -38,6 +38,7 @@
     'src/story-modules/pressure-quality-ending-polish.js',
     'src/story-modules/narrative-clock-polish.js',
     'src/story-modules/true-ending-route-polish.js',
+    'src/story-modules/sun-fast-support-polish.js',
     'src/story-modules/hidden-ending-gate-cleanup.js',
     'src/story-modules/status-polish.js',
     'src/story-modules/ending-layout-polish.js'
