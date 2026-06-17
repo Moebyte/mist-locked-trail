@@ -11,9 +11,17 @@
       return E.state?.pressure?.heat || 0;
     }
 
+    function minutesLeft() {
+      const deadline = E.state?.pressure?.deadline;
+      const now = E.state?.inGameTime;
+      if (!deadline || !now) return 9999;
+      if (typeof E.timeToMinutes === 'function') return E.timeToMinutes(deadline) - E.timeToMinutes(now);
+      const toMinutes = (t) => (t.day || 1) * 1440 + (t.hour || 0) * 60 + (t.minute || 0);
+      return toMinutes(deadline) - toMinutes(now);
+    }
+
     function deadlinePhase() {
-      if (typeof E.deadlinePhase === 'function') return E.deadlinePhase();
-      const left = typeof E.minutesUntilDeadline === 'function' ? E.minutesUntilDeadline() : 9999;
+      const left = minutesLeft();
       if (left < 0) return 'expired';
       if (left < 180) return 'critical';
       if (left < 600) return 'tight';
@@ -24,19 +32,23 @@
       return E.state?.currentScene || '';
     }
 
+    function isDockPressureScene(id) {
+      return /^ch4_(suzhou|dock)/.test(id);
+    }
+
     E.narrativeClockLabel = function () {
       const id = sceneId();
       if (!id) return '—';
       if (id.startsWith('end_')) return '尘埃暂落';
-      if (E.getFlag('missed_deadline')) return '迟到一步';
 
       const phase = deadlinePhase();
       const h = heat();
 
       if (phase === 'expired') return '迟到一步';
+      if (E.getFlag('missed_deadline') && !isDockPressureScene(id)) return '迟到一步';
       if (phase === 'critical') return '只够救人';
 
-      if (/^ch4_(suzhou|dock)/.test(id)) {
+      if (isDockPressureScene(id)) {
         if (phase === 'tight') return h >= 5 ? '风声很紧' : '夜色紧迫';
         return h >= 5 ? '已有惊动' : '夜色正深';
       }
