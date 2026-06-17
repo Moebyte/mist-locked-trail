@@ -1,7 +1,9 @@
 // ===== 逃离码头选项语义收束 =====
-// 目标：码头口遇见傅启元时，选项按“人手规模”分流。
-// 只有一个便衣：只能护送撤离；当场质问并亮证据会触发码头坏结局。
+// 目标：码头口遇见傅启元时，选项只按三种明确人手规模分流。
+// 无支援：只能借雾撤离；当场质问由码头 tension/control 机制判断是否灭口。
+// 一个便衣：只能护送撤离；当场亮核心证据会把码头危机值推到灭口边缘。
 // 老孙带队：可以正面压制傅启元；也可以趁乱撤离，但公董局会出面干预，影响后续真相质量。
+// 不再保留“有支援但非完整老孙”的灰区分支。
 
 (function installDockEscapeChoicePolish() {
   function applyDockEscapeChoicePolish() {
@@ -21,25 +23,8 @@
         || (E.getFlag('sun_support_in_action') && !E.getFlag('sun_fast_support'));
     }
 
-    function hardDockEvidenceReady() {
-      return E.hasItem('清场指令')
-        || E.hasItem('光华货运单')
-        || E.hasClue('公董局公文纸')
-        || E.hasClue('教具箱走私')
-        || E.getFlag('fu_waybill_exposed')
-        || E.getFlag('fu_clearance_exposed');
-    }
-
-    function supportPresent() {
-      return E.getFlag('sun_support_available')
-        || E.getFlag('sun_fast_support')
-        || E.getFlag('sun_full_support')
-        || E.getFlag('sun_wait_support')
-        || E.getFlag('sun_support_in_action');
-    }
-
     function fullSupportCanPressFu() {
-      return supportPresent() && fullSupportAtDock();
+      return fullSupportAtDock();
     }
 
     if (nodes.ch4_dock_escape && !nodes.ch4_dock_escape.__escapeChoicePolished) {
@@ -87,22 +72,11 @@
           return opts;
         }
 
-        if (supportPresent() && hardDockEvidenceReady()) {
-          opts.push({
-            text: '🚓 让老孙的人护住出口，先把人带走',
-            effect: () => {
-              E.setFlag('sun_support_cover_escape', true);
-              E.addClue('支援掩护撤离', '老孙的人手不足以当场扣住傅启元，但足以护住你们撤离。');
-            },
-            goto: 'ch4_dock_escape_finish'
-          });
-        }
-
         opts.push({ text: '🌫️ 借雾绕开汽车，先把人带走', goto: 'ch4_dock_escape_finish' });
         opts.push({
           text: '⚠️ 当场质问傅启元',
           effect: () => E.addHeat(1, '你当场质问傅启元，局势变得危险。'),
-          goto: supportPresent() ? 'ch4_fu_confront' : 'end_dock_silenced'
+          goto: 'end_dock_silenced'
         });
         return opts;
       };
@@ -128,7 +102,7 @@
         if (fullSupportCanPressFu()) {
           return `你没有绕开那辆黑色汽车。<br><br>老孙带着人从雾里压出来，没拔枪，却把码头两头都封住了。<br><br>你把清场指令、光华货运单和蓝封纸角一件件摆在车灯前。<br><br>傅启元的表情没有变，但你看到他握公文夹的手指收紧了。<br><br><span class="sys">“傅秘书，今晚这两个人，得先跟我们走。”</span>老孙说。<br><br>几名公董局的人很快赶到，试图用“越权办案”压住老孙。但老孙没有退，他只是把烟咬在嘴里，冲你偏了偏头。<br><br>傅启元看了你很久，最后让开半步。<br><br>这不是胜利，只是他暂时不愿在码头上开枪。你们必须趁这个缝隙把人带走。`;
         }
-        return `你把清场指令、光华货运单和蓝封纸角一件件摆出来。<br><br>傅启元的表情没有变，但你看到他握公文夹的手指收紧了。<br><br>老孙的人从雾里走出来，枪没有拔，却把路堵住了。<br><br><span class="sys">"傅秘书，今晚这两个人，得先跟我们走。"</span><br><br>傅启元看了你很久，最后让开半步。<br><br>这不是胜利，只是他暂时不愿在码头上开枪。`;
+        return `你把清场指令、光华货运单和蓝封纸角一件件摆出来。<br><br>傅启元的表情没有变，但你看到他握公文夹的手指收紧了。<br><br>黑车没有熄火，车灯把你和证人的影子钉在仓门前。<br><br>这不是胜利，只是他暂时还没选择开枪。`;
       };
       nodes.ch4_fu_confront.choices = [{ text: '🚕 趁傅启元让开的半步，立刻送她们离开码头', goto: 'ch4_dock_escape_finish' }];
       nodes.ch4_fu_confront.__supportAwareTextPatched = true;
