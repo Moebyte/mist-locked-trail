@@ -64,6 +64,9 @@ jobs:
       - name: Smoke test dock heat system
         run: node scripts/smoke-dock-heat-system.mjs
 
+      - name: Smoke test solo entry route
+        run: node scripts/smoke-solo-entry-route.mjs
+
       - name: Smoke test fusheng key gates
         run: node scripts/smoke-fusheng-key-gates.mjs
 
