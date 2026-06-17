@@ -27,7 +27,9 @@ reset({
   clues: [{ name: '母亲证词', desc: '' }, { name: '光华小学事件', desc: '' }],
   items: [{ name: '卷宗摘抄', desc: '' }],
 });
-assert(has('ch2_leave_home', '圣约翰大学'), '先巡捕房再苏家后，缺大学线时应引导去大学');
+assert(has('ch2_leave_home', '回圣约翰大学'), '先巡捕房再苏家后，缺大学线时应自然引导回大学');
+assert(has('ch2_leave_home', '晚亭失踪前的线索'), '大学回流文案应是叙事口吻');
+assert(!has('ch2_leave_home', '补齐薛华立路来源'), '大学回流文案不应使用路线依赖式表达');
 assert(!has('ch2_leave_home', '薛华立路'), '缺大学线时，苏家出来不应直接去薛华立路');
 
 reset({
