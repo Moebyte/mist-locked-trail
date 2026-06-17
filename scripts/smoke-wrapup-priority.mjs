@@ -64,6 +64,16 @@ texts = choiceTexts('ch3_wrapup');
 assert(has(texts, '下一步：推理黑衣男人与陆小姐的关系'), '拿到翡翠镯且条件齐后，应引导第二段推理');
 assert(notHas(texts, '苏州河废弃码头'), '第二段推理前，不应提前显示码头入口');
 
+reset({
+  clues: [...richPreDeductionClues, { name: '翡翠镯', desc: '' }, { name: '跟踪黑衣男人', desc: '' }, { name: '神秘女子', desc: '' }, { name: '沈玉兰的妹妹', desc: '' }],
+  items: [{ name: '翡翠镯', desc: '' }],
+  flags: { school_wu_three_proofs: true, deduced_chen: true, deduced_lu_zhao: true },
+});
+texts = choiceTexts('ch3_wrapup');
+assert(has(texts, '下一步：不找支援，独自去福生仓'), '完成第二段推理且未找老孙时，应显示 solo 福生仓入口');
+assert(has(texts, '下一步：去巡捕房找老孙商量福生仓'), '完成第二段推理且未找老孙时，应同时显示老孙支援入口');
+assert(has(texts, '回顾现有证据'), '行动选择阶段仍应保留回顾入口');
+
 if (errors.length) {
   console.error('Wrapup priority smoke failed:');
   for (const error of errors) console.error(`- ${error}`);
