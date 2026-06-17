@@ -22,6 +22,7 @@
     'src/story-modules/su-home-trust-gate.js',
     'src/story-modules/premature-conclusion-polish.js',
     'src/story-modules/present-ui-polish.js',
+    'src/story-modules/zhou-ending-polish.js',
     'src/story-modules/status-polish.js'
   ];
 
