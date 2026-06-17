@@ -2,6 +2,7 @@
 import { loadStoryRuntime } from './story-harness.mjs';
 
 const rt = loadStoryRuntime();
+const { nodes } = rt;
 const errors = [];
 
 function assert(condition, message) {
@@ -28,6 +29,10 @@ reset();
 assert(has('ch2_frenchtown', '先在周围观察'), '薛华立路初到时应显示周围观察');
 assert(has('ch2_frenchtown', '问看门老头关于陆姓女子'), '薛华立路初到时应显示问看门老头');
 assert(!has('ch2_frenchtown', '上二楼，敲 203'), '未问看门老头前不应直接上203');
+
+reset({ clues: [{ name: '法租界地图', desc: '' }], items: [{ name: '法租界地图', desc: '' }] });
+assert(typeof nodes.ch2_building_enter.onPresent !== 'function', '永兴贸易商行入口不应保留通用 onPresent，避免提前向老头出示地图');
+assert(!has('ch2_building_enter', '出示地图'), '未搜203前，入口处不应出现向老头出示地图');
 
 reset({ flags: { saw_man: true } });
 assert(!has('ch2_frenchtown', '先在周围观察'), '周围观察完成后应隐藏观察选项');
