@@ -100,12 +100,24 @@
   function hasDockEvidence() {
     return hasThing('公董局公文纸')
       || hasThing('暗室刚被清空')
+      || hasThing('暗室已经转空')
+      || hasThing('仓库暗室')
+      || hasThing('获救者身份')
+      || hasThing('苏晚亭曾在暗室')
+      || hasThing('苏晚亭手表')
+      || hasThing('苏晚亭学生证')
+      || hasThing('沈玉芳曾在暗室')
       || hasThing('教具箱走私')
       || hasThing('管制药品走私')
       || hasThing('光华货运单')
       || hasThing('清场指令')
+      || E.getFlag('dock_entry_committed')
+      || E.getFlag('dock_solo_entry')
+      || E.getFlag('found_yufang')
       || E.getFlag('rescued_yufang')
       || E.getFlag('found_su_at_dock')
+      || E.getFlag('su_moved_from_dock')
+      || E.getFlag('su_trace_only')
       || E.getFlag('missed_both_at_dock');
   }
 
@@ -116,11 +128,26 @@
       && !hasDockEvidence();
   }
 
-  function normalizeWrapupReviewLoop(choice) {
-    if (!choice || !isFushengActionStage()) return choice;
+  function isRepeatedFushengEntry(choice) {
+    if (!choice || !hasDockEvidence()) return false;
     const text = textOf(choice);
-    if (choice.goto === 'ch4_conclusion' || text.includes('回顾现有证据') || text.includes('证据链仍不完整')) {
+    return choice.goto === 'ch4_suzhou_creek'
+      || choice.goto === 'ch4_sun_support'
+      || text.includes('不找支援，独自去福生仓')
+      || text.includes('巡捕房找老孙商量福生仓')
+      || text.includes('苏州河废弃码头')
+      || text.includes('查福生仓');
+  }
+
+  function normalizeWrapupReviewLoop(choice) {
+    if (!choice) return choice;
+    if (isRepeatedFushengEntry(choice)) return null;
+    const text = textOf(choice);
+    if (isFushengActionStage() && (choice.goto === 'ch4_conclusion' || text.includes('回顾现有证据') || text.includes('证据链仍不完整'))) {
       return { ...choice, text: '🔙 回顾现有证据（暂不行动）', goto: 'ch4_conclusion' };
+    }
+    if (hasDockEvidence() && (choice.goto === 'ch4_conclusion' || text.includes('回顾现有证据') || text.includes('证据链仍不完整'))) {
+      return { ...choice, text: '🔙 回顾现有证据，准备收束', goto: 'ch4_conclusion' };
     }
     return choice;
   }
@@ -143,7 +170,7 @@
     node.choices = function (state) {
       let choices = typeof oldChoices === 'function' ? oldChoices(state) : (oldChoices || []);
       if (!Array.isArray(choices)) return choices;
-      choices = choices.map(normalizeWrapupReviewLoop);
+      choices = choices.map(normalizeWrapupReviewLoop).filter(Boolean);
       if (hasFushengDeductionChoice(choices)) return choices;
       if (!E.getFlag('deduced_lu_zhao') || E.getFlag('deduced_fusheng') || E.getFlag('deduced_fusheng_fail')) return choices;
       if (typeof E.canDeduce === 'function' && !E.canDeduce('deduce_fusheng')) return choices;
