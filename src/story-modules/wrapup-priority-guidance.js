@@ -84,6 +84,10 @@
       return { text: '🔙 回顾现有证据（暂不推进主线）', goto: 'ch4_conclusion' };
     }
 
+    function reviewChoice(base, text = '🔙 回顾现有证据（暂不推进主线）') {
+      return { ...(base || fallbackReview()), text, goto: 'ch4_conclusion' };
+    }
+
     function recommendText(stage) {
       return `<br><br><span class="sys"><b>建议下一步：</b>${stage}</span>`;
     }
@@ -123,14 +127,17 @@
           ? '先把陈明远之死推清楚。现在证据已经够了，不要急着去码头。'
           : '先补齐陈明远之死的关键证据。';
       }
-      if (!hasThing('翡翠镯')) return '去永昌当铺查当票。翡翠镯会把陆小姐的旧名和黑衣男人线接上。';
+      if (!hasThing('翡翠镯')) return '去永昌当铺查当票上的翡翠镯。';
       if (!E.getFlag('deduced_lu_zhao')) {
         return E.canDeduce('deduce_lu_zhao')
           ? '现在可以推理黑衣男人与陆小姐的关系。'
           : '黑衣男人与陆小姐这条线还差一点证据。';
       }
-      if (!hasSunSupport()) return '福生仓已经能去了。你可以独自潜入，也可以先找老孙，把行动变得更可控。';
-      if (!hasDockEvidence()) return '准备已经够了，去苏州河废弃码头查福生仓。';
+      if (!hasDockEvidence()) {
+        return hasSunSupport()
+          ? '你已经找过老孙，准备够了。现在去苏州河废弃码头查福生仓。'
+          : '前两段推理已经完成。现在不是结案，而是进入福生仓行动：可以独自潜入，也可以先找老孙支援。';
+      }
       if (!E.getFlag('deduced_fusheng')) {
         return E.canDeduce('deduce_fusheng')
           ? '福生仓现场证据已经到手，现在推理公董局与走私链。'
@@ -139,38 +146,51 @@
       return '主证据链已经闭合，可以进入终局收束。';
     }
 
+    function actionStageSummary() {
+      const parts = [];
+      if (E.getFlag('deduced_chen')) parts.push('陈明远之死已经推清');
+      if (E.getFlag('deduced_lu_zhao')) parts.push('黑衣男人与陆小姐的关系已经推清');
+      if (hasThing('王巡官遗留纸条') || hasThing('福生仓位置') || hasThing('福生仓标识')) parts.push('福生仓入口已经锁定');
+      if (hasSunSupport()) parts.push('老孙支援已经接上');
+      return parts.length ? parts.join('；') : '主线线索已经串起';
+    }
+
+    function compactWrapupText() {
+      return `你在办公室里把线索重新排了一遍。<br><br><span class="sys">${actionStageSummary()}。</span><br><br>这里已经不是“再补线索”的阶段，而是要决定下一步行动路线。${recommendText(stageHint())}`;
+    }
+
     function pickStageChoices(choices) {
       const review = firstMatching(choices, isReview, fallbackReview());
 
       if (!E.getFlag('deduced_chen')) {
         const deduce = firstMatching(choices, isDeduceChen, null);
-        if (deduce) return [deduceChoice('deduce_chen', '🧩 下一步：拼合线索——推理陈明远之死', deduce), review];
+        if (deduce) return [deduceChoice('deduce_chen', '🧩 下一步：拼合线索——推理陈明远之死', deduce), reviewChoice(review)];
       }
 
       if (E.getFlag('deduced_chen') && !hasThing('翡翠镯')) {
         const pawn = firstMatching(choices, isPawn, { text: '🏛️ 下一步：去当铺——查当票上的翡翠镯', goto: 'ch4_pawnshop' });
-        return [{ ...pawn, text: '🏛️ 下一步：去当铺——查当票上的翡翠镯' }, review];
+        return [{ ...pawn, text: '🏛️ 下一步：去当铺——查当票上的翡翠镯' }, reviewChoice(review)];
       }
 
       if (hasThing('翡翠镯') && !E.getFlag('deduced_lu_zhao')) {
         const deduce = firstMatching(choices, isDeduceLu, null);
-        if (deduce) return [deduceChoice('deduce_lu_zhao', '🧩 下一步：推理黑衣男人与陆小姐的关系', deduce), review];
+        if (deduce) return [deduceChoice('deduce_lu_zhao', '🧩 下一步：推理黑衣男人与陆小姐的关系', deduce), reviewChoice(review)];
       }
 
-      if (E.getFlag('deduced_lu_zhao') && !hasSunSupport()) {
+      if (E.getFlag('deduced_lu_zhao') && !hasSunSupport() && !hasDockEvidence()) {
         const dock = firstMatching(choices, isDock, { text: '⛵ 下一步：去苏州河废弃码头——查福生仓', goto: 'ch4_suzhou_creek' });
         const sun = firstMatching(choices, isSunSupport, { text: '🚓 下一步：去巡捕房找老孙商量福生仓', goto: 'ch4_sun_support' });
-        return [dockSoloChoice(dock), sunChoice(sun), review];
+        return [dockSoloChoice(dock), sunChoice(sun), reviewChoice(review, '🔙 回顾现有证据（暂不行动）')];
       }
 
       if (hasSunSupport() && !hasDockEvidence()) {
         const dock = firstMatching(choices, isDock, { text: '⛵ 下一步：去苏州河废弃码头——查福生仓', goto: 'ch4_suzhou_creek' });
-        return [{ ...dock, text: '⛵ 下一步：去苏州河废弃码头——查福生仓' }, review];
+        return [{ ...dock, text: '⛵ 下一步：去苏州河废弃码头——查福生仓' }, reviewChoice(review, '🔙 回顾现有证据（暂不行动）')];
       }
 
       if (hasDockEvidence() && !E.getFlag('deduced_fusheng')) {
         const deduce = firstMatching(choices, isDeduceFusheng, null);
-        if (deduce) return [deduceChoice('deduce_fusheng', '🧩 下一步：推理福生仓与公董局的真相', deduce), review];
+        if (deduce) return [deduceChoice('deduce_fusheng', '🧩 下一步：推理福生仓与公董局的真相', deduce), reviewChoice(review)];
       }
 
       return choices;
@@ -184,11 +204,7 @@
         const base = typeof oldText === 'function' ? oldText(state) : oldText;
         const visited = E.getFlag('ch3_wrapup_visited');
         E.setFlag('ch3_wrapup_visited', true);
-        if (visited && base.length > 200) {
-          // 第二次回访时缩短线索清单
-          const summary = base.split('。').slice(0,2).join('。') + '。';
-          return `${summary} 你已经掌握了不少线索，该决定下一步做什么了。${recommendText(stageHint())}`;
-        }
+        if (visited && base.length > 200) return compactWrapupText();
         return `${base}${recommendText(stageHint())}`;
       };
 
