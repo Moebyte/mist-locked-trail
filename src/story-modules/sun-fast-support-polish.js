@@ -1,6 +1,7 @@
 // ===== 老孙私下增援收束 =====
 // 目标：“只带一个便衣”表示低调快速潜入，不应直接显示/路由成“只够救人”。
 // 人少的代价是压不住傅启元，不是找不到暗室或必然错过苏晚亭。
+// 注意：调齐人手/老孙带队不是本模块的快速支援；它会触发时间 tradeoff，不应被这里强行改回双人暗室。
 
 (function installSunFastSupportPolish() {
   function applySunFastSupportPolish() {
@@ -13,6 +14,15 @@
 
     function lowProfileRouteReady() {
       return fastSupportActive() && !E.getFlag('missed_deadline');
+    }
+
+    function trueFastRescuePrepared() {
+      if (typeof E.trueEndingFastRescuePrepared === 'function') return E.trueEndingFastRescuePrepared();
+      return typeof E.trueEndingPrepared === 'function' && E.trueEndingPrepared() && lowProfileRouteReady();
+    }
+
+    function fullSupportTradeoffActive() {
+      return typeof E.fullSupportTradeoffActive === 'function' && E.fullSupportTradeoffActive();
     }
 
     if (nodes.ch4_dock_sun_fast_support && !nodes.ch4_dock_sun_fast_support.__sunFastTextPatched) {
@@ -31,7 +41,11 @@
     if (typeof E.routeDockByPressure === 'function' && !E.__sunFastRouteDockPatched) {
       const oldRouteDockByPressure = E.routeDockByPressure.bind(E);
       E.routeDockByPressure = function () {
-        if (typeof this.trueEndingPrepared === 'function' && this.trueEndingPrepared()) return 'ch4_dock_full_search';
+        if (trueFastRescuePrepared()) return 'ch4_dock_full_search';
+        if (fullSupportTradeoffActive()) {
+          this.setFlag('dock_full_support_tradeoff', true);
+          return 'ch4_dock_full_search';
+        }
         if (lowProfileRouteReady()) {
           const target = oldRouteDockByPressure();
           if (target === 'ch4_dock_cleared') return target;
@@ -46,7 +60,11 @@
     if (typeof E.routeDockDeepByPressure === 'function' && !E.__sunFastRouteDockDeepPatched) {
       const oldRouteDockDeepByPressure = E.routeDockDeepByPressure.bind(E);
       E.routeDockDeepByPressure = function () {
-        if (typeof this.trueEndingPrepared === 'function' && this.trueEndingPrepared()) return 'ch4_dock_deep_dual';
+        if (trueFastRescuePrepared()) return 'ch4_dock_deep_dual';
+        if (fullSupportTradeoffActive()) {
+          this.setFlag('dock_full_support_tradeoff', true);
+          return 'ch4_dock_deep_trace';
+        }
         if (lowProfileRouteReady()) {
           const target = oldRouteDockDeepByPressure();
           if (target === 'ch4_dock_cleared') return target;
