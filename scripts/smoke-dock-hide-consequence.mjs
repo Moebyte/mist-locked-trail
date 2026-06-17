@@ -71,10 +71,17 @@ reset({
 });
 opts = choices('ch4_dock_full_search');
 texts = opts.map(choice => choice.text || choice.fogText || '');
-assert(texts.includes('📦 先检查旁边的教具箱'), '完整搜查时应显示检查教具箱选项');
-assert(texts.includes('🔦 先循着敲击声去仓库深处'), '完整搜查时应显示循声找人选项');
-assert(opts.find(choice => (choice.text || '').includes('敲击声'))?.goto === 'ch4_dock_locked_door', '循声找人应先到暗门节点');
+assert(texts.includes('🗂️ 先摸进临时账房查看桌上的公文夹'), '完整搜查时应先显示临时账房选项');
+assert(texts.includes('🚶 贴着货架往仓库深处移动'), '完整搜查时应显示货架推进选项');
+assert(!texts.some(text => text.includes('教具箱')), '完整搜查入口不应直接显示教具箱');
 assertNoSpoilerChoice(texts, '完整搜查');
+
+opts = choices('ch4_dock_shelf_approach');
+texts = opts.map(choice => choice.text || choice.fogText || '');
+assert(texts.includes('📦 先检查旁边的教具箱'), '到达货架深处后才应显示检查教具箱选项');
+assert(texts.includes('🔦 先循着敲击声去仓库深处'), '到达货架深处后应显示循声找人选项');
+assert(opts.find(choice => (choice.text || '').includes('敲击声'))?.goto === 'ch4_dock_locked_door', '循声找人应先到暗门节点');
+assertNoSpoilerChoice(texts, '货架深处');
 
 opts = choices('ch4_dock_locked_door');
 texts = opts.map(choice => choice.text || choice.fogText || '');
