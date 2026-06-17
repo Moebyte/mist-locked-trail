@@ -85,7 +85,7 @@ function applyCausalEchoes() {
     weather: 3,
     text: () => `沈玉兰抬起头看你。她像是想确认你有没有只是随口安慰，盯了你很久。<br><br><span class="sys">"沈先生，我找了两个月。巡捕房说她自己走了，赵先生说快有消息了，可没有一个人真的去找她。"</span><br><br>她把手袋里的旧照片推到你面前。照片上，沈玉芳站在光华小学门口，头发被风吹乱，笑得很轻。<br><br><span class="sys">"如果你真要查，请别只查苏小姐。也看看我妹妹。她们也许在同一场雾里。"</span>`,
     choices: [
-      { text: '🏛️ 去薛华立路 22 号——这个地址两案都有', goto: 'ch2_building_enter' },
+      { text: '🔎 回203室——继续搜查陆小姐住处', goto: 'ch2_building_enter' },
       { text: '📚 去光华小学——查沈玉芳和陈老师的线索', goto: 'ch3_school' }
     ]
   };
@@ -95,7 +95,7 @@ function applyCausalEchoes() {
     weather: 1,
     text: () => `沈玉兰听完，没有立刻说话。她把眼泪压回去，反而显得比刚才更冷静。<br><br><span class="sys">"我明白。你是周先生请来的，不是我请来的。"</span><br><br>她停了一下，又补了一句：<br><br><span class="sys">"可如果你在查苏小姐的时候，碰见我妹妹的名字，请不要像他们一样，把它当成一个麻烦。"</span><br><br>你点头。这个案子从这一刻开始，不再只有一个失踪者。`,
     choices: [
-      { text: '🏛️ 去薛华立路 22 号——这个地址两案都有', goto: 'ch2_building_enter' },
+      { text: '🔎 回203室——继续搜查陆小姐住处', goto: 'ch2_building_enter' },
       { text: '📚 去光华小学——查沈玉芳和陈老师的线索', goto: 'ch3_school' }
     ]
   };
