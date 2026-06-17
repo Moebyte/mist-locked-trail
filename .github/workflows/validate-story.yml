@@ -58,6 +58,9 @@ jobs:
       - name: Smoke test Sun fast support
         run: node scripts/smoke-sun-fast-support.mjs
 
+      - name: Smoke test dock heat system
+        run: node scripts/smoke-dock-heat-system.mjs
+
       - name: Smoke test conclusion summary
         run: node scripts/smoke-conclusion-summary.mjs
 
