@@ -43,6 +43,9 @@ jobs:
       - name: Smoke test narrative depth routes
         run: node scripts/smoke-narrative-depth.mjs
 
+      - name: Smoke test ending reachability
+        run: node scripts/smoke-ending-reachability.mjs
+
       - name: Smoke test causal echo
         run: node scripts/smoke-causal-echo.mjs
 
