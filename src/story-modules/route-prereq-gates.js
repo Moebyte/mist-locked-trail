@@ -1,7 +1,7 @@
 // ===== 主线路径前置条件 =====
 // 目标：把“福生仓入口”和“沈玉芳施救识别”拆成两个独立门槛。
 // 1) 王巡官纸条负责解锁福生仓入口。
-// 2) 薛华立路/沈玉兰线负责让玩家认识沈玉芳，否则进了福生仓也无法完成施救。
+// 2) 薛华立路/沈玉兰线负责让玩家知道沈玉芳这条人质线；否则即使进入仓库，也不会找到暗室。
 (function installRoutePrereqGates() {
   function applyRoutePrereqGates() {
     if (typeof E === 'undefined' || typeof nodes === 'undefined') return;
@@ -112,21 +112,91 @@
       nodes.ch4_suzhou_creek.__routePrereqWangPatched = true;
     }
 
-    if (!nodes.ch4_dock_unknown_yufang) {
-      nodes.ch4_dock_unknown_yufang = {
-        title: '福生仓 · 身份断线',
+    if (!nodes.ch4_dock_no_darkroom) {
+      nodes.ch4_dock_no_darkroom = {
+        title: '福生仓 · 搜查断线',
         weather: 5,
         effect: () => {
-          E.setFlag('yufang_identity_missed', true);
-          E.addHeat(1, '你进入暗室，却没有足够的人物线索建立信任。');
-          E.addClue('暗室身份断线', '你在福生仓暗室找到被关押的女教师，但因没有追到沈玉芳线，无法当场确认身份并完成施救');
+          E.setFlag('yufang_context_missing_at_dock', true);
+          E.addHeat(1, '你在仓库里耽搁太久，却没有找到真正关人的地方。');
+          E.addClue('福生仓搜查断线', '你进入福生仓后只找到货箱、蓝封纸角和清场痕迹；因没有追到沈玉芳线，没有发现暗室');
         },
-        text: () => `暗门后是一间不足十平米的小房间。床边蜷缩着一个穿灰旗袍的年轻女人，床上还散着学生证和半张字条。<br><br>她看见你，第一反应不是求救，而是往墙角缩。<br><br><span class="sys">“你是谁？你们又想把我带到哪里去？”</span><br><br>你能判断她与光华小学有关，却叫不出她的名字，也不知道沈玉兰是谁。没有照片，没有姐姐的托付，也没有吴校长关于沈老师的证词。<br><br>脚步声已经靠近。你意识到：你进了福生仓，却没有带着能让她相信你的那条线。现在强行带人，只会把她和你一起推到更危险的地方。`,
+        text: () => `你把仓库前后搜了一遍。<br><br>木箱、货运单、蓝封纸角、临时搬空的车辙——这些都说明福生仓不是普通仓库。可除此之外，仓库深处只有潮气和霉味。<br><br>你没有听见敲击声，也没有想到这里会被人改出一间暗室。<br><br>如果你之前见过沈玉兰，知道她有个妹妹沈玉芳也失踪在这条线上，也许你会把“仓库”当成关人的地方来查。可现在，你只把它当成转运点。<br><br>等你意识到这里可能还藏着活人时，外面的脚步声已经近了。`,
         choices: [
-          { text: '⚠️ 无法确认身份，先带着现场证据撤出', goto: 'ch3_wrapup' },
+          { text: '📦 带走货运单和蓝封纸角，先撤出福生仓', goto: 'ch3_wrapup' },
           { text: '🔍 回事务所重新梳理人物关系', goto: 'ch4_conclusion' }
         ]
       };
+    }
+
+    function patchDockSearchNode(nodeId, textWithoutContext, choicesWithoutContext) {
+      const node = nodes[nodeId];
+      if (!node || node.__routePrereqNoYufangSearchPatched) return;
+      const oldText = node.text;
+      const oldChoices = node.choices;
+      node.text = function (state) {
+        if (hasWangFushengLead() && !knowsYufangForRescue()) return textWithoutContext(state);
+        return typeof oldText === 'function' ? oldText(state) : oldText;
+      };
+      node.choices = function (state) {
+        if (hasWangFushengLead() && !knowsYufangForRescue()) return choicesWithoutContext(state);
+        return choicesOf(oldChoices, state);
+      };
+      node.__routePrereqNoYufangSearchPatched = true;
+    }
+
+    patchDockSearchNode(
+      'ch4_dock_full_search',
+      () => `你先观察换班，再从东侧窗户进入。时间尚算充裕，仓库里还有一排排标着<span class="sys">“光华小学·教学器材”</span>的木箱。<br><br>你查到了转运痕迹，却没有明确的“找人”目标。这里太大，货箱太多，潮气把细小声音全压进了木板和墙缝里。<br><br>你没有听见敲击声，也没有发现暗门。`,
+      () => [
+        { text: '📦 检查教具箱和货运单', goto: 'ch4_dock_crates' },
+        { text: '🔍 继续搜仓库深处', goto: 'ch4_dock_no_darkroom' }
+      ]
+    );
+
+    patchDockSearchNode(
+      'ch4_dock_limited_search',
+      () => `仓库已经搬走一半。你只能抢下蓝封纸角和几张货运单。<br><br>你知道这里有问题，却不知道这里还可能关着人。仓库深处一片死寂，只有外面搬货的脚步声越来越近。<br><br>没有沈玉芳这条线，你不会把那些旧木箱后面的夹墙当成重点。`,
+      () => [
+        { text: '📦 冒险检查教具箱', goto: 'ch4_dock_crates' },
+        { text: '🔍 继续搜仓库深处', goto: 'ch4_dock_no_darkroom' }
+      ]
+    );
+
+    patchDockSearchNode(
+      'ch4_dock_rescue_only',
+      () => `货箱大多已经搬空，外面的车随时会走。<br><br>你赶到得太晚，又没有沈玉芳这条人质线作指引。眼前只剩清场痕迹和残留纸灰。你能判断这里是转运点，却找不到它真正用来藏人的地方。`,
+      () => [
+        { text: '🔍 抢时间再搜一遍仓库深处', goto: 'ch4_dock_no_darkroom' }
+      ]
+    );
+
+    if (nodes.ch4_dock_crates && !nodes.ch4_dock_crates.__routePrereqNoYufangCratesPatched) {
+      const oldChoices = nodes.ch4_dock_crates.choices;
+      nodes.ch4_dock_crates.choices = function (state) {
+        if (hasWangFushengLead() && !knowsYufangForRescue()) {
+          return [
+            { text: '📦 躲进空木箱，等守卫过去', goto: 'ch4_dock_hide' },
+            { text: '🔍 带着货运单继续搜仓库深处', goto: 'ch4_dock_no_darkroom' }
+          ];
+        }
+        return choicesOf(oldChoices, state);
+      };
+      nodes.ch4_dock_crates.__routePrereqNoYufangCratesPatched = true;
+    }
+
+    if (nodes.ch4_dock_locked_door && !nodes.ch4_dock_locked_door.__routePrereqNoYufangLockedDoorPatched) {
+      const oldText = nodes.ch4_dock_locked_door.text;
+      const oldChoices = nodes.ch4_dock_locked_door.choices;
+      nodes.ch4_dock_locked_door.text = function (state) {
+        if (hasWangFushengLead() && !knowsYufangForRescue()) return nodes.ch4_dock_no_darkroom.text(state);
+        return typeof oldText === 'function' ? oldText(state) : oldText;
+      };
+      nodes.ch4_dock_locked_door.choices = function (state) {
+        if (hasWangFushengLead() && !knowsYufangForRescue()) return nodes.ch4_dock_no_darkroom.choices;
+        return choicesOf(oldChoices, state);
+      };
+      nodes.ch4_dock_locked_door.__routePrereqNoYufangLockedDoorPatched = true;
     }
 
     if (!E.__routePrereqRoutePatched) {
@@ -141,7 +211,7 @@
         const oldRouteDockDeepByPressure = E.routeDockDeepByPressure.bind(E);
         E.routeDockDeepByPressure = function () {
           if (!hasWangFushengLead()) return 'ch4_fusheng_locked_by_wang';
-          if (!knowsYufangForRescue()) return 'ch4_dock_unknown_yufang';
+          if (!knowsYufangForRescue()) return 'ch4_dock_no_darkroom';
           return oldRouteDockDeepByPressure();
         };
       }
