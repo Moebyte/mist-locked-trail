@@ -1,5 +1,6 @@
 // ===== 推理链提示收束 =====
 // 目标：推理不是一次性三连问；后续推理条件不足时，不再凭空消失，而是显示锁定提示。
+// 修正：推理放行不再依赖原始 requiredClues 的单一精确名，避免玩家已拿到等价线索却被卡死。
 
 (function installDeductionFlowGuidance() {
   function applyDeductionFlowGuidance() {
@@ -17,30 +18,52 @@
 
     const DEDUCTION_REQUIREMENTS = {
       deduce_chen: [
-        ['陈明远坠楼案', '陈明远坠楼案'],
-        ['恐吓信', '203 室恐吓信'],
-        ['陆小姐的笔记', '陆小姐的笔记'],
-        ['陈明远的信', '陈明远的信']
+        { names: ['陈明远坠楼案', '陈老师遗物'], label: '陈明远坠楼案' },
+        { names: ['恐吓信'], label: '203 室恐吓信' },
+        { names: ['陆小姐的笔记', '陆念薇旧名', '杭州旧案剪报'], label: '陆小姐身份线索' },
+        { names: ['陈明远的信', '陈老师给苏晚亭的信'], label: '陈明远的信' }
       ],
       deduce_lu_zhao: [
-        ['跟踪黑衣男人', '跟踪黑衣男人'],
-        ['神秘女子', '茶楼神秘女子'],
-        ['沈玉兰的妹妹', '沈玉兰的妹妹'],
-        ['翡翠镯', '永昌当铺的翡翠镯']
+        { names: ['跟踪黑衣男人', '鸿运茶楼', '黑衣男人姓赵'], label: '跟踪黑衣男人' },
+        { names: ['神秘女子'], label: '茶楼神秘女子' },
+        { names: ['沈玉兰的妹妹', '沈玉芳'], label: '沈玉兰的妹妹' },
+        { names: ['翡翠镯'], label: '永昌当铺的翡翠镯' }
       ],
       deduce_fusheng: [
-        ['王巡官遗留纸条', '王巡官遗留纸条'],
-        ['陈明远的信', '陈明远的信'],
-        ['恐吓信', '203 室恐吓信'],
-        ['公董局公文纸', '福生仓公董局公文纸'],
-        ['教具箱走私', '福生仓教具箱走私证据']
+        { names: ['王巡官遗留纸条', '半张烟盒纸'], label: '王巡官遗留纸条' },
+        { names: ['陈明远的信'], label: '陈明远的信' },
+        { names: ['恐吓信'], label: '203 室恐吓信' },
+        { names: ['公董局公文纸', '清场指令'], label: '福生仓公董局公文纸' },
+        { names: ['教具箱走私', '管制药品走私', '傅启元夜运教具箱'], label: '福生仓教具箱走私证据' }
       ]
     };
 
+    function requirementMet(req) {
+      return req.names.some(name => hasThing(name));
+    }
+
     function missingFor(id) {
       return (DEDUCTION_REQUIREMENTS[id] || [])
-        .filter(([name]) => !hasThing(name))
-        .map(([, label]) => label);
+        .filter(req => !requirementMet(req))
+        .map(req => req.label);
+    }
+
+    function deductionSolved(id) {
+      const d = Array.isArray(E.deductions) ? E.deductions.find(x => x.id === id) : null;
+      return !!d?.solved;
+    }
+
+    function canDeduceByState(id) {
+      return !!DEDUCTION_REQUIREMENTS[id] && !deductionSolved(id) && missingFor(id).length === 0;
+    }
+
+    if (typeof E.canDeduce === 'function' && !E.__deductionCanDeduceRelaxed) {
+      const oldCanDeduce = E.canDeduce.bind(E);
+      E.canDeduce = function (id) {
+        if (DEDUCTION_REQUIREMENTS[id]) return canDeduceByState(id);
+        return oldCanDeduce(id);
+      };
+      E.__deductionCanDeduceRelaxed = true;
     }
 
     function hasDeductionChoice(choices, id) {
