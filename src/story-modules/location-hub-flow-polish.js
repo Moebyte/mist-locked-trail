@@ -22,10 +22,6 @@
       return E.hasClue('母亲证词') && E.getFlag('asked_photo') && E.getFlag('asked_mother_photo') && E.getFlag('shown_photo_to_mother');
     }
 
-    function schoolBasicDone() {
-      return E.getFlag('asked_about_chen') && E.getFlag('chen_su_link') && E.hasClue('陈老师与女子争吵') && E.getFlag('got_chen_evidence');
-    }
-
     // —— 圣约翰大学：地点内连续调查 ——
     if (nodes.ch2_university) {
       nodes.ch2_university.text = function () {
@@ -178,7 +174,15 @@
           });
         }
         if (E.getFlag('asked_about_chen') && !E.hasClue('陈老师与女子争吵')) {
-          opts.push({ text: '💬 问学校最近有没有异常', goto: 'ch3_school_weird' });
+          opts.push({
+            text: '💬 问学校最近有没有异常',
+            effect: () => {
+              E.addClue('陈老师与女子争吵', '出事前三天；沈玉芳同时请假失踪');
+              E.addClue('沈玉芳请假失踪', '光华小学数学老师，陈明远出事前一周请病假，此后一直没有回来。');
+              E.addContact('沈玉芳');
+            },
+            goto: 'ch3_school'
+          });
         }
         if (E.getFlag('sister_case') && !E.hasClue('沈玉芳与陈明远')) {
           opts.push({
