@@ -24,6 +24,11 @@ function text(id) {
   return typeof node.text === 'function' ? node.text(E.state) : node.text;
 }
 
+function presentable(id) {
+  rt.renderNode(id);
+  return E.getPresentableThings(rt.nodes[id], E.state).map(thing => thing.name);
+}
+
 const baseFlags = {
   got_wang_note: true,
   sister_case: true,
@@ -63,10 +68,13 @@ const beforeQuality = E.v07InvestigationQuality().score;
 confirm?.effect?.(E.state);
 assert(E.hasYufangTestimonyBoost(), '执行快速确认后，应有沈玉芳证词强化');
 assert(E.getFlag('yufang_confirmed_photo'), '三人合影应被沈玉芳确认');
+assert(E.getFlag('presented_photo_to_yufang_dual'), '快速确认后应同步旧举证标记，避免三人合影重复出示');
 assert(E.hasClue('沈玉芳暗室证词强化'), '快速确认应增加沈玉芳暗室证词强化线索');
 assert(E.witnessStabilityScore() > beforeWitness, `沈玉芳证词强化应提高 witness，之前 ${beforeWitness} 之后 ${E.witnessStabilityScore()}`);
 assert(E.truthCompletenessTier().score >= beforeTruth, '沈玉芳证词强化不应降低真相完整度');
 assert(E.v07InvestigationQuality().score > beforeQuality, `沈玉芳证词强化应提高终局质量分，之前 ${beforeQuality} 之后 ${E.v07InvestigationQuality().score}`);
+assert(!presentable('ch4_dock_who_dual').includes('三人合影'), '快速确认后，三人合影不应继续出现在出示菜单');
+assert(!presentable('ch4_dock_who_dual').includes('苏晚亭的银发夹'), '已经出示银发夹后，不应继续出现在出示菜单');
 const confirmText = text('ch4_yufang_quick_testimony');
 assert(confirmText.includes('证词已强化'), '证词确认节点应明确说明这是证词强化');
 assert(confirmText.includes('救援成败仍由撤离和苏晚亭信物决定'), '证词确认节点应说明它不是救援硬门槛');
@@ -80,7 +88,10 @@ c = choices('ch4_dock_who_dual');
 c.find(choice => (choice.text || '').includes('快速确认'))?.effect?.(E.state);
 assert(E.getFlag('yufang_confirmed_chen_letter'), '陈明远的信应被沈玉芳确认');
 assert(E.getFlag('yufang_confirmed_su_agency'), '日记残页应确认苏晚亭主动追查');
+assert(E.getFlag('presented_letter_to_yufang_dual'), '快速确认后应同步陈明远的信旧举证标记');
+assert(E.getFlag('presented_diary_to_yufang_dual'), '快速确认后应同步日记残页旧举证标记');
 assert(choices('ch4_dock_who_dual').filter(choice => (choice.text || '').includes('快速确认')).length === 0, '确认后不应重复显示快速确认证词选项');
+assert(presentable('ch4_dock_who_dual').length === 0, `确认沈玉芳证词并出示银发夹后，不应再出现出示菜单，实际 ${presentable('ch4_dock_who_dual').join('、')}`);
 
 reset({
   flags: { ...baseFlags },
