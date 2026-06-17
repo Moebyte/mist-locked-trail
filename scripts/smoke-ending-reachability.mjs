@@ -125,7 +125,7 @@ reports.push('PASS 吾爱晚亭可达');
 
 // 8. 码头人手不足硬质问坏结局。
 reset({ flags: { sun_fast_support: true, rescued_yufang: true, found_su_at_dock: true } });
-assert(hasTarget('ch4_dock_escape', 'end_dock_silenced'), '只有一个便衣时，当场质问傅启元应能进入码头坏结局');
+assert(hasTarget('ch4_dock_exit_assess', 'end_dock_silenced'), '只有一个便衣时，当场质问傅启元应能进入码头坏结局');
 reports.push('PASS 码头人手不足硬质问坏结局可达');
 
 if (errors.length) {

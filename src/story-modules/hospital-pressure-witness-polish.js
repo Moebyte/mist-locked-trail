@@ -112,8 +112,8 @@
       let score = 0;
       if (wp.yufang) score += 2;
       if (wp.su) score += 2;
-      if (hasThing('清场指令') || hasThing('公董局公文纸')) score += 1;
-      if (hasThing('光华货运单') || hasThing('教具箱走私')) score += 1;
+      if (hasThing('清场指令') || hasThing('公董局公文纸') || this.getFlag('fu_clearance_exposed')) score += 1;
+      if (hasThing('光华货运单') || hasThing('教具箱走私') || this.getFlag('fu_waybill_exposed')) score += 1;
       if (this.getFlag('hospital_doctor_record')) score += 1;
       if (this.getFlag('v07_lu_to_sun')) score += 2;
       else if (this.getFlag('v07_lu_statement')) score += 1;

@@ -142,7 +142,7 @@
             {
               text: '⚠️ 站到车灯前，当场拿出货运单和清场指令',
               effect: markFastHardConfront,
-              goto: () => E.fuWillSilenceAtDock() ? 'end_dock_silenced' : 'ch4_fu_confront'
+              goto: () => 'end_dock_silenced'
             }
           ];
         }

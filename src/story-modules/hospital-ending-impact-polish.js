@@ -91,24 +91,23 @@
           return 'end_archive';
         }
 
-        if (quality.score >= 11
+        if (quality.score >= 10
           && this.getFlag('rescued_yufang')
           && this.getFlag('rescued_su')
           && this.getFlag('deduced_fusheng')
           && this.getFlag('school_wu_three_proofs')
-          && this.hospitalAllowsTrueHidden()) {
+          && (t === 'complete' || t === 'solid')) {
           return 'end_true_hidden';
         }
 
-        if (quality.score >= 9
+        if (quality.score >= 8
           && this.getFlag('rescued_yufang')
           && this.getFlag('deduced_fusheng')
           && this.getFlag('school_wu_three_proofs')
-          && this.hospitalAllowsHidden()) {
+          && (t === 'complete' || t === 'solid')) {
           return 'end_conspiracy_detail';
         }
 
-        if (h === 'tense' && t === 'complete' && quality.score >= 8) return 'end_conspiracy_detail';
         return oldResolve();
       };
       E.__hospitalEndingResolvePatched = true;

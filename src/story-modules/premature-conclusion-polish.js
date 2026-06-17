@@ -40,6 +40,7 @@
     }
 
     function isPrematureConclusion() {
+      if (E.getFlag('rescued_yufang') || E.getFlag('rescued_su') || E.getFlag('v07_witnesses_protected')) return false;
       return isBadRouteLocked() || !hasReachedFushengCore();
     }
 
@@ -127,6 +128,7 @@
       nodes.ch4_conclusion.choices = function (state) {
         const choices = choicesOf(oldChoices, state);
         if (!isPrematureConclusion()) return choices;
+        if (E.getFlag('missed_deadline')) return choices;
         return [
           { text: '📁 证据不足，暂时归档此案', goto: 'end_archive' },
           { text: '⚠️ 证据不足，仍要冒然指认嫌疑人', goto: 'ch4_accuse' }

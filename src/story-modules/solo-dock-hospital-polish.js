@@ -100,6 +100,7 @@
 
     if (nodes.ch4_dock_solo_infiltration && !nodes.ch4_dock_solo_infiltration.__soloWindowPatched) {
       nodes.ch4_dock_solo_infiltration.choices = [
+        { text: '🔦 独自从东侧窗户翻进去', goto: () => E.routeDockSearchByTime() },
         { text: '🔦 贴近东窗，先看清守卫巡灯', goto: 'ch4_dock_solo_window_crisis' }
       ];
       nodes.ch4_dock_solo_infiltration.__soloWindowPatched = true;

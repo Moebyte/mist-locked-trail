@@ -84,6 +84,30 @@
       q.score = Number(q.score || 0);
       q.reasons = Array.isArray(q.reasons) ? q.reasons.slice() : [];
 
+      if (this.getFlag('deduced_fusheng') && !q.reasons.includes('推明福生仓与公董局关联')) {
+        q.score += 2;
+        q.reasons.push('推明福生仓与公董局关联');
+      }
+      if (this.getFlag('fu_waybill_exposed') && !q.reasons.includes('福生仓货运单已曝光')) {
+        q.score += 1;
+        q.reasons.push('福生仓货运单已曝光');
+      }
+      if (this.getFlag('fu_clearance_exposed') && !q.reasons.includes('清场指令已曝光')) {
+        q.score += 1;
+        q.reasons.push('清场指令已曝光');
+      }
+      if (this.getFlag('v07_lu_confronted') && !q.reasons.includes('陆念薇已对峙')) {
+        q.score += 1;
+        q.reasons.push('陆念薇已对峙');
+      }
+      if (this.getFlag('v07_rejected_fu_deal') && !q.reasons.includes('拒绝傅启元交易')) {
+        q.score += 1;
+        q.reasons.push('拒绝傅启元交易');
+      }
+      if (this.getFlag('v07_witnesses_protected') && !q.reasons.includes('证人已保护')) {
+        q.score += 1;
+        q.reasons.push('证人已保护');
+      }
       if (this.getFlag('school_wu_three_proofs') && !q.reasons.includes('光华小学三证物闭环完成')) {
         q.score += 1;
         q.reasons.push('光华小学三证物闭环完成');
@@ -118,10 +142,10 @@
     E.v07ResolveEnding = function () {
       const quality = this.v07InvestigationQuality();
       if (this.getFlag('missed_deadline')) return 'end_too_late';
-      if (quality.score >= 11 && this.getFlag('rescued_yufang') && this.getFlag('rescued_su') && this.getFlag('deduced_fusheng') && this.getFlag('school_wu_three_proofs')) {
+      if (quality.score >= 10 && this.getFlag('rescued_yufang') && this.getFlag('rescued_su') && this.getFlag('deduced_fusheng') && this.getFlag('school_wu_three_proofs')) {
         return 'end_true_hidden';
       }
-      if (quality.score >= 9 && this.getFlag('rescued_yufang') && this.getFlag('deduced_fusheng') && this.getFlag('school_wu_three_proofs')) {
+      if (quality.score >= 8 && this.getFlag('rescued_yufang') && this.getFlag('deduced_fusheng') && this.getFlag('school_wu_three_proofs')) {
         return 'end_conspiracy_detail';
       }
       if (this.getFlag('rescued_su') || this.getFlag('v07_witnesses_protected')) return 'end_rescue';

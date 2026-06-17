@@ -35,6 +35,17 @@ function present(sceneId, itemName, desc = '') {
   return scene.onPresent?.({ name: itemName, desc }, rt.E.state);
 }
 
+function runChoice(sceneId, textFragment) {
+  const choices = rt.choicesOf(sceneId);
+  const choice = choices.find(c => (c.text || '').includes(textFragment));
+  if (!choice) throw new Error(`未找到包含“${textFragment}”的选项`);
+  if (choice.when && !choice.when(rt.E.state)) throw new Error('选项条件未满足');
+  if (typeof choice.effect === 'function') choice.effect(rt.E.state);
+  const next = typeof choice.goto === 'function' ? choice.goto(rt.E.state) : choice.goto;
+  rt.renderNode(next);
+  return { goto: next };
+}
+
 reset({
   flags: { got_case_file: true, asked_about_chen: true, chen_su_link: true, got_chen_evidence: true, read_letter: true },
   clues: [{ name: '光华小学事件', desc: '' }, { name: '陈老师与女子争吵', desc: '' }],
@@ -103,17 +114,20 @@ const zhouText = nodeText('ch4_revisit_zhou');
 assert(zhouText.includes('晚亭吾爱'), '坏路线周怀安回访应提示陈明远的信');
 assert(zhouText.includes('遗书'), '坏路线周怀安回访应提示苏晚亭的遗书');
 assert(!zhouText.includes('伪造遗书'), '周怀安回访入口不应提前剧透遗书伪造');
-const jadeResult = present('ch4_revisit_zhou', '翡翠镯');
-assert(jadeResult?.goto === 'ch4_zhou_present_jade_premature', '坏路线向周怀安出示翡翠镯应进入弱证据节点');
+
+const jadeResult = runChoice('ch4_revisit_zhou', '翡翠镯');
+assert(jadeResult.goto === 'ch4_zhou_present_jade_premature', '坏路线向周怀安出示翡翠镯应进入弱证据节点');
 rt.renderNode(jadeResult.goto);
 assert(rt.E.hasClue('周怀安识出陆念'), '坏路线翡翠镯仍应记录陆念旧名线索');
-const chenFirst = present('ch4_revisit_zhou', '陈明远的信');
-assert(chenFirst?.goto === 'ch4_zhou_present_chen_letter', '坏路线先出示陈明远的信，应进入晚亭吾爱举证节点');
+
+const chenFirst = runChoice('ch4_revisit_zhou', '陈明远');
+assert(chenFirst.goto === 'ch4_zhou_present_chen_letter', '坏路线先出示陈明远的信，应进入晚亭吾爱举证节点');
 rt.renderNode(chenFirst.goto);
 assert(rt.E.getFlag('presented_chen_letter_to_zhou'), '出示陈明远的信后应设置 flag');
 assert(!rt.E.getFlag('zhou_chen_letter_easter_egg'), '只出示陈明远的信不应直接触发结局');
-const noteSecond = present('ch4_revisit_zhou', '苏晚亭的遗书');
-assert(noteSecond?.goto === 'end_zhou_chen_letter', '第二封出示苏晚亭的遗书后应触发吾爱晚亭结局');
+
+const noteSecond = runChoice('ch4_revisit_zhou', '遗书');
+assert(noteSecond.goto === 'end_zhou_chen_letter', '第二封出示苏晚亭的遗书后应触发吾爱晚亭结局');
 rt.renderNode('end_zhou_chen_letter');
 assert(rt.E.getFlag('zhou_chen_letter_easter_egg'), '吾爱晚亭结局应设置对应 flag');
 assert(rt.E.hasClue('周怀安读到两封信'), '吾爱晚亭结局应记录周怀安读到两封信');
@@ -125,11 +139,11 @@ reset({
   clues: [{ name: '光华小学事件', desc: '' }],
   items: [{ name: '陈明远的信', desc: '' }, { name: '苏晚亭的遗书', desc: '' }],
 });
-const noteFirst = present('ch4_revisit_zhou', '苏晚亭的遗书');
-assert(noteFirst?.goto === 'ch4_zhou_present_su_last_letter', '坏路线先出示苏晚亭的遗书，应进入遗书举证节点');
+const noteFirst = runChoice('ch4_revisit_zhou', '遗书');
+assert(noteFirst.goto === 'ch4_zhou_present_su_last_letter', '坏路线先出示苏晚亭的遗书，应进入遗书举证节点');
 rt.renderNode(noteFirst.goto);
-const chenSecond = present('ch4_revisit_zhou', '陈明远的信');
-assert(chenSecond?.goto === 'end_zhou_chen_letter', '坏路线第二封出示陈明远的信后也应触发吾爱晚亭结局');
+const chenSecond = runChoice('ch4_revisit_zhou', '陈明远');
+assert(chenSecond.goto === 'end_zhou_chen_letter', '坏路线第二封出示陈明远的信后也应触发吾爱晚亭结局');
 
 reset({
   flags: { got_wang_note: true, shown_map_to_landlord: true, deduced_fusheng: true, rescued_yufang: true, rescued_su: true, read_letter: true },

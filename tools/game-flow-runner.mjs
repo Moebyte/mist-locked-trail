@@ -68,7 +68,8 @@ const GOLDEN_KEYWORDS = [
   '翡翠镯',
   '周怀安',
   '黑衣男人与陆小姐',
-  '老孙',
+  '不找支援',
+  '独自',
   '福生仓',
   '立刻',
   '后门观察',
@@ -82,6 +83,8 @@ const GOLDEN_KEYWORDS = [
   '送她们离开',
   '福生仓与公董局',
   '自然收束',
+  '苏家',
+  '看她母亲',
 ];
 
 function parseArgs(argv) {
@@ -114,9 +117,54 @@ function makeElement(id = '') {
     setAttribute(k, v) { this.attributes[k] = v; },
     getAttribute(k) { return this.attributes[k]; },
     querySelector(selector) {
+      if (!selector) return null;
+      const match = (el) => {
+        if (selector.startsWith('.')) {
+          const cls = selector.slice(1);
+          return (el.className || '').includes(cls) || (el.attributes?.class || '').includes(cls);
+        }
+        if (selector.startsWith('#')) {
+          return el.id === selector.slice(1);
+        }
+        return el.id === selector || (el.tagName && el.tagName === selector);
+      };
+      const search = (arr) => {
+        for (const child of arr || []) {
+          if (match(child)) return child;
+          const found = search(child.children);
+          if (found) return found;
+        }
+        return null;
+      };
+      const found = search(this.children);
+      if (found) return found;
+      // fallback: return a stub element so that property assignments don't crash
       if (!this.__qs) this.__qs = new Map();
       if (!this.__qs.has(selector)) this.__qs.set(selector, makeElement(selector));
       return this.__qs.get(selector);
+    },
+    querySelectorAll(selector) {
+      if (!selector) return [];
+      const match = (el) => {
+        if (selector.startsWith('.')) {
+          const cls = selector.slice(1);
+          return (el.className || '').includes(cls) || (el.attributes?.class || '').includes(cls);
+        }
+        if (selector.startsWith('#')) {
+          return el.id === selector.slice(1);
+        }
+        return el.id === selector || (el.tagName && el.tagName === selector);
+      };
+      const results = [];
+      const search = (arr) => {
+        for (const child of arr || []) {
+          if (match(child)) results.push(child);
+          search(child.children);
+        }
+      };
+      search(this.children);
+      results.forEach = Array.prototype.forEach;
+      return results;
     },
     scrollIntoView() {},
     addEventListener() {},
@@ -139,6 +187,7 @@ function makeRuntime() {
     },
     document: {
       body: makeElement('body'),
+      head: { appendChild() {} },
       getElementById(id) {
         if (!elements.has(id)) elements.set(id, makeElement(id));
         return elements.get(id);
@@ -168,8 +217,14 @@ function makeRuntime() {
     vm.runInContext(code, context, { filename: rel });
   }
 
-  runFile('src/engine.js');
-  runFile('src/story.js');
+  function runFileWithGlobal(name, fileRel) {
+    const abs = path.join(ROOT, fileRel);
+    const code = fs.readFileSync(abs, 'utf8');
+    vm.runInContext(code + '\nglobalThis.' + name + ' = ' + name + ';', context, { filename: fileRel });
+  }
+
+  runFileWithGlobal('E', 'src/engine.js');
+  runFileWithGlobal('nodes', 'src/story.js');
   runFile('src/main.js');
 
   const modules = readStoryModules();
@@ -260,6 +315,20 @@ function clickChoice(ctx, sceneId, choice) {
         return result;
       }
       ctx.E.go(target);
+      // 自动出示：到达 ch4_sun_support 时若有半张烟盒纸则自动出示
+      if (target === 'ch4_sun_support' && ctx.nodes[target].onPresent) {
+        const sunItem = ctx.E.hasItem('半张烟盒纸') ? { name: '半张烟盒纸' } 
+          : ctx.E.hasItem('福生仓地址') ? { name: '福生仓地址' }
+          : null;
+        if (sunItem) {
+          try {
+            const presentResult = ctx.nodes[target].onPresent(sunItem, ctx.E.state);
+            if (presentResult && presentResult.goto && ctx.nodes[presentResult.goto]) {
+              ctx.E.go(presentResult.goto);
+            }
+          } catch {}
+        }
+      }
     }
 
     if (choice.end) {
@@ -314,6 +383,8 @@ function runGolden() {
 
   let sceneId = ctx.E.state.currentScene || 'ch1_open';
   const visited = [];
+  // 循环检测：记录最近 5 次 (from,to) 对
+  const cycleWindow = [];
   for (let depth = 0; depth < MAX_DEPTH; depth++) {
     const node = ctx.nodes[sceneId];
     if (!node) {
@@ -339,10 +410,36 @@ function runGolden() {
       report.errors.push({ type: 'transition_error', sceneId, transition });
       break;
     }
-    sceneId = ctx.E.state.currentScene || transition.to;
+    const nextScene = ctx.E.state.currentScene || transition.to;
+    // 循环检测：记录每次的 key = 场景名 + 可用选项文本
+    const availText = (choices||[]).filter(c=>!isLocked(ctx,c)).map(c=>choiceText(c)).join('|');
+    cycleWindow.push(nextScene + '::' + availText);
+    if (cycleWindow.length > 15) cycleWindow.shift();
+    if (cycleWindow.length >= 8) {
+      const recent = cycleWindow.slice(-8);
+      const scenes = recent.map(s => s.split('::')[0]);
+      const uniqueScenes = new Set(scenes);
+      // 1) 同场景 8 次不变
+      // 2) 2 场景来回切换（ABAB...）且选项文本重复 ≥3 次
+      if (uniqueScenes.size === 1) {
+        report.errors.push({ type: 'loop_detected', window: recent.slice(0,5), at: nextScene });
+        break;
+      }
+      if (uniqueScenes.size === 2) {
+        const keys = recent.slice(-6).map(s => s.split('::')[1]);
+        const uniqueKeys = new Set(keys);
+        if (uniqueKeys.size <= 2) {
+          report.errors.push({ type: 'loop_detected_2cycle', window: recent.slice(0,6), at: nextScene });
+          break;
+        }
+      }
+    }
+    sceneId = nextScene;
   }
 
   report.finalScene = ctx.E.state.currentScene;
+  const finalNode = ctx.nodes[report.finalScene];
+  if (finalNode && finalNode.type === 'end') report.reachedEndings.add(report.finalScene);
   report.finalFlags = clone(ctx.E.state.flags || {});
   report.path = visited;
   report.summary = summarize(report);

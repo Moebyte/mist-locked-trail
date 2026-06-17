@@ -175,7 +175,7 @@
 
       nodes.ch4_conclusion.choices = function (state) {
         const opts = choicesOf(oldChoices, state).slice();
-        if (!E.getFlag('deduced_fusheng') && dockEvidenceReady() && E.canDeduce && E.canDeduce('deduce_fusheng') && !hasFushengDeductionChoice(opts)) {
+        if (!E.getFlag('deduced_fusheng') && dockEvidenceReady() && !hasFushengDeductionChoice(opts)) {
           opts.unshift({ text: '🧩 先推理——福生仓与公董局的真相', effect: () => E.openDeduction('deduce_fusheng') });
         }
         return opts;

@@ -30,7 +30,7 @@ export function createEngineStub(initialState = {}) {
     sceneEl: { style: {} },
     titleEl: {},
     textEl: {},
-    choicesEl: { innerHTML: '', appendChild() {} },
+    choicesEl: { innerHTML: '', querySelector() { return null; }, querySelectorAll() { return []; }, appendChild() {} },
     relationData: { nodes: [], edges: [] },
     init() {},
     freshState() { return freshState(); },
@@ -98,6 +98,8 @@ export function createDocumentStub(domReadyHandlers) {
     addEventListener(event, handler) {
       if (event === 'DOMContentLoaded') domReadyHandlers.push(handler);
     },
+    body: { classList: { add() {}, remove() {}, toggle() {}, contains() { return false; } }, appendChild() {} },
+    head: { appendChild() {} },
     getElementById() {
       return {
         style: {},
