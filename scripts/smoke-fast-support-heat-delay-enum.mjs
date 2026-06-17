@@ -42,6 +42,23 @@ function expect(label, flags, clues, items, expected) {
   }
 }
 
+function runNode(id) {
+  const node = h.nodes[id];
+  assert(node, `缺少节点：${id}`);
+  if (!node) return;
+  if (typeof node.effect === 'function') node.effect(E.state);
+}
+
+function runChoice(id, textFragment) {
+  h.renderNode(id);
+  const choices = h.choicesOf(id);
+  const choice = choices.find(c => (c.text || c.fogText || '').includes(textFragment));
+  assert(choice, `节点 ${id} 找不到选项：${textFragment}；实际 ${choices.map(c => c.text || c.fogText || '').join(' / ')}`);
+  if (!choice) return null;
+  if (typeof choice.effect === 'function') choice.effect(E.state);
+  return typeof choice.goto === 'function' ? choice.goto(E.state) : choice.goto;
+}
+
 const clearanceClue = [{ name: '公董局公文纸', desc: '' }];
 const clearanceItem = [{ name: '清场指令', desc: '' }];
 const waybillClue = [{ name: '教具箱走私', desc: '' }];
@@ -55,7 +72,7 @@ expect(
   { dock_clearance_seen_inside: true, found_door_tool: true, dock_hid_in_crate: true },
   bothClues,
   bothItems,
-  { exposure: 0, delay: 3, total: 3, tier: 'low', route: 'ch4_dock_deep_dual' }
+  { exposure: 0, delay: 2, total: 2, tier: 'low', route: 'ch4_dock_deep_dual' }
 );
 
 // 只拿运单 + 躲木箱：轻微 delay，不应过早掉到中风险。
@@ -64,16 +81,16 @@ expect(
   { found_door_tool: true, dock_hid_in_crate: true },
   waybillClue,
   waybillItem,
-  { exposure: 0, delay: 2, total: 2, tier: 'low', route: 'ch4_dock_deep_dual' }
+  { exposure: 0, delay: 1, total: 1, tier: 'low', route: 'ch4_dock_deep_dual' }
 );
 
-// 指令 + 运单 + 一个明显冒进：仍在中风险边界，救出一方。
+// 指令 + 运单 + 一个明显冒进：便衣低调掩护仍能吸收一次小失误，但不能吸收多次冒进。
 expect(
   '便衣全证据但快速穿中道',
   { dock_clearance_seen_inside: true, found_door_tool: true, dock_hid_in_crate: true, dock_shelf_shortcut: true },
   bothClues,
   bothItems,
-  { exposure: 1, delay: 3, total: 4, tier: 'mid', route: 'ch4_dock_deep_trace' }
+  { exposure: 1, delay: 2, total: 3, tier: 'low', route: 'ch4_dock_deep_dual' }
 );
 
 // 指令 + 运单 + 多个冒进动作：高风险，空暗室。
@@ -100,6 +117,36 @@ expect(
   waybillItem,
   { exposure: 0, delay: 6, total: 6, tier: 'high', route: 'ch4_dock_empty_after_return' }
 );
+
+// 真实玩家路径：便衣进入 → 账房拿指令 → 慢行到货架 → 查教具箱 → 躲木箱 → 开暗门，必须双救。
+h.resetState({
+  flags: { sun_fast_support: true },
+  pressure: { heat: 0, deadline: { day: 2, hour: 23, minute: 0 } },
+  inGameTime: { day: 2, hour: 21, minute: 0 },
+});
+runNode('ch4_dock_fast_infiltration');
+let goto = runChoice('ch4_dock_fast_infiltration', '借便衣掩护');
+assert(goto === 'ch4_dock_full_search', `便衣入口应进入完整搜索窗口，实际 ${goto}`);
+runNode(goto);
+goto = runChoice('ch4_dock_full_search', '临时账房');
+assert(goto === 'ch4_dock_inner_office', `应能先去临时账房，实际 ${goto}`);
+runNode(goto);
+goto = runChoice('ch4_dock_inner_office', '放慢脚步');
+assert(goto === 'ch4_dock_shelf_approach', `账房后应到货架区，实际 ${goto}`);
+runNode(goto);
+goto = runChoice('ch4_dock_shelf_approach', '检查旁边的教具箱');
+assert(goto === 'ch4_dock_crates', `货架区应能查教具箱，实际 ${goto}`);
+runNode(goto);
+goto = runChoice('ch4_dock_crates', '躲进空木箱');
+assert(goto === 'ch4_dock_hide', `查教具箱后应能躲木箱，实际 ${goto}`);
+runNode(goto);
+goto = runChoice('ch4_dock_hide', '带着铁钎');
+assert(goto === 'ch4_dock_locked_door', `躲木箱后应去暗门，实际 ${goto}`);
+runNode(goto);
+goto = runChoice('ch4_dock_locked_door', '用铁钎');
+const actual = score();
+assert(goto === 'ch4_dock_deep_dual', `便衣真实优秀路径应进入暗室双救，实际 goto=${goto}；分数 ${JSON.stringify(actual)}`);
+assert(actual.tier === 'low', `便衣真实优秀路径应是低风险，实际 ${JSON.stringify(actual)}`);
 
 if (errors.length) {
   console.error('Fast support heat-delay enumeration smoke failed:');
