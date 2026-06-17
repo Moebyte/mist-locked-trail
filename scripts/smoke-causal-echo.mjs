@@ -21,13 +21,17 @@ function runChoiceByText(id, fragment) {
 }
 
 rt.resetState();
-runChoiceByText('ch1_open', '接下委托');
-assert(E.getFlag('echo_zhou_quick_trust') === true, '周明远快速信任线未设置 echo_zhou_quick_trust');
-assert(E.causalEchoSummary().some(e => e.id === 'zhou_quick_trust'), '周明远快速信任线未进入回响摘要');
+runChoiceByText('ch1_open', '先问清楚');
+runChoiceByText('ch1_ask', '好，这委托我接了');
+assert(E.getFlag('echo_zhou_quick_trust') === true, '周怀安快速信任线未设置 echo_zhou_quick_trust');
+assert(E.causalEchoSummary().some(e => e.id === 'zhou_quick_trust'), '周怀安快速信任线未进入回响摘要');
 
 rt.resetState();
-runChoiceByText('ch1_ask', '好，这委托我接了');
-assert(E.getFlag('echo_zhou_questioned_first') === true, '周明远谨慎追问线未设置 echo_zhou_questioned_first');
+runChoiceByText('ch1_open', '先问清楚');
+runChoiceByText('ch1_ask', '再问清几个细节');
+runChoiceByText('ch1_ask_detail', '接下委托');
+assert(E.getFlag('echo_zhou_questioned_first') === true, '周怀安谨慎追问线未设置 echo_zhou_questioned_first');
+assert(E.causalEchoSummary().some(e => e.id === 'zhou_questioned_first'), '周怀安谨慎追问线未进入回响摘要');
 
 rt.resetState();
 runChoiceByText('ch2_woman_detail', '我会尽力');
