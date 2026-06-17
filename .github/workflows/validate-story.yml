@@ -67,6 +67,9 @@ jobs:
       - name: Smoke test hospital flow
         run: node scripts/smoke-hospital-flow.mjs
 
+      - name: Smoke test hospital pressure witness
+        run: node scripts/smoke-hospital-pressure-witness.mjs
+
       - name: Smoke test dock hide consequence
         run: node scripts/smoke-dock-hide-consequence.mjs
 
