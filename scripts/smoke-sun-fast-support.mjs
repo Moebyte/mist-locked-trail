@@ -13,6 +13,19 @@ function reset(overrides = {}) {
   rt.resetState(overrides);
 }
 
+const preparedClues = [
+  { name: '王巡官遗留纸条', desc: '' },
+  { name: '沈玉芳', desc: '' },
+  { name: '苏母认出照片', desc: '' }
+];
+const preparedItems = [{ name: '苏晚亭的银发夹', desc: '' }];
+const preparedFlags = {
+  school_wu_three_proofs: true,
+  got_wang_note: true,
+  sister_case: true,
+  shown_photo_to_mother: true,
+};
+
 reset({
   currentScene: 'ch4_dock_sun_fast_support',
   inGameTime: { day: 2, hour: 21, minute: 0 },
@@ -40,18 +53,34 @@ reset({
   flags: {
     sun_fast_support: true,
     sun_support_available: true,
-    school_wu_three_proofs: true,
-    got_wang_note: true,
-    sister_case: true,
-    shown_photo_to_mother: true,
+    ...preparedFlags,
   },
-  clues: [{ name: '王巡官遗留纸条', desc: '' }, { name: '沈玉芳', desc: '' }, { name: '苏母认出照片', desc: '' }],
-  items: [{ name: '苏晚亭的银发夹', desc: '' }],
+  clues: preparedClues,
+  items: preparedItems,
 });
 
 assert(E.trueEndingPrepared(), '完整救人准备状态应为 trueEndingPrepared');
+assert(E.trueEndingFastRescuePrepared(), '完整准备 + 快速/一个便衣应为 trueEndingFastRescuePrepared');
 assert(E.routeDockByPressure() === 'ch4_dock_full_search', '完整准备 + 私下增援应进入完整搜查');
 assert(E.routeDockDeepByPressure() === 'ch4_dock_deep_dual', '完整准备 + 私下增援应能同时找到沈玉芳和苏晚亭');
+
+reset({
+  currentScene: 'ch4_dock_wait',
+  inGameTime: { day: 2, hour: 21, minute: 0 },
+  pressure: { heat: 0, deadline: { day: 2, hour: 23, minute: 0 } },
+  flags: {
+    sun_wait_support: true,
+    sun_support_available: true,
+    ...preparedFlags,
+  },
+  clues: preparedClues,
+  items: preparedItems,
+});
+
+assert(E.trueEndingPrepared(), '老孙带队也可以是完整救人准备状态');
+assert(E.fullSupportTradeoffActive(), '老孙带队应触发 fullSupportTradeoffActive');
+assert(E.routeDockByPressure() === 'ch4_dock_full_search', '老孙带队应保留完整搜查/封锁优势');
+assert(E.routeDockDeepByPressure() === 'ch4_dock_deep_trace', '老孙带队耽误时间后，苏晚亭应刚被转走，而不是双人暗室');
 
 if (errors.length) {
   console.error('Sun fast support smoke failed:');
