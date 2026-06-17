@@ -1,7 +1,8 @@
 // ===== 线索整理页阶段引导 =====
 // 目标：ch3_wrapup 不再同时抛出推理、当铺、老孙、码头等多个主线入口。
-// 同一阶段只突出一个推荐下一步，降低玩家迷路感。
+// 同一阶段只突出当前阶段的关键选择，降低玩家迷路感。
 // 推理入口使用 safe opener，避免“下一步推理”点击无反应。
+// 调整：福生仓行动阶段同时提供 solo 和老孙支援入口，避免 solo 线被隐藏。
 
 (function installWrapupPriorityGuidance() {
   function applyWrapupPriorityGuidance() {
@@ -100,6 +101,22 @@
       return { ...(base || {}), text, effect: openDeductionEffect(id), goto: undefined };
     }
 
+    function dockSoloChoice(base) {
+      return {
+        ...(base || {}),
+        text: '🔦 下一步：不找支援，独自去福生仓',
+        goto: 'ch4_suzhou_creek'
+      };
+    }
+
+    function sunChoice(base) {
+      return {
+        ...(base || {}),
+        text: '🚓 下一步：去巡捕房找老孙商量福生仓',
+        goto: 'ch4_sun_support'
+      };
+    }
+
     function stageHint() {
       if (!E.getFlag('deduced_chen')) {
         return E.canDeduce('deduce_chen')
@@ -112,7 +129,7 @@
           ? '现在可以推理黑衣男人与陆小姐的关系。'
           : '黑衣男人与陆小姐这条线还差一点证据。';
       }
-      if (!hasSunSupport()) return '先去巡捕房找老孙，把福生仓行动变成可控行动。';
+      if (!hasSunSupport()) return '福生仓已经能去了。你可以独自潜入，也可以先找老孙，把行动变得更可控。';
       if (!hasDockEvidence()) return '准备已经够了，去苏州河废弃码头查福生仓。';
       if (!E.getFlag('deduced_fusheng')) {
         return E.canDeduce('deduce_fusheng')
@@ -141,8 +158,9 @@
       }
 
       if (E.getFlag('deduced_lu_zhao') && !hasSunSupport()) {
+        const dock = firstMatching(choices, isDock, { text: '⛵ 下一步：去苏州河废弃码头——查福生仓', goto: 'ch4_suzhou_creek' });
         const sun = firstMatching(choices, isSunSupport, { text: '🚓 下一步：去巡捕房找老孙商量福生仓', goto: 'ch4_sun_support' });
-        return [{ ...sun, text: '🚓 下一步：去巡捕房找老孙商量福生仓' }, review];
+        return [dockSoloChoice(dock), sunChoice(sun), review];
       }
 
       if (hasSunSupport() && !hasDockEvidence()) {
