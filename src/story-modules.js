@@ -18,6 +18,7 @@
     'src/story-modules/xuehua-source-gate.js',
     'src/story-modules/wang-note-prereq.js',
     'src/story-modules/investigation-guidance.js',
+    'src/story-modules/home-route-polish.js',
     'src/story-modules/status-polish.js'
   ];
 
