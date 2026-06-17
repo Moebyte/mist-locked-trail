@@ -112,6 +112,7 @@
 
     if (nodes.ch3_school_office && !nodes.ch3_school_office.__guanghuaOfficePatched) {
       const oldEffect = nodes.ch3_school_office.effect;
+      nodes.ch3_school_office.text = () => `吴校长带你来到一楼拐角的一间办公室。门上贴着“陈明远老师”的名牌，已经有些褪色。<br><br>办公室被收拾过，书架空了一大半，桌面干净得不像刚死过一个主人。<br><br>但人越想抹平痕迹，越容易留下边角。<br><br>在书桌最底层的抽屉里，你摸到一个夹层。撬开以后，里面压着一个牛皮纸信封。<br><br>信封里有三样东西：<br><br><b>一、</b>一张当票——“永昌当铺 · 民国三十七年九月 · 押：翡翠镯一只 · 洋三百元”。<br><br><b>二、</b>一封没有寄出的信。开头是：“晚亭吾爱……”<br><br><b>三、</b>一张黑白照片——陈明远、苏晚亭和陆小姐站在光华小学门前。陆小姐站得离陈明远不近，却离学校大门很近，像一个本不该出现在这里的人。<br><br>这三样东西不能单独回答所有问题，但已经足够让吴校长不能再只说“巡捕房已经结案”。`;
       nodes.ch3_school_office.effect = function (state) {
         if (typeof oldEffect === 'function') oldEffect(state);
         if (!E.hasItem('三人合影')) E.addItem('三人合影', '陈明远、苏晚亭和陆小姐在光华小学门前的合影。');
