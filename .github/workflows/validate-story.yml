@@ -97,6 +97,9 @@ jobs:
       - name: Smoke test hospital truth score
         run: node scripts/smoke-hospital-truth-score.mjs
 
+      - name: Smoke test Lu procedure truth
+        run: node scripts/smoke-lu-procedure-truth.mjs
+
       - name: Smoke test dock exit hospital crisis
         run: node scripts/smoke-dock-exit-hospital-crisis.mjs
 
