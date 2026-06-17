@@ -42,6 +42,34 @@
     if (nodes.ch2_landlord_map) nodes.ch2_landlord_map.choices = afterLandlordChoices;
     if (nodes.ch2_203_door) nodes.ch2_203_door.choices = room203Choices;
 
+    if (nodes.ch2_building_stakeout) {
+      nodes.ch2_building_stakeout.choices = [
+        { text: '🕵️ 跟踪黑衣男人', goto: 'ch2_tail' },
+        { text: '🚶 不跟了，进永兴贸易商行看看', goto: 'ch2_building_enter' }
+      ];
+    }
+
+    if (nodes.ch2_tail) {
+      nodes.ch2_tail.choices = [
+        { text: '☕ 找个角落坐下，继续监视他', effect: () => { E.setFlag('tailing', true); E.addClue('鸿运茶楼', '黑衣男人在等人'); }, goto: 'ch2_tea_monitor' },
+        { text: '🔙 放弃尾随，回永兴贸易商行继续搜查', goto: 'ch2_building_enter' }
+      ];
+    }
+
+    if (nodes.ch2_tea_monitor) {
+      nodes.ch2_tea_monitor.choices = [
+        { text: '👩 走向那个女人', effect: () => { E.setFlag('approach_woman', true); }, goto: 'ch2_talk_woman' },
+        { text: '🔙 不接触她，回永兴贸易商行继续搜查', goto: 'ch2_building_enter' }
+      ];
+    }
+
+    if (nodes.ch2_talk_woman) {
+      nodes.ch2_talk_woman.choices = [
+        { text: '💬 详细问她妹妹的事', goto: 'ch2_woman_detail' },
+        { text: '🔙 留下联系方式，回永兴贸易商行继续搜查', goto: 'ch2_building_enter' }
+      ];
+    }
+
     if (nodes.ch2_yulan_promise_echo) {
       nodes.ch2_yulan_promise_echo.choices = [
         { text: '🔎 回永兴贸易商行——继续查陆小姐住处', goto: 'ch2_building_enter' },
