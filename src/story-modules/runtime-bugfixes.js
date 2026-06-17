@@ -89,9 +89,43 @@
     patchChoiceList('ch4_dock_watch');
   }
 
+  function textOf(choice) {
+    return choice?.text || choice?.fogText || '';
+  }
+
+  function hasFushengDeductionChoice(choices) {
+    return choices.some(choice => textOf(choice).includes('福生仓与公董局'));
+  }
+
+  function openDeductionEffect(id) {
+    return () => {
+      if (typeof E.openDeductionSafe === 'function') E.openDeductionSafe(id);
+      else if (typeof E.openDeduction === 'function') E.openDeduction(id);
+    };
+  }
+
+  function patchWrapupFushengDeductionChoice() {
+    const node = nodes.ch3_wrapup;
+    if (!node || node.__runtimeFushengDeductionChoicePatched) return;
+    const oldChoices = node.choices;
+    node.choices = function (state) {
+      const choices = typeof oldChoices === 'function' ? oldChoices(state) : (oldChoices || []);
+      if (!Array.isArray(choices)) return choices;
+      if (hasFushengDeductionChoice(choices)) return choices;
+      if (!E.getFlag('deduced_lu_zhao') || E.getFlag('deduced_fusheng') || E.getFlag('deduced_fusheng_fail')) return choices;
+      if (typeof E.canDeduce === 'function' && !E.canDeduce('deduce_fusheng')) return choices;
+      return [
+        { text: '🧩 推理——福生仓与公董局的真相', effect: openDeductionEffect('deduce_fusheng') },
+        ...choices,
+      ];
+    };
+    node.__runtimeFushengDeductionChoicePatched = true;
+  }
+
   function applyRuntimeBugfixes() {
     patchDeductionRegistry();
     patchDockRoutes();
+    patchWrapupFushengDeductionChoice();
   }
 
   // 立即补一层：start/loadGame 后的 registerAll 会走去重登记。
