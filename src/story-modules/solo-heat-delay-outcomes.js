@@ -113,19 +113,26 @@
       E.__soloDeepOutcomeRoutePatched = true;
     }
 
-    function outcomeBadge() {
+    function narrativeRiskHint() {
       if (typeof E.soloDockOutcomeTier !== 'function') return '';
       const t = E.soloDockOutcomeTier();
-      return `<br><br><span class="sys">Solo 风险：${t.label} · heat ${t.exposure} / delay ${t.delay} / 总分 ${t.score}</span>`;
+      if (t.key === 'full_evidence_no_rescue') return '你已经把能证明福生仓罪证的东西攥在手里，可仓库深处的声音也越来越远。';
+      if (t.key === 'partial_evidence_one_rescue') return '你手里有一块关键拼图，但仓库深处的时间已经被你用掉一截。';
+      return '你几乎没有停下取证，仓库深处的敲击声还来得及回应。';
+    }
+
+    function outcomeBadge() {
+      const hint = narrativeRiskHint();
+      return hint ? `<br><br><span class="sys">${hint}</span>` : '';
     }
 
     nodes.ch4_dock_solo_search_choice = {
       title: '福生仓 · 取证还是救人',
       weather: 3,
-      text: () => `你翻进东窗，落在一排木箱后面。<br><br>仓库深处传来很轻的敲击声。另一边的桌上压着蓝封公文，木箱夹层里也许还有货运单。<br><br>一个人行动没有后手。你在这里多拿一件证据，delay 就多一分；脚步越急，heat 也会升。最后能不能救到人，只看 heat + delay 的总分。${outcomeBadge()}`,
+      text: () => `你翻进东窗，落在一排木箱后面。<br><br>仓库深处传来很轻的敲击声。另一边的桌上压着蓝封公文，木箱夹层里也许还有货运单。<br><br>一个人行动没有后手。你在这里多停一下，就多接近真相；但深处那几下敲击声不会一直等你。${outcomeBadge()}`,
       choices: [
         {
-          text: '🔦 不碰公文和货箱，直奔敲击声开暗门（delay 0）',
+          text: '🔦 不碰公文和货箱，直奔敲击声开暗门',
           effect: () => {
             E.setFlag('dock_solo_search_committed', true);
             E.setFlag('dock_solo_no_evidence_rush', true);
@@ -134,7 +141,7 @@
           goto: () => E.routeSoloDockDeepByHeatDelay()
         },
         {
-          text: '📄 只拿蓝封清场指令，马上去暗门（delay 至少 3）',
+          text: '📄 只拿蓝封清场指令，马上去暗门',
           effect: () => {
             E.setFlag('dock_solo_search_committed', true);
             E.setFlag('dock_solo_partial_evidence_sweep', true);
@@ -143,7 +150,7 @@
           goto: () => E.routeSoloDockDeepByHeatDelay()
         },
         {
-          text: '📦 只翻教具箱货运单，马上去暗门（delay 至少 3）',
+          text: '📦 只翻教具箱货运单，马上去暗门',
           effect: () => {
             E.setFlag('dock_solo_search_committed', true);
             E.setFlag('dock_solo_partial_evidence_sweep', true);
@@ -152,7 +159,7 @@
           goto: () => E.routeSoloDockDeepByHeatDelay()
         },
         {
-          text: '📚 清场指令和教具箱货运单都查清，再去暗门（delay 至少 5）',
+          text: '📚 清场指令和教具箱货运单都查清，再去暗门',
           effect: () => {
             E.setFlag('dock_solo_search_committed', true);
             E.setFlag('dock_solo_full_evidence_sweep', true);
