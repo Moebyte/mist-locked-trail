@@ -18,6 +18,7 @@ const ENDINGS = [
   'end_conspiracy_detail',
   'end_zhou_chen_letter',
   'end_true_hidden',
+  'end_dock_silenced',
 ];
 
 function assert(condition, message) {
@@ -55,7 +56,7 @@ function endingTitle(id) {
   return nodes[id]?.title || '(missing title)';
 }
 
-// 1. 结局节点集合必须正好 11 个有效结局。
+// 1. 结局节点集合必须正好 12 个有效结局。
 for (const id of ENDINGS) {
   assert(nodes[id], `缺少结局节点：${id}`);
   assert(nodes[id]?.type === 'end', `${id} 不是 type=end，可能不会被记录为结局`);
@@ -121,6 +122,11 @@ reset({
 });
 assert(hasTarget('ch4_zhou_present_chen_letter', 'end_zhou_chen_letter') || hasTarget('ch4_zhou_present_su_last_letter', 'end_zhou_chen_letter'), '两封信并出后应能进入吾爱晚亭');
 reports.push('PASS 吾爱晚亭可达');
+
+// 8. 码头人手不足硬质问坏结局。
+reset({ flags: { sun_fast_support: true, rescued_yufang: true, found_su_at_dock: true } });
+assert(hasTarget('ch4_dock_escape', 'end_dock_silenced'), '只有一个便衣时，当场质问傅启元应能进入码头坏结局');
+reports.push('PASS 码头人手不足硬质问坏结局可达');
 
 if (errors.length) {
   console.error('Ending reachability smoke failed:');
