@@ -12,6 +12,11 @@ function assertChoiceTarget(sceneId, target) {
   if (!ok) throw new Error(`${sceneId} 缺少通往 ${target} 的选择`);
 }
 
+function choiceTargets(sceneId) {
+  h.renderNode(sceneId);
+  return h.choicesOf(sceneId).map(c => typeof c.goto === 'function' ? c.goto(E.state) : c.goto);
+}
+
 function rescueReadyFlags(extra = {}) {
   return {
     found_su_at_dock: true,
@@ -27,6 +32,20 @@ function hiddenReadyFlags(extra = {}) {
     presented_university_to_wu: true,
     school_wu_three_proofs: true,
     school_wu_full_confront: true,
+    ...extra,
+  });
+}
+
+function highQualityFlags(extra = {}) {
+  return rescueReadyFlags({
+    rescued_yufang: true,
+    rescued_su: true,
+    deduced_fusheng: true,
+    fu_waybill_exposed: true,
+    fu_clearance_exposed: true,
+    v07_witnesses_protected: true,
+    v07_lu_confronted: true,
+    v07_rejected_fu_deal: true,
     ...extra,
   });
 }
@@ -74,6 +93,18 @@ function testHiddenEndingRequiresSchoolThreeProofs() {
   reports.push(`PASS 隐藏结局需要校长三证物闭环，未完成时分流到 ${ending}`);
 }
 
+function testConclusionChoicesRespectHiddenGate() {
+  h.resetState({ flags: highQualityFlags() });
+  let targets = choiceTargets('ch4_conclusion');
+  if (targets.includes('end_conspiracy_detail')) throw new Error('ch4_conclusion 未完成校长三证物时，不应出现或跳往隐藏结局');
+  if (!targets.includes('end_rescue') && !targets.includes('end_conspiracy')) throw new Error('ch4_conclusion 未完成校长三证物时，自然结案应降级到普通好结局/普通结局');
+
+  h.resetState({ flags: highQualityFlags({ school_wu_three_proofs: true, school_wu_full_confront: true }) });
+  targets = choiceTargets('ch4_conclusion');
+  if (!targets.includes('end_conspiracy_detail')) throw new Error('ch4_conclusion 完成校长三证物后，应允许进入隐藏结局');
+  reports.push('PASS ch4_conclusion 选项层也受光华三证物门槛约束');
+}
+
 function testLateNaturalEnding() {
   h.resetState({ flags: { missed_deadline: true } });
   const ending = E.v07ResolveEnding();
@@ -96,6 +127,7 @@ try {
   testHospitalConflict();
   testHighQualityNaturalEnding();
   testHiddenEndingRequiresSchoolThreeProofs();
+  testConclusionChoicesRespectHiddenGate();
   testLateNaturalEnding();
   testFuOfferBranches();
 } catch (err) {
