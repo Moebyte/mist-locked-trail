@@ -18,6 +18,7 @@ const checks = [
   'scripts/check-story-chapter3-wu-present-runtime.mjs',
   'scripts/check-story-chapter3-school-teacher-runtime.mjs',
   'scripts/check-story-chapter3-school-hub-runtime.mjs',
+  'scripts/check-story-chapter3-wrapup-runtime.mjs',
   'scripts/remove-migrated-chapter3-first-batch-from-story.mjs',
   'scripts/remove-migrated-chapter3-second-batch-from-story.mjs',
   'scripts/remove-migrated-chapter3-yufang-batch-from-story.mjs',
