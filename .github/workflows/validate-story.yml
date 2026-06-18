@@ -142,6 +142,9 @@ jobs:
       - name: Smoke test Lu procedure truth
         run: node scripts/smoke-lu-procedure-truth.mjs
 
+      - name: Smoke test Lu evidence panel
+        run: node scripts/smoke-lu-evidence-panel.mjs
+
       - name: Smoke test dynamic endings
         run: node scripts/smoke-dynamic-endings.mjs
 
