@@ -33,7 +33,6 @@
         || hasThing('获救者身份')
         || hasThing('苏晚亭曾在暗室')
         || hasThing('沈玉芳曾在暗室')
-        || hasThing('教具箱走私')
         || hasThing('光华货运单')
         || hasThing('清场指令')
         || E.getFlag('dock_entry_committed')
@@ -72,18 +71,29 @@
       return choices.some(choice => choice?.goto === goto || (typeof choice?.goto === 'function' && choice.goto(E.state) === goto));
     }
 
+    function isPrematureClosureChoice(choice) {
+      const text = String(choice?.text || choice?.fogText || '');
+      const goto = typeof choice?.goto === 'function' ? choice.goto(E.state) : choice?.goto;
+      return goto === 'ch4_conclusion'
+        || text.includes('第三段推理')
+        || text.includes('福生仓与公董局')
+        || text.includes('封卷')
+        || text.includes('落笔');
+    }
+
     function addFushengChoices(base) {
-      const out = Array.isArray(base) ? base.slice() : [];
-      const review = out.find(choice => choice?.goto === 'ch4_conclusion' || String(choice?.text || choice?.fogText || '').includes('回顾'))
+      const source = Array.isArray(base) ? base.slice() : [];
+      const out = source.filter(choice => !isPrematureClosureChoice(choice));
+      const review = source.find(choice => choice?.goto === 'ch4_conclusion' || String(choice?.text || choice?.fogText || '').includes('回顾'))
         || { text: '🔙 先把桌上的材料再看一遍', goto: 'ch4_conclusion' };
 
       if (!hasGoto(out, 'ch4_suzhou_creek')) {
-        out.unshift({ text: '🔦 不等别人，先去福生仓探一探', goto: 'ch4_suzhou_creek' });
+        out.unshift({ text: '🔦 独自去福生仓探一探', goto: 'ch4_suzhou_creek' });
       }
       if (!hasSunSupport() && !hasGoto(out, 'ch4_sun_support')) {
-        out.splice(1, 0, { text: '🚓 先去巡捕房，把福生仓的事告诉老孙', goto: 'ch4_sun_support' });
+        out.splice(1, 0, { text: '🚓 找老孙商量福生仓', goto: 'ch4_sun_support' });
       }
-      if (!out.includes(review) && !hasGoto(out, 'ch4_conclusion')) out.push(review);
+      if (!hasGoto(out, 'ch4_conclusion')) out.push(review);
       return out.filter((choice, idx, arr) => {
         const text = choice?.text || choice?.fogText || '';
         const goto = typeof choice?.goto === 'function' ? choice.goto(E.state) : choice?.goto;
