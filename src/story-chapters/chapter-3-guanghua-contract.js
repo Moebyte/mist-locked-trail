@@ -34,7 +34,7 @@
         ch3_school_yufang: ['ch3_school_teacher', 'ch3_school_weird', 'ch3_school_office', 'ch3_school', 'ch3_school_confront_wu'],
         ch3_school_weird: ['ch3_school_office', 'ch3_school', 'ch3_school_confront_wu'],
         ch3_school_office: ['ch3_chen_letter', 'ch3_school_confront_wu'],
-        ch3_chen_letter: ['ch3_school_confront_wu', 'ch3_school'],
+        ch3_chen_letter: ['runtime region flow; verify all emitted targets exist'],
       },
       physicalRemovalAllowed: false,
     };
