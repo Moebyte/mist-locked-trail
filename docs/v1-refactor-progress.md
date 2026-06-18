@@ -1,8 +1,8 @@
 # v1 Refactor Progress Checkpoint
 
-This document tracks the actual progress of `v1_refactor` against `docs/v1-refactor-framework.md`.
+This document tracks actual progress of `v1_refactor` against `docs/v1-refactor-framework.md`.
 
-The framework remains the source of truth for phase order and migration discipline. This checkpoint only records what has already been completed and what the next safe step is.
+The framework remains the source of truth for phase order and migration discipline. This checkpoint records the current safe state and next step.
 
 ## Current branch
 
@@ -10,130 +10,28 @@ The framework remains the source of truth for phase order and migration discipli
 v1_refactor
 ```
 
-## Completed phases and milestones
-
-### Phase 0 — framework documents
-
-Status: complete.
-
-Completed documents:
+## Completed phases
 
 ```text
-docs/v1-refactor-framework.md
-docs/story-js-split-plan.md
-docs/styles-split-plan.md
+Phase 0: framework documents complete
+Phase 1: styles.css split complete
+Phase 2: chapter loading scaffold complete
+Phase 3: endings runtime takeover complete
+Phase 4: Chapter 2 runtime takeover and physical removal complete
+Phase 5: Chapter 3 high-risk migration in progress
 ```
 
-### Phase 1 — split `styles.css`
+## Chapter 3 migration discipline
 
-Status: complete.
-
-`src/styles.css` has been reduced to an import-style entry, with style layers moved into:
-
-```text
-src/styles/base.css
-src/styles/theme.css
-src/styles/layout.css
-src/styles/scene.css
-src/styles/choices.css
-src/styles/panel.css
-src/styles/modals.css
-src/styles/responsive.css
-src/styles/effects.css
-src/styles/status.css
-src/styles/title.css
-```
-
-### Phase 2 — chapter loading scaffold
-
-Status: complete.
-
-Chapter loading now uses:
-
-```text
-src/story-chapters/index.js
-src/story-modules.js
-```
-
-Chapter modules can register nodes into the shared `nodes` registry.
-
-### Phase 3 — endings migration
-
-Status: runtime takeover complete.
-
-Endings have been moved into:
-
-```text
-src/story-chapters/endings.js
-src/story-chapters/endings-contract.js
-```
-
-Runtime ending audit is available through:
-
-```text
-scripts/check-story-endings.mjs
-scripts/audit-story-endings.mjs
-```
-
-### Phase 4 — low-risk chapter migration
-
-Status: partially complete.
-
-Completed Chapter 1 runtime takeover:
-
-```text
-src/story-chapters/chapter-1-opening.js
-src/story-chapters/chapter-1-opening-contract.js
-```
-
-Chapter 2 has completed runtime takeover and physical removal from `src/story.js`.
-
-Migrated Chapter 2 files:
-
-```text
-src/story-chapters/chapter-2-university-entry.js
-src/story-chapters/chapter-2-university-entry-contract.js
-src/story-chapters/chapter-2-home-xuehua.js
-src/story-chapters/chapter-2-home-xuehua-contract.js
-src/story-chapters/chapter-2-home-entry.js
-src/story-chapters/chapter-2-home-entry-contract.js
-src/story-chapters/chapter-2-home-fixed.js
-src/story-chapters/chapter-2-home-fixed-contract.js
-src/story-chapters/chapter-2-home-talk.js
-src/story-chapters/chapter-2-home-talk-contract.js
-src/story-chapters/chapter-2-leave-home.js
-src/story-chapters/chapter-2-leave-home-contract.js
-src/story-chapters/chapter-2-police-dynamic.js
-src/story-chapters/chapter-2-police-dynamic-contract.js
-src/story-chapters/chapter-2-frenchtown-entry.js
-src/story-chapters/chapter-2-frenchtown-entry-contract.js
-src/story-chapters/chapter-2-frenchtown-tail.js
-src/story-chapters/chapter-2-frenchtown-tail-contract.js
-src/story-chapters/chapter-2-building-enter.js
-src/story-chapters/chapter-2-building-enter-contract.js
-src/story-chapters/chapter-2-xuehua-203.js
-src/story-chapters/chapter-2-xuehua-203-contract.js
-```
-
-Chapter 2 physical removal guard:
-
-```text
-scripts/remove-migrated-chapter2-from-story.mjs
-```
-
-The script is now an idempotent regression check. It should report that no migrated Chapter 2 node definitions remain in `src/story.js`.
-
-## Phase 5 — Chapter 3 high-risk migration
-
-Status: in progress.
-
-Chapter 3 must continue to use the high-risk migration discipline:
+Chapter 3 must continue to use this sequence:
 
 ```text
 runtime takeover -> focused runtime gate -> removal dry-run -> physical removal -> workflow收口
 ```
 
-### Completed Chapter 3 physical removals
+No direct Chapter 3 deletion should happen without a dedicated removal script and a focused runtime gate.
+
+## Completed Chapter 3 physical removals
 
 These Chapter 3 nodes have completed runtime takeover, focused gate coverage, removal dry-run, physical removal, and workflow收口:
 
@@ -146,86 +44,18 @@ ch3_chen_letter
 ch3_wu_present_threat
 ch3_wu_present_photo
 ch3_school_teacher
+ch3_school
 ```
 
 Current `src/story.js` physical removal footprint:
 
 ```text
-src/story.js: -826 lines
+src/story.js: -849 lines
 ```
 
-### Completed Chapter 3 Chen letter migration
+## Completed Chapter 3 school hub migration
 
-`ch3_chen_letter` has completed runtime takeover, focused runtime gate alignment, removal dry-run, physical removal, and workflow收口.
-
-Files:
-
-```text
-src/story-chapters/chapter-3-guanghua.js
-src/story-chapters/chapter-3-guanghua-contract.js
-scripts/check-story-chapter3-chen-letter-runtime.mjs
-scripts/remove-migrated-chapter3-chen-letter-from-story.mjs
-.github/workflows/chapter3-chen-letter-physical-removal.yml
-```
-
-Important behavior note:
-
-```text
-ch3_chen_letter is affected by guanghua-school-flow-polish.js,
-region-gates.js, and premature-conclusion-polish.js.
-The focused gate therefore verifies the owned effect and verifies that all emitted
-runtime targets exist, instead of hard-coding a single final outbound pair.
-```
-
-### Completed Chapter 3 Wu present migration
-
-`ch3_wu_present_threat` and `ch3_wu_present_photo` have completed runtime takeover, focused runtime gate wiring, removal dry-run, physical removal, and workflow收口.
-
-Files:
-
-```text
-src/story-chapters/chapter-3-guanghua.js
-src/story-chapters/chapter-3-guanghua-contract.js
-scripts/check-story-chapter3-wu-present-runtime.mjs
-scripts/remove-migrated-chapter3-wu-present-from-story.mjs
-.github/workflows/chapter3-wu-present-physical-removal.yml
-```
-
-Important behavior note:
-
-```text
-ch3_wu_present_threat and ch3_wu_present_photo are affected by
-guanghua-school-flow-polish.js and guanghua-confront-choice-cleanup.js.
-The focused gate verifies the owned effects plus the final emitted runtime targets
-after the confrontation cleanup patch rewrites the choices.
-```
-
-### Completed Chapter 3 school teacher migration
-
-`ch3_school_teacher` has completed runtime takeover, focused runtime gate wiring, removal dry-run, physical removal, and workflow收口.
-
-Files:
-
-```text
-src/story-chapters/chapter-3-guanghua.js
-src/story-chapters/chapter-3-guanghua-contract.js
-scripts/check-story-chapter3-school-teacher-runtime.mjs
-scripts/remove-migrated-chapter3-school-teacher-from-story.mjs
-.github/workflows/chapter3-school-teacher-physical-removal.yml
-```
-
-Important behavior note:
-
-```text
-ch3_school_teacher is affected by guanghua-school-flow-polish.js and
-guanghua-confront-choice-cleanup.js. The cleanup patch removes onPresent,
-disables direct evidence presentation, and rewrites choices based on the state of
-school questioning and confrontation closure.
-```
-
-### Current Chapter 3 physical removal
-
-`ch3_school` has completed runtime takeover, focused runtime gate wiring, and removal dry-run guard wiring. The temporary physical-removal workflow has been created and is waiting for manual run.
+`ch3_school` has completed runtime takeover, focused runtime gate wiring, removal dry-run, physical removal, and workflow收口.
 
 Files:
 
@@ -237,17 +67,13 @@ scripts/remove-migrated-chapter3-school-hub-from-story.mjs
 .github/workflows/chapter3-school-hub-physical-removal.yml
 ```
 
-Important behavior note:
+Behavior note:
 
 ```text
-ch3_school is affected by location-hub-flow-polish.js. The focused gate verifies
-the final polished hub behavior, including loop-in-place questioning choices,
-Wu confrontation unlock, and wrapup exit after the confrontation is closed.
+ch3_school is affected by location-hub-flow-polish.js. The focused gate verifies final polished hub behavior, including loop-in-place questioning choices, Wu confrontation unlock, and wrapup exit after the confrontation is closed.
 ```
 
-Legacy definition remains in `src/story.js` until the physical-removal workflow runs and commits the deletion.
-
-### Current Chapter 3 gates and removal guards
+## Current Chapter 3 gates
 
 Focused runtime gates:
 
@@ -284,34 +110,10 @@ Manual verification workflows already收口:
 .github/workflows/chapter3-chen-letter-physical-removal.yml
 .github/workflows/chapter3-wu-present-physical-removal.yml
 .github/workflows/chapter3-school-teacher-physical-removal.yml
-```
-
-Temporary physical-removal workflows waiting to run:
-
-```text
 .github/workflows/chapter3-school-hub-physical-removal.yml
 ```
 
-## Current gate setup
-
-### Lightweight migration gate
-
-Used by GitHub Actions:
-
-```text
-.github/workflows/story-refactor-check.yml
-```
-
-Runs:
-
-```bash
-node scripts/check-story-refactor.mjs
-node scripts/remove-migrated-chapter2-from-story.mjs
-```
-
-This gate is intentionally narrow and focused on migration safety.
-
-### Full refactor health check
+## Full refactor health check
 
 Available through:
 
@@ -319,56 +121,30 @@ Available through:
 node scripts/check-story-refactor-full.mjs
 ```
 
-Also available in GitHub Actions:
-
-```text
-.github/workflows/story-refactor-full-check.yml
-```
-
-This full check currently includes Chapter 2 route smoke, Chapter 3 runtime gates, and all existing Chapter 3 removal guards, including the school hub runtime and removal dry-run gates.
+This full check includes Chapter 2 route smoke, Chapter 3 runtime gates, and all existing Chapter 3 removal guards.
 
 ## Current next step
 
 Next safe step:
 
 ```text
-Manually run Chapter 3 School Hub Physical Removal in GitHub Actions.
+Begin the final Chapter 3专项 migration for ch3_wrapup.
 ```
 
-The temporary workflow will:
+Recommended discipline for `ch3_wrapup`:
 
 ```text
-1. run node scripts/check-story-refactor-full.mjs;
-2. run node scripts/remove-migrated-chapter3-school-hub-from-story.mjs --write;
-3. run node scripts/check-story-refactor-full.mjs again;
-4. commit the src/story.js deletion back to v1_refactor.
+1. run wrapup audit and confirm patch sources;
+2. define wrapup contract and runtime gate;
+3. verify ending exits, evidence conditions, quality gates, and old-save compatibility;
+4. keep legacy story.js definition until runtime takeover and focused gate pass;
+5. only then add the dedicated removal dry-run guard.
 ```
-
-After that workflow is green and the bot commit appears, convert the workflow to manual idempotent verification only.
 
 ## Remaining Chapter 3 migration order
 
-Recommended remaining order:
-
 ```text
-1. ch3_school physical removal
-2. ch3_wrapup
+1. ch3_wrapup
 ```
 
-Do not migrate `ch3_wrapup` yet. It must remain the final Chapter 3 专项迁移对象.
-
-## Chapter 3 migration rule
-
-Chapter 3 belongs to Phase 5 high-risk migration in the framework.
-
-Before moving any additional `ch3_*` node:
-
-```text
-1. confirm patch sources;
-2. define the target chapter file;
-3. add or update a focused runtime audit for the selected batch;
-4. keep legacy story.js definitions until runtime takeover passes;
-5. only then consider physical removal for that batch.
-```
-
-No direct Chapter 3 physical deletion should happen without a Chapter 3 removal script and a focused Chapter 3 migration gate.
+`ch3_wrapup` is the final Chapter 3 专项迁移对象.
