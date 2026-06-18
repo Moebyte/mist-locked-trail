@@ -155,6 +155,14 @@ Available but not used as the routine migration blocker:
 node scripts/check-story-refactor-full.mjs
 ```
 
+Also available in GitHub Actions:
+
+```text
+.github/workflows/story-refactor-full-check.yml
+```
+
+This full check includes the Chapter 3 pre-migration audit.
+
 ## Current next step
 
 Next phase: Phase 5 pre-migration audit for Chapter 3.
@@ -163,6 +171,12 @@ Do not migrate Chapter 3 nodes yet. First run and review:
 
 ```bash
 node scripts/audit-story-chapter3.mjs
+```
+
+Audit details are documented in:
+
+```text
+docs/chapter3-migration-audit.md
 ```
 
 Purpose:
