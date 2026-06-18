@@ -14,12 +14,14 @@
     if (!enabled) return;
 
     const DEV_CLUES = [
-      '苏母知道周怀安婚约', '为情而去说法存疑', '苏母认出照片', '苏母托付信物',
+      '苏母知道周怀安婚约', '为情而去说法存疑', '苏母认出照片', '苏母托付信物', '苏晚亭认出银发夹',
       '陈明远的信', '陈明远残信', '苏晚亭疑似遗书', '陈明远的退缩', '光华小学箱子异常',
       '203 室恐吓信', '三人合影', '杭州旧案剪报', '陆念薇旧名', '陆小姐的笔记',
       '苏晚亭日记残页', '黑衣男人线索', '沈玉兰的妹妹', '推理结论：黑衣男是暗线',
-      '推理结论：陈明远被灭口', '光华小学不完整结论', '王巡官遗留纸条', '福生仓标识',
-      '公董局公文纸', '教具箱走私', '光华货运单', '沈玉芳证词'
+      '推理结论：陈明远被灭口', '推理结论：法租界利益链', '光华小学不完整结论', '王巡官遗留纸条', '福生仓标识',
+      '公董局公文纸', '教具箱走私', '光华货运单', '清场指令', '仓库暗室', '现场确认：暗室关押痕迹',
+      '沈玉芳证词', '沈玉芳暗室证词强化', '苏晚亭未能撤离', '苏晚亭未完全信任',
+      '便衣掩护撤离', '码头正面压制傅启元', '公董局干预码头'
     ];
 
     const DEV_ITEMS = [
@@ -34,12 +36,41 @@
       'chen_letter_packet_altered', 'su_mother_knows_zhou_fiance', 'shown_photo_to_mother',
       'got_wang_note', 'shown_map_to_landlord', 'presented_jade_to_zhou', 'presented_jade_to_zhou_premature',
       'found_yufang', 'rescued_yufang', 'found_su_at_dock', 'rescued_su', 'presented_su_keepsake',
+      'su_trust_established_in_darkroom', 'su_trust_failed_in_darkroom', 'darkroom_yufang_only_escape', 'darkroom_forced_untrusted_escape',
+      'yufang_testimony_confirmed', 'yufang_testimony_quick_confirmed', 'presented_photo_to_yufang_dual', 'presented_letter_to_yufang_dual', 'presented_diary_to_yufang_dual',
+      'dock_full_search', 'dock_limited_search', 'dock_entered_by_east_window', 'dock_clearance_seen_inside', 'dock_reached_crate_area',
+      'scene_confirmed_clearance_order', 'scene_confirmed_waybill_crates', 'scene_confirmed_darkroom_marks', 'scene_confirmed_fu_lu_conversation',
+      'sun_fast_support', 'sun_full_support', 'sun_wait_support', 'sun_support_in_action', 'sun_fast_cover_escape', 'dock_sun_pressed_fu', 'dock_escaped_during_sun_standoff',
       'dock_solo_entry', 'dock_exit_side_lane', 'solo_darkroom_marks', 'solo_rescuer_trust'
     ];
 
+    const BASE_FUSHENG_CLUES = [
+      '推理结论：陈明远被灭口', '推理结论：黑衣男是暗线', '陈明远的信', '203 室恐吓信',
+      '三人合影', '苏晚亭日记残页', '福生仓标识', '王巡官遗留纸条'
+    ];
+
+    const BASE_FUSHENG_ITEMS = ['陈明远的信', '三人合影', '日记残页', '半张烟盒纸'];
+
+    const BASE_FUSHENG_FLAGS = {
+      deduced_chen: true,
+      deduced_lu_zhao: true,
+      shown_map_to_landlord: true,
+      got_wang_note: true,
+      school_wu_three_proofs: true
+    };
+
+    const BASE_DOCK_FLAGS = {
+      ...BASE_FUSHENG_FLAGS,
+      dock_full_search: true,
+      dock_entered_by_east_window: true,
+      dock_reached_crate_area: true,
+      found_yufang: true,
+      found_su_at_dock: true
+    };
+
     const PRESETS = {
       empty: {
-        label: '空状态', scene: 'ch1_open', clues: [], items: [], flags: {}
+        label: '空状态', scene: 'ch1_open', chapter: 0, clues: [], items: [], flags: {}
       },
       guanghuaIncompleteWu: {
         label: '非三证 · 吴校长方向', scene: 'ch4_conclusion',
@@ -67,15 +98,87 @@
       },
       fushengReady: {
         label: '福生仓前 · 全前置', scene: 'ch3_wrapup',
-        clues: ['推理结论：陈明远被灭口', '推理结论：黑衣男是暗线', '陈明远的信', '203 室恐吓信', '三人合影', '苏晚亭日记残页', '福生仓标识', '王巡官遗留纸条'],
-        items: ['陈明远的信', '三人合影', '日记残页', '半张烟盒纸'],
-        flags: { deduced_chen: true, deduced_lu_zhao: true, shown_map_to_landlord: true, got_wang_note: true, school_wu_three_proofs: true }
+        clues: BASE_FUSHENG_CLUES,
+        items: BASE_FUSHENG_ITEMS,
+        flags: BASE_FUSHENG_FLAGS
+      },
+      fushengOfficeFresh: {
+        label: '福生仓 · 临时账房未确认', scene: 'ch4_dock_inner_office',
+        clues: BASE_FUSHENG_CLUES,
+        items: BASE_FUSHENG_ITEMS,
+        flags: { ...BASE_FUSHENG_FLAGS, dock_full_search: true, dock_entered_by_east_window: true }
+      },
+      fushengShelfBeforeOffice: {
+        label: '福生仓 · 货架未看账房', scene: 'ch4_dock_shelf_approach',
+        clues: BASE_FUSHENG_CLUES,
+        items: BASE_FUSHENG_ITEMS,
+        flags: { ...BASE_FUSHENG_FLAGS, dock_full_search: true, dock_entered_by_east_window: true, dock_reached_crate_area: true }
+      },
+      fushengShelfAfterOffice: {
+        label: '福生仓 · 货架已看账房', scene: 'ch4_dock_shelf_approach',
+        clues: [...BASE_FUSHENG_CLUES, '公董局公文纸', '清场指令'],
+        items: [...BASE_FUSHENG_ITEMS, '清场指令'],
+        flags: { ...BASE_FUSHENG_FLAGS, dock_full_search: true, dock_entered_by_east_window: true, dock_clearance_seen_inside: true, scene_confirmed_clearance_order: true, dock_reached_crate_area: true }
+      },
+      fushengDarkDoor: {
+        label: '福生仓 · 暗门未撬开', scene: 'ch4_dock_locked_door',
+        clues: [...BASE_FUSHENG_CLUES, '公董局公文纸', '教具箱走私'],
+        items: [...BASE_FUSHENG_ITEMS, '清场指令', '光华货运单'],
+        flags: { ...BASE_DOCK_FLAGS, scene_confirmed_clearance_order: true, scene_confirmed_waybill_crates: true }
+      },
+      darkroomNoKeepsake: {
+        label: '暗室 · 没拿银发夹', scene: 'ch4_dock_who_dual',
+        clues: [...BASE_FUSHENG_CLUES, '公董局公文纸', '教具箱走私', '仓库暗室'],
+        items: [...BASE_FUSHENG_ITEMS, '清场指令', '光华货运单'],
+        flags: { ...BASE_DOCK_FLAGS, scene_confirmed_clearance_order: true, scene_confirmed_waybill_crates: true }
+      },
+      darkroomKeepsakeUnshown: {
+        label: '暗室 · 有银发夹未出示', scene: 'ch4_dock_who_dual',
+        clues: [...BASE_FUSHENG_CLUES, '苏母知道周怀安婚约', '为情而去说法存疑', '苏母托付信物', '公董局公文纸', '教具箱走私', '仓库暗室'],
+        items: [...BASE_FUSHENG_ITEMS, '苏晚亭的银发夹', '清场指令', '光华货运单'],
+        flags: { ...BASE_DOCK_FLAGS, shown_photo_to_mother: true, su_mother_knows_zhou_fiance: true, scene_confirmed_clearance_order: true, scene_confirmed_waybill_crates: true }
+      },
+      darkroomKeepsakeShown: {
+        label: '暗室 · 银发夹已出示', scene: 'ch4_dock_who_dual',
+        clues: [...BASE_FUSHENG_CLUES, '苏母知道周怀安婚约', '为情而去说法存疑', '苏母托付信物', '苏晚亭认出银发夹', '公董局公文纸', '教具箱走私', '仓库暗室'],
+        items: [...BASE_FUSHENG_ITEMS, '苏晚亭的银发夹', '清场指令', '光华货运单'],
+        flags: { ...BASE_DOCK_FLAGS, shown_photo_to_mother: true, su_mother_knows_zhou_fiance: true, presented_su_keepsake: true, su_trust_established_in_darkroom: true, scene_confirmed_clearance_order: true, scene_confirmed_waybill_crates: true }
+      },
+      darkroomYufangConfirmedNoKeepsake: {
+        label: '暗室 · 证词已稳但无银发夹', scene: 'ch4_dock_who_dual',
+        clues: [...BASE_FUSHENG_CLUES, '沈玉芳暗室证词强化', '沈玉芳确认三人合影', '沈玉芳确认陈明远求助', '沈玉芳确认苏晚亭主动追查', '公董局公文纸', '教具箱走私', '仓库暗室'],
+        items: [...BASE_FUSHENG_ITEMS, '清场指令', '光华货运单'],
+        flags: { ...BASE_DOCK_FLAGS, yufang_testimony_confirmed: true, yufang_testimony_quick_confirmed: true, presented_photo_to_yufang_dual: true, presented_letter_to_yufang_dual: true, presented_diary_to_yufang_dual: true, scene_confirmed_clearance_order: true, scene_confirmed_waybill_crates: true }
+      },
+      dockEscapeNoSupportYufangOnly: {
+        label: '码头逃离 · 无支援只救沈玉芳', scene: 'ch4_dock_escape',
+        clues: [...BASE_FUSHENG_CLUES, '公董局公文纸', '教具箱走私', '仓库暗室', '苏晚亭未能撤离'],
+        items: [...BASE_FUSHENG_ITEMS, '清场指令', '光华货运单'],
+        flags: { ...BASE_DOCK_FLAGS, scene_confirmed_clearance_order: true, scene_confirmed_waybill_crates: true, darkroom_yufang_only_escape: true, su_trust_failed_in_darkroom: true }
+      },
+      dockEscapeFastSupport: {
+        label: '码头逃离 · 便衣快援', scene: 'ch4_dock_escape',
+        clues: [...BASE_FUSHENG_CLUES, '公董局公文纸', '教具箱走私', '仓库暗室'],
+        items: [...BASE_FUSHENG_ITEMS, '苏晚亭的银发夹', '清场指令', '光华货运单'],
+        flags: { ...BASE_DOCK_FLAGS, presented_su_keepsake: true, rescued_su: true, sun_fast_support: true, scene_confirmed_clearance_order: true, scene_confirmed_waybill_crates: true }
+      },
+      dockEscapeFullSupport: {
+        label: '码头逃离 · 老孙带队', scene: 'ch4_dock_escape',
+        clues: [...BASE_FUSHENG_CLUES, '公董局公文纸', '教具箱走私', '仓库暗室'],
+        items: [...BASE_FUSHENG_ITEMS, '苏晚亭的银发夹', '清场指令', '光华货运单'],
+        flags: { ...BASE_DOCK_FLAGS, presented_su_keepsake: true, rescued_su: true, sun_full_support: true, scene_confirmed_clearance_order: true, scene_confirmed_waybill_crates: true }
+      },
+      hospitalYufangOnly: {
+        label: '医院前 · 只救沈玉芳', scene: 'ch4_hospital_conflict',
+        clues: ['推理结论：法租界利益链', '沈玉芳证词', '公董局公文纸', '教具箱走私', '苏晚亭未能撤离'],
+        items: ['光华货运单', '清场指令'],
+        flags: { deduced_chen: true, deduced_lu_zhao: true, deduced_fusheng: true, found_yufang: true, rescued_yufang: true, found_su_at_dock: true, darkroom_yufang_only_escape: true, su_trust_failed_in_darkroom: true }
       },
       hospitalFull: {
         label: '医院/陆小姐前 · 双证人', scene: 'ch4_hospital_conflict',
-        clues: ['推理结论：法租界利益链', '沈玉芳证词', '公董局公文纸', '教具箱走私'],
-        items: ['光华货运单', '清场指令'],
-        flags: { deduced_chen: true, deduced_lu_zhao: true, deduced_fusheng: true, found_yufang: true, rescued_yufang: true, found_su_at_dock: true, rescued_su: true }
+        clues: ['推理结论：法租界利益链', '沈玉芳证词', '公董局公文纸', '教具箱走私', '苏晚亭认出银发夹'],
+        items: ['光华货运单', '清场指令', '苏晚亭的银发夹'],
+        flags: { deduced_chen: true, deduced_lu_zhao: true, deduced_fusheng: true, found_yufang: true, rescued_yufang: true, found_su_at_dock: true, rescued_su: true, presented_su_keepsake: true, su_trust_established_in_darkroom: true }
       },
       soloLantern: {
         label: 'Solo · 孤灯照雾候选', scene: 'ch4_final_closure',
@@ -126,7 +229,9 @@
       for (const clue of preset.clues || []) upsertByName('clues', clue);
       for (const item of preset.items || []) upsertByName('items', item);
       E.state.flags = { ...(preset.flags || {}) };
-      E.state.chapter = 3;
+      E.state.chapter = preset.chapter ?? 3;
+      if (preset.time) E.state.inGameTime = { ...preset.time };
+      if (preset.pressure) E.state.pressure = { ...E.state.pressure, ...preset.pressure };
       E.state.currentScene = preset.scene;
       E.updateStatus();
       refreshDevPanel();
@@ -273,6 +378,7 @@
       addClue: name => { upsertByName('clues', name); E.updateStatus(); refreshDevPanel(); },
       addItem: name => { upsertByName('items', name); E.updateStatus(); refreshDevPanel(); },
       setFlag: (name, value = true) => { setFlag(name, !!value); E.updateStatus(); refreshDevPanel(); },
+      presets: PRESETS,
       exportState: () => JSON.stringify(E.state, null, 2),
       importState: json => { E.state = JSON.parse(json); E.updateStatus(); refreshDevPanel(); },
     };
