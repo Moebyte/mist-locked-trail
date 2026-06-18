@@ -72,7 +72,8 @@ reset({
 texts = choiceTexts('ch3_wrapup');
 assert(has(texts, '下一步：不找支援，独自去福生仓'), '完成第二段推理且未找老孙时，应显示 solo 福生仓入口');
 assert(has(texts, '下一步：去巡捕房找老孙商量福生仓'), '完成第二段推理且未找老孙时，应同时显示老孙支援入口');
-assert(has(texts, '回顾现有证据'), '行动选择阶段仍应保留回顾入口');
+assert(has(texts, '封卷'), '行动选择阶段仍应保留提前封卷入口');
+assert(notHas(texts, '回顾现有证据'), '行动选择阶段不应再把提前结案入口标成“回顾现有证据”');
 
 if (errors.length) {
   console.error('Wrapup priority smoke failed:');
