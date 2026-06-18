@@ -30,6 +30,8 @@
       }
     };
 
+    let lastWarnings = [];
+
     function safeCall(fn, fallback = null) {
       try { return typeof fn === 'function' ? fn() : fallback; } catch (err) { return fallback; }
     }
@@ -49,14 +51,59 @@
       }
     }
 
+    function hasThing(name) {
+      return !!(E.hasItem?.(name) || E.hasClue?.(name));
+    }
+
+    function hasRealDockAction() {
+      return E.getFlag?.('dock_entry_committed')
+        || E.getFlag?.('dock_solo_entry')
+        || E.getFlag?.('dock_fast_support_entry')
+        || E.getFlag?.('dock_full_support_entry')
+        || E.getFlag?.('dock_full_search')
+        || E.getFlag?.('dock_limited_search')
+        || E.getFlag?.('dock_rescue_only')
+        || E.getFlag?.('dock_entered_by_east_window')
+        || E.getFlag?.('dock_reached_crate_area')
+        || E.getFlag?.('found_yufang')
+        || E.getFlag?.('rescued_yufang')
+        || E.getFlag?.('found_su_at_dock')
+        || E.getFlag?.('rescued_su')
+        || E.getFlag?.('su_moved_from_dock')
+        || E.getFlag?.('missed_both_at_dock')
+        || E.getFlag?.('scene_confirmed_clearance_order')
+        || E.getFlag?.('scene_confirmed_waybill_crates')
+        || E.getFlag?.('scene_confirmed_darkroom_marks')
+        || hasThing('公董局公文纸')
+        || hasThing('清场指令')
+        || hasThing('仓库暗室')
+        || hasThing('暗室刚被清空')
+        || hasThing('暗室已经转空')
+        || hasThing('沈玉芳曾在暗室')
+        || hasThing('苏晚亭曾在暗室')
+        || hasThing('苏晚亭学生证')
+        || hasThing('暗室刻痕')
+        || hasThing('暗室刻痕拓片');
+    }
+
+    function sanitizeDiagnosticState() {
+      lastWarnings = [];
+      if (!E.state?.flags) return;
+      if (!hasRealDockAction()) {
+        const stale = Object.keys(E.state.flags).filter(k => /^solo_outcome_/.test(k));
+        if (stale.length) {
+          stale.forEach(k => delete E.state.flags[k]);
+          lastWarnings.push({ type: 'stale_solo_outcome_flags_removed', flags: stale, reason: '没有真实福生仓入仓/暗室证据，solo_outcome_* 视为旧诊断污染。' });
+        }
+      }
+    }
+
     function findDeduction(id) {
       return Array.isArray(E.deductions) ? E.deductions.find(d => d && d.id === id) : null;
     }
 
     function repairDeductionRegistryForDiagnostic() {
-      if (typeof E.repairDeductionRegistry === 'function') {
-        safeCall(() => E.repairDeductionRegistry(), null);
-      }
+      if (typeof E.repairDeductionRegistry === 'function') safeCall(() => E.repairDeductionRegistry(), null);
       if (!Array.isArray(E.deductions)) E.deductions = [];
       for (const [id, spec] of Object.entries(fallbackDeductions)) {
         if (!findDeduction(id)) E.deductions.push({ ...spec, solved: false });
@@ -82,13 +129,7 @@
       return (raw || []).map(choice => withStateSnapshot(() => {
         const locked = !!(choice.when && !choice.when(E.state));
         const goto = typeof choice.goto === 'function' ? safeCall(() => choice.goto(E.state), '[function error]') : choice.goto;
-        return {
-          text: choice.text || choice.fogText || '',
-          locked,
-          goto: goto || null,
-          hasEffect: typeof choice.effect === 'function',
-          fogHint: locked ? (choice.fogHint || '') : ''
-        };
+        return { text: choice.text || choice.fogText || '', locked, goto: goto || null, hasEffect: typeof choice.effect === 'function', fogHint: locked ? (choice.fogHint || '') : '' };
       }, { text: choice?.text || choice?.fogText || '', locked: false, goto: null, hasEffect: typeof choice?.effect === 'function', fogHint: '' }));
     }
 
@@ -123,9 +164,7 @@
         'fuOfferLeverageScore', 'fuOfferPressureScore', 'fuOfferConsequenceTier', 'v07ResolveEnding'
       ];
       const out = {};
-      for (const name of fns) {
-        if (typeof E[name] === 'function') out[name] = withStateSnapshot(() => E[name](), '[error]');
-      }
+      for (const name of fns) if (typeof E[name] === 'function') out[name] = withStateSnapshot(() => E[name](), '[error]');
       return out;
     }
 
@@ -141,9 +180,11 @@
     }
 
     function buildDiagnosticPackage() {
+      sanitizeDiagnosticState();
       repairDeductionRegistryForDiagnostic();
       return {
         meta: { kind: 'mist-locked-trail-dev-diagnostic', exportedAt: new Date().toISOString(), url: location.href, userAgent: navigator.userAgent, saveVersion: E.state?.saveVersion || null },
+        diagnosticWarnings: lastWarnings.slice(),
         scene: sceneSummary(),
         counts: {
           clues: E.state?.clues?.length || 0,
