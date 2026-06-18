@@ -67,7 +67,6 @@
     'src/story-modules/hospital-ending-impact-polish.js',
     'src/story-modules/dynamic-ending-polish.js',
     'src/story-modules/deadline-deprecation-polish.js',
-    'src/story-modules/fusheng-entry-unblock-polish.js',
     'src/story-modules/fusheng-decision-no-review.js',
     'src/story-modules/solo-reward-ending-polish.js',
     'src/story-modules/final-closure-flow-polish.js',
@@ -82,6 +81,7 @@
     'src/story-modules/ending-layout-polish.js',
     'src/story-modules/solo-heat-delay-outcomes.js',
     'src/story-modules/runtime-bugfixes.js',
+    'src/story-modules/fusheng-entry-unblock-polish.js',
     'src/story-modules/wrapup-no-repeat-fusheng-entry-fix.js',
     'src/story-modules/dev-mode-panel.js'
   ];
