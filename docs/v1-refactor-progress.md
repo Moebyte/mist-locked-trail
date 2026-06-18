@@ -69,7 +69,7 @@ scripts/remove-migrated-chapter3-school-hub-from-story.mjs
 
 ## Current Chapter 3 wrapup migration
 
-`ch3_wrapup` has completed runtime takeover and focused runtime gate wiring. Legacy definition remains in `src/story.js` until the focused gate passes green.
+`ch3_wrapup` has completed runtime takeover, focused runtime gate wiring, and removal dry-run guard wiring. Legacy definition remains in `src/story.js` until the removal dry-run passes green.
 
 Files:
 
@@ -77,6 +77,7 @@ Files:
 src/story-chapters/chapter-3-wrapup.js
 src/story-chapters/chapter-3-wrapup-contract.js
 scripts/check-story-chapter3-wrapup-runtime.mjs
+scripts/remove-migrated-chapter3-wrapup-from-story.mjs
 ```
 
 Behavior note:
@@ -111,6 +112,7 @@ scripts/remove-migrated-chapter3-chen-letter-from-story.mjs
 scripts/remove-migrated-chapter3-wu-present-from-story.mjs
 scripts/remove-migrated-chapter3-school-teacher-from-story.mjs
 scripts/remove-migrated-chapter3-school-hub-from-story.mjs
+scripts/remove-migrated-chapter3-wrapup-from-story.mjs
 ```
 
 Manual verification workflows already收口:
@@ -141,24 +143,23 @@ This full check includes Chapter 2 route smoke, Chapter 3 runtime gates, and all
 Next safe step:
 
 ```text
-Wait for GitHub Actions to go green on the ch3_wrapup runtime takeover.
+Wait for GitHub Actions to go green on the ch3_wrapup removal dry-run.
 ```
 
 After green:
 
 ```text
-1. add dedicated ch3_wrapup removal dry-run guard;
-2. wire it into check-story-refactor-full.mjs;
-3. wait for GitHub Actions green;
-4. then enter physical removal workflow for ch3_wrapup.
+1. create temporary ch3_wrapup physical-removal workflow;
+2. let it run full check -> --write -> full check -> commit src/story.js;
+3. convert the temporary workflow to manual idempotent verification only;
+4. close out Chapter 3 migration.
 ```
 
 ## Remaining Chapter 3 migration order
 
 ```text
-1. ch3_wrapup removal dry-run
-2. ch3_wrapup physical removal
-3. Chapter 3 migration closeout
+1. ch3_wrapup physical removal
+2. Chapter 3 migration closeout
 ```
 
 `ch3_wrapup` is the final Chapter 3 专项迁移对象.
