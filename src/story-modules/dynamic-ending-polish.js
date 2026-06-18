@@ -41,14 +41,16 @@
       return Number(t.hardEvidenceCount || 0) >= 2;
     }
 
-    function schoolHiddenGatePassed() {
-      return E.getFlag('school_wu_three_proofs') && E.getFlag('school_wu_full_confront');
-    }
-
     function dockVisited() {
       return E.getFlag('dock_entry_committed') || E.getFlag('dock_solo_entry') || E.getFlag('dock_full_support_entry')
         || E.getFlag('dock_fast_support_entry') || E.getFlag('missed_both_at_dock') || E.getFlag('missed_both_due_to_return_tool')
         || E.hasClue?.('仓库暗室') || E.hasClue?.('光华货运单') || E.hasItem?.('光华货运单') || E.hasItem?.('清场指令');
+    }
+
+    function soloMode() {
+      return E.getFlag('dock_solo_entry') || E.getFlag('dock_solo_waterline_escape')
+        || E.getFlag('dock_solo_crate_screen') || E.getFlag('dock_solo_decoy_escape')
+        || E.getFlag('dock_solo_hard_confront');
     }
 
     function fourCharTitle(nodeId, title) {
@@ -103,9 +105,8 @@
     }
 
     function bureauParagraph() {
-      if (E.getFlag('dock_escaped_during_sun_standoff') || E.getFlag('v07_choice_blockade_after_interference')) {
-        return '公董局已经出面。后来的每一步都不再只是查案，而是在抢手续、抢口径、抢谁有资格定义这一夜。';
-      }
+      if (E.getFlag('hospital_bureau_forced_entry') || E.getFlag('fu_offer_bureau_intervention')) return '公董局强行介入了医院程序。后来的每一句证词，都像是在印章和枪口之间抢出来的。';
+      if (E.getFlag('dock_escaped_during_sun_standoff') || E.getFlag('v07_choice_blockade_after_interference')) return '公董局已经出面。后来的每一步都不再只是查案，而是在抢手续、抢口径、抢谁有资格定义这一夜。';
       return '公董局还没来得及把所有手续压下来。这个短暂的空隙，让你们能把证词和物证先钉在一起。';
     }
 
@@ -153,22 +154,17 @@
         const l = lu();
         const score = Number(t.score || 0);
         const hasWitness = hasAnyDockWitness();
-        const schoolGate = schoolHiddenGatePassed();
 
         if (h.key === 'unstable') {
           if (hasWitness) return 'end_rescue';
           return score >= 6 ? 'end_partial_truth' : 'end_archive';
         }
 
-        // 隐藏/真隐藏必须先完成光华小学三证物质询闭环；否则只能进入普通动态收束。
-        if (schoolGate && score >= 10 && (h.key === 'stable' || h.key === 'controlled') && l.key === 'formal' && !this.getFlag('dock_solo_entry')) {
-          return 'end_true_hidden';
-        }
-        if (schoolGate && score >= 8 && h.key !== 'unstable') {
+        if (score >= 10 && (h.key === 'stable' || h.key === 'controlled') && l.key === 'formal' && !soloMode()) return 'end_true_hidden';
+        if (score >= 8 && h.key !== 'unstable') {
           if (l.key === 'formal' || l.key === 'private' || l.key === 'informant') return 'end_hidden_truth';
           return 'end_conspiracy_detail';
         }
-        if (score >= 8 && h.key !== 'unstable') return 'end_partial_truth';
         if (score >= 6) return 'end_partial_truth';
         if (hasWitness) return 'end_rescue';
         return oldResolve();
@@ -180,9 +176,9 @@
     const titleMap = {
       end_true_hidden: ['破晓之前', '真隐藏'],
       end_conspiracy_detail: ['雨夜灯火', '隐藏'],
-      end_rescue: ['黎明灯火', ''],
+      end_rescue: ['生还之夜', ''],
       end_conspiracy: ['迷雾未尽', ''],
-      end_archive: ['封存案卷', ''],
+      end_archive: ['无声归档', ''],
       end_too_late: ['空仓余证', '']
     };
     for (const [id, [title]] of Object.entries(titleMap)) fourCharTitle(id, title);
@@ -196,6 +192,17 @@
         return `${base}<br><br>${dynamicTail()}${scoreLine()}${endingFooter(title, tag)}`;
       };
       node.__dynamicTailPatched = true;
+    }
+
+    for (const id of ['end_boss_lu', 'end_boss_zhao', 'end_boss_wu']) {
+      const node = nodes[id];
+      if (!node || node.__earlyNoDockTextPatched) continue;
+      const oldText = node.text;
+      node.text = function (state) {
+        const base = typeof oldText === 'function' ? oldText(state) : oldText;
+        return `${base}<br><br><span class="sys">这条结局发生在你未进入福生仓线之前。福生仓、医院证人和傅启元后巷交易都还没有真正展开。</span>`;
+      };
+      node.__earlyNoDockTextPatched = true;
     }
 
     E.__dynamicEndingPolishPatched = true;
