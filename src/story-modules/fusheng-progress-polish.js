@@ -65,10 +65,10 @@
       if (typeof E.deadlinePhase === 'function' && E.deadlinePhase() === 'critical') {
         out.push({ text: '⛵ 时间不多了，立刻去苏州河废弃码头', goto: 'ch4_suzhou_creek' });
       } else {
-        out.push({ text: '⛵ 证据还差福生仓——继续追查', goto: 'ch3_wrapup' });
+        out.push({ text: '⛵ 福生仓还没查完，继续追下去', goto: 'ch3_wrapup' });
       }
-      out.push({ text: '📁 暂时归档此案（证据仍不足）', goto: 'end_archive' });
-      out.push({ text: '⚠️ 证据不足，仍要冒然指认嫌疑人', goto: 'ch4_accuse' });
+      out.push({ text: '📁 先把案卷压下', goto: 'end_archive' });
+      out.push({ text: '⚠️ 明知线索还断着，仍要指认嫌疑人', goto: 'ch4_accuse' });
       return out;
     }
 
@@ -79,7 +79,7 @@
         if (!Array.isArray(base) || !shouldContinueFusheng()) return base;
         return base.map(choice => {
           if (choice.goto === 'ch4_conclusion') {
-            return { ...choice, text: '🔙 带着翡翠镯回去整理下一步', goto: 'ch3_wrapup' };
+            return { ...choice, text: '🔙 带着翡翠镯回去想下一步', goto: 'ch3_wrapup' };
           }
           return choice;
         });
@@ -94,7 +94,7 @@
         if (!Array.isArray(base) || !shouldContinueFusheng()) return base;
         return base.map(choice => {
           if (choice.goto === 'ch4_conclusion') {
-            return { ...choice, text: '🔙 暂时不打扰他，回去继续追查福生仓', goto: 'ch3_wrapup' };
+            return { ...choice, text: '🔙 暂时不打扰他，回去继续查福生仓', goto: 'ch3_wrapup' };
           }
           return choice;
         });
@@ -109,7 +109,7 @@
         if (!Array.isArray(base) || !shouldContinueFusheng()) return base;
         return base.map(choice => {
           if (choice.goto === 'ch4_conclusion') {
-            return { ...choice, text: '⛵ 带着这条旁证继续追查福生仓', goto: 'ch3_wrapup' };
+            return { ...choice, text: '⛵ 带着翡翠镯，继续往福生仓查', goto: 'ch3_wrapup' };
           }
           return choice;
         });
