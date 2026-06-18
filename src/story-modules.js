@@ -70,6 +70,7 @@
     'src/story-modules/legacy-quality-scope-polish.js',
     'src/story-modules/legacy-quality-text-polish.js',
     'src/story-modules/yufang-testimony-polish.js',
+    'src/story-modules/darkroom-evidence-panel.js',
     'src/story-modules/conclusion-summary-polish.js',
     'src/story-modules/status-polish.js',
     'src/story-modules/ending-layout-polish.js',
