@@ -57,6 +57,10 @@
       return phrases.length ? phrases.join('；') + '。' : '这几条线还没有在吴校长面前真正合拢。';
     }
 
+    function incompleteWrapupNotice() {
+      return '<br><br><div class="notice"><b>光华小学线索只到表层</b><br>你选择按现有材料整理结案。陈明远、苏晚亭和陆小姐之间的关系可以被写成一份案情说明，但学校背后是否还有更深的安排，仍然留在雾里。</div>';
+    }
+
     nodes.ch3_school_incomplete_closure = {
       title: '光华小学 · 不完整的答案',
       weather: 4,
@@ -65,7 +69,7 @@
         E.setFlag('school_truth_partial_only', true);
         E.addClue('光华小学不完整结论', '你在光华小学只压出部分事实：陈明远与苏晚亭、陆小姐之间确有联系，但学校背后是否还有更深的关系，仍没有被接上。');
       },
-      text: () => `吴校长终于不再说“巡捕房已经结案”。<br><br>可他也没有真正把话说到底。<br><br>你手里的证据能说明陈明远不是单纯坠楼，能说明苏晚亭和陆小姐都曾靠近光华小学，也能说明学校里有人在害怕。可是这些线索还没能合成一条完整的链。<br><br><span class="sys">${incompleteReasonText()}</span><br><br>吴校长顺着这个缺口，把事情往最安全的方向推：陈明远与苏晚亭有私情，陆小姐只是校外来客，学校只是怕名声受损。<br><br>这不是没有答案。<br><br>只是一个太容易被接受的答案。`,
+      text: () => `这是一个不完整的答案。<br><br>吴校长终于不再说“巡捕房已经结案”。<br><br>可他也没有真正把话说到底。<br><br>你手里的证据能说明陈明远不是单纯坠楼，能说明苏晚亭和陆小姐都曾靠近光华小学，也能说明学校里有人在害怕。可是这些线索还没能合成一条完整的链。<br><br><span class="sys">${incompleteReasonText()}</span><br><br>吴校长顺着这个缺口，把事情往最安全的方向推：陈明远与苏晚亭有私情，陆小姐只是校外来客，学校只是怕名声受损。<br><br>这不是没有答案。<br><br>只是一个太容易被接受的答案。`,
       choices: [
         { text: '📁 接受这个较容易成立的说法，回去整理结案', goto: 'ch4_conclusion' },
         { text: '🔙 不甘心，回到校长办公室继续找缺口', goto: 'ch3_school_confront_wu' }
@@ -100,7 +104,8 @@
       nodes.ch3_wrapup.text = function (state) {
         const base = typeof oldText === 'function' ? oldText(state) : oldText;
         if (!E.getFlag('school_incomplete_closure')) return base;
-        return `${base}<br><br><div class="notice"><b>光华小学线索只到表层</b><br>你选择按现有材料整理结案。陈明远、苏晚亭和陆小姐之间的关系可以被写成一份案情说明，但学校背后是否还有更深的安排，仍然留在雾里。</div>`;
+        if (String(base).includes('光华小学线索只到表层')) return base;
+        return `${base}${incompleteWrapupNotice()}`;
       };
       nodes.ch3_wrapup.__guanghuaIncompleteWrapupPatched = true;
     }
