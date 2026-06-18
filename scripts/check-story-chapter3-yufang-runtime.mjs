@@ -20,6 +20,11 @@ function freshState(overrides = {}) {
     clues: [],
     items: [],
     contacts: [],
+    endings: [],
+    sceneLog: [],
+    currentScene: null,
+    visitedNodes: {},
+    weatherIdx: 0,
     pressure: { heat: 0, deadline: { day: 2, hour: 23, minute: 0 } },
     inGameTime: { day: 2, hour: 9, minute: 0 },
     ...overrides,
@@ -28,28 +33,80 @@ function freshState(overrides = {}) {
 
 const E = {
   state: freshState(),
+  saveKey: 'chapter-3-yufang-runtime-audit',
+  logEl: null,
+  sceneEl: null,
+  titleEl: null,
+  textEl: null,
+  choicesEl: null,
   freshState,
-  init() {}, toast() {}, saveGame() {}, updateStatus() {}, openDeduction() {},
+  init() {}, toast() {}, saveGame() {}, updateStatus() {}, openDeduction() {}, openPanel() {}, scroll() {}, showPresentBtn() {}, applyWeatherClass() {}, ambientLine() {}, logChoice() {}, logNarration() {},
   addClue(name, desc = '') { if (!this.hasClue(name)) this.state.clues.push({ name, desc }); },
   hasClue(name) { return this.state.clues.some(c => c.name === name); },
   addItem(name, desc = '') { if (!this.hasItem(name)) this.state.items.push({ name, desc }); },
   hasItem(name) { return this.state.items.some(i => i.name === name); },
   addContact(name) { if (!this.state.contacts.includes(name)) this.state.contacts.push(name); },
   discoverRelation(name) { this.addContact(name); },
+  registerRelation() {},
   setFlag(k, v = true) { this.state.flags[k] = v; },
   getFlag(k) { return this.state.flags[k]; },
   canDeduce() { return true; },
   caseStrength() { return { name: 'audit', desc: 'audit' }; },
   deadlinePhase() { return 'safe'; },
   v07InvestigationQuality() { return { score: 0, reasons: [] }; },
+  pressureLabel() { return 'safe'; },
+  setWeather(i) { this.state.weatherIdx = i; },
+  renderAtmosphere() { return ''; },
+  setTime(day, hour, minute) { this.state.inGameTime = { day: day || 1, hour: hour || 14, minute: minute || 0 }; },
+  advanceTime() {}, spendTime() {}, checkDeadline() {}, minutesUntilDeadline() { return 999; }, timeToMinutes() { return 0; }, addHeat() {},
 };
+
+function makeElement() {
+  return {
+    style: {},
+    dataset: {},
+    className: '',
+    id: '',
+    innerHTML: '',
+    textContent: '',
+    title: '',
+    value: '',
+    checked: false,
+    disabled: false,
+    children: [],
+    classList: { add() {}, remove() {}, toggle() {}, contains() { return false; } },
+    appendChild(child) { this.children.push(child); return child; },
+    removeChild(child) { this.children = this.children.filter(item => item !== child); return child; },
+    insertBefore(child) { this.children.push(child); return child; },
+    replaceChildren(...children) { this.children = children; },
+    addEventListener() {},
+    removeEventListener() {},
+    setAttribute(name, value) { this[name] = value; },
+    getAttribute(name) { return this[name]; },
+    removeAttribute(name) { delete this[name]; },
+    querySelector() { return makeElement(); },
+    querySelectorAll() { return []; },
+    scrollIntoView() {},
+    focus() {},
+    blur() {},
+    click() {},
+  };
+}
 
 const locationStub = { href: 'http://localhost/', search: '', hash: '', pathname: '/' };
 const documentStub = {
+  body: makeElement(),
+  head: makeElement(),
+  documentElement: makeElement(),
+  location: locationStub,
   write() {},
   addEventListener(event, handler) { if (event === 'DOMContentLoaded') domReadyHandlers.push(handler); },
-  getElementById() { return { style: {}, innerHTML: '', textContent: '', appendChild() {}, addEventListener() {} }; },
-  createElement() { return { style: {}, appendChild() {} }; },
+  removeEventListener() {},
+  getElementById() { return makeElement(); },
+  createElement() { return makeElement(); },
+  createTextNode(text = '') { return { textContent: text }; },
+  querySelector() { return makeElement(); },
+  querySelectorAll() { return []; },
 };
 
 const context = vm.createContext({
@@ -60,12 +117,25 @@ const context = vm.createContext({
   location: locationStub,
   URL,
   URLSearchParams,
-  localStorage: { getItem() { return null; }, setItem() {} },
-  setTimeout(fn) { if (typeof fn === 'function') fn(); },
+  localStorage: { getItem() { return null; }, setItem() {}, removeItem() {} },
+  sessionStorage: { getItem() { return null; }, setItem() {}, removeItem() {} },
+  navigator: { userAgent: 'node' },
+  history: { pushState() {}, replaceState() {} },
+  setTimeout(fn) { if (typeof fn === 'function') fn(); return 0; },
   clearTimeout() {},
+  setInterval() { return 0; },
+  clearInterval() {},
 });
 context.globalThis = context;
 context.window = context;
+context.location = locationStub;
+context.self = context;
+
+E.logEl = makeElement();
+E.sceneEl = makeElement();
+E.titleEl = makeElement();
+E.textEl = makeElement();
+E.choicesEl = makeElement();
 
 function runScript(rel, suffix = '') {
   try {
