@@ -50,6 +50,12 @@ function highQualityFlags(extra = {}) {
   });
 }
 
+function finalQualityScore() {
+  if (typeof E.finalTruthQuality === 'function') return E.finalTruthQuality().score;
+  if (typeof E.truthCompletenessTier === 'function') return E.truthCompletenessTier().score;
+  return E.v07InvestigationQuality().score;
+}
+
 function testHospitalConflict() {
   h.resetState({ flags: rescueReadyFlags({ deduced_fusheng: true }) });
   h.renderNode('ch4_dock_escape_finish');
@@ -77,16 +83,20 @@ function testHighQualityNaturalEnding() {
   h.assertFlag('v07_witnesses_protected');
   h.goByTarget('ch4_lu_confrontation');
   h.assertFlag('v07_lu_confronted');
-  h.goByText('让她写下');
-  h.assertFlag('v07_lu_statement');
+  h.goByText('交给老孙');
+  h.assertFlag('v07_lu_to_sun');
   h.goByText('拒绝交易');
   h.assertFlag('v07_rejected_fu_deal');
 
-  const quality = E.v07InvestigationQuality();
-  if (quality.score < 11) throw new Error(`高质量路线分数过低：${quality.score}`);
+  const legacyQuality = E.v07InvestigationQuality();
+  if (legacyQuality.scope === 'deprecated_after_fusheng' && legacyQuality.score > 5) {
+    throw new Error(`福生仓后旧质量分应退役封顶，实际 ${legacyQuality.score}`);
+  }
+  const finalScore = finalQualityScore();
+  if (finalScore < 10) throw new Error(`高质量路线最终真相分过低：${finalScore}`);
   const ending = E.v07ResolveEnding();
-  if (ending !== 'end_true_hidden') throw new Error(`高质量路线预期真隐藏结局，实际 ${ending}`);
-  reports.push(`PASS 高质量路线自然分流到 ${ending}，score=${quality.score}`);
+  if (ending !== 'end_true_hidden') throw new Error(`高质量路线预期真隐藏结局，实际 ${ending}，finalScore=${finalScore}`);
+  reports.push(`PASS 高质量路线自然分流到 ${ending}，finalScore=${finalScore}`);
 }
 
 function testHiddenEndingRequiresSchoolThreeProofs() {
@@ -114,24 +124,24 @@ function testHiddenButNotTrueHiddenWithoutSuRescue() {
       school_wu_full_confront: true,
     })
   });
-  const quality = E.v07InvestigationQuality();
+  const finalScore = finalQualityScore();
   const ending = E.v07ResolveEnding();
-  if (ending !== 'end_conspiracy_detail') throw new Error(`救出沈玉芳但未救出苏晚亭时，应进入隐藏结局而非真隐藏；实际 ${ending}，quality=${quality.score}`);
+  if (ending !== 'end_conspiracy_detail' && ending !== 'end_hidden_truth') throw new Error(`救出沈玉芳但未救出苏晚亭时，应进入隐藏层级而非真隐藏；实际 ${ending}，finalScore=${finalScore}`);
   const targets = choiceTargets('ch4_conclusion');
-  if (!targets.includes('end_conspiracy_detail')) throw new Error('救出沈玉芳但未救出苏晚亭时，ch4_conclusion 应允许隐藏结局入口');
+  if (!targets.includes('end_conspiracy_detail') && !targets.includes('end_hidden_truth')) throw new Error('救出沈玉芳但未救出苏晚亭时，ch4_conclusion 应允许隐藏结局入口');
   if (targets.includes('end_true_hidden')) throw new Error('未救出苏晚亭时，ch4_conclusion 不应出现真隐藏结局入口');
-  reports.push(`PASS 救出沈玉芳但未救出苏晚亭时进入隐藏结局 ${ending}，score=${quality.score}`);
+  reports.push(`PASS 救出沈玉芳但未救出苏晚亭时进入隐藏层级 ${ending}，finalScore=${finalScore}`);
 }
 
 function testConclusionChoicesRespectHiddenGate() {
   h.resetState({ flags: highQualityFlags() });
   let targets = choiceTargets('ch4_conclusion');
-  if (targets.includes('end_conspiracy_detail') || targets.includes('end_true_hidden')) throw new Error('ch4_conclusion 未完成校长三证物时，不应出现或跳往隐藏/真隐藏结局');
-  if (!targets.includes('end_rescue') && !targets.includes('end_conspiracy')) throw new Error('ch4_conclusion 未完成校长三证物时，自然结案应降级到普通好结局/普通结局');
+  if (targets.includes('end_conspiracy_detail') || targets.includes('end_true_hidden') || targets.includes('end_hidden_truth')) throw new Error('ch4_conclusion 未完成校长三证物时，不应出现或跳往隐藏/真隐藏结局');
+  if (!targets.includes('end_rescue') && !targets.includes('end_conspiracy') && !targets.includes('end_partial_truth')) throw new Error('ch4_conclusion 未完成校长三证物时，自然结案应降级到普通好结局/普通结局');
 
-  h.resetState({ flags: highQualityFlags({ school_wu_three_proofs: true, school_wu_full_confront: true }) });
+  h.resetState({ flags: highQualityFlags({ school_wu_three_proofs: true, school_wu_full_confront: true, v07_lu_to_sun: true }) });
   targets = choiceTargets('ch4_conclusion');
-  if (!targets.includes('end_true_hidden')) throw new Error('ch4_conclusion 完成校长三证物并救出苏晚亭后，应允许进入真隐藏结局');
+  if (!targets.includes('end_true_hidden')) throw new Error('ch4_conclusion 完成校长三证物、正式口供并救出苏晚亭后，应允许进入真隐藏结局');
   reports.push('PASS ch4_conclusion 选项层也受光华三证物、沈玉芳获救、苏晚亭获救门槛约束');
 }
 
