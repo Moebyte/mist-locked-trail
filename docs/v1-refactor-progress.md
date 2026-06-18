@@ -69,7 +69,7 @@ scripts/remove-migrated-chapter3-school-hub-from-story.mjs
 
 ## Current Chapter 3 wrapup migration
 
-`ch3_wrapup` has completed runtime takeover, focused runtime gate wiring, and removal dry-run guard wiring. Legacy definition remains in `src/story.js` until the removal dry-run passes green.
+`ch3_wrapup` has completed runtime takeover, focused runtime gate wiring, removal dry-run guard wiring, and temporary physical-removal workflow creation. The legacy definition remains in `src/story.js` until the workflow completes `--write`, reruns the full check, and commits the deletion.
 
 Files:
 
@@ -78,6 +78,7 @@ src/story-chapters/chapter-3-wrapup.js
 src/story-chapters/chapter-3-wrapup-contract.js
 scripts/check-story-chapter3-wrapup-runtime.mjs
 scripts/remove-migrated-chapter3-wrapup-from-story.mjs
+.github/workflows/chapter3-wrapup-physical-removal.yml
 ```
 
 Behavior note:
@@ -128,6 +129,12 @@ Manual verification workflows already收口:
 .github/workflows/chapter3-school-hub-physical-removal.yml
 ```
 
+Temporary physical-removal workflow awaiting bot deletion commit:
+
+```text
+.github/workflows/chapter3-wrapup-physical-removal.yml
+```
+
 ## Full refactor health check
 
 Available through:
@@ -143,23 +150,24 @@ This full check includes Chapter 2 route smoke, Chapter 3 runtime gates, and all
 Next safe step:
 
 ```text
-Wait for GitHub Actions to go green on the ch3_wrapup removal dry-run.
+Wait for GitHub Actions to run the ch3_wrapup physical-removal workflow and commit the src/story.js deletion.
 ```
 
-After green:
+After the bot commit appears:
 
 ```text
-1. create temporary ch3_wrapup physical-removal workflow;
-2. let it run full check -> --write -> full check -> commit src/story.js;
-3. convert the temporary workflow to manual idempotent verification only;
+1. verify the bot commit only removes ch3_wrapup from src/story.js;
+2. convert .github/workflows/chapter3-wrapup-physical-removal.yml to manual idempotent verification only;
+3. update this checkpoint with the final src/story.js footprint;
 4. close out Chapter 3 migration.
 ```
 
 ## Remaining Chapter 3 migration order
 
 ```text
-1. ch3_wrapup physical removal
-2. Chapter 3 migration closeout
+1. ch3_wrapup workflow bot deletion commit
+2. ch3_wrapup workflow收口
+3. Chapter 3 migration closeout
 ```
 
 `ch3_wrapup` is the final Chapter 3 专项迁移对象.
