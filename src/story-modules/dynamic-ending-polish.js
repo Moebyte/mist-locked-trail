@@ -31,6 +31,18 @@
         : { key: 'none', label: '未形成陆念薇口供' };
     }
 
+    function hasActualLuOutcome() {
+      return E.getFlag('v07_lu_to_sun') || E.getFlag('v07_lu_statement') || E.getFlag('v07_lu_as_informant');
+    }
+
+    function hasFormalLuOutcome() {
+      return E.getFlag('v07_lu_to_sun');
+    }
+
+    function schoolHiddenGatePassed() {
+      return E.getFlag('school_wu_three_proofs') && E.getFlag('school_wu_full_confront');
+    }
+
     function hasAnyDockWitness() {
       const p = wp();
       return p.count > 0 || E.getFlag('rescued_yufang') || E.getFlag('rescued_su') || E.getFlag('found_yufang') || E.getFlag('found_su_at_dock');
@@ -154,14 +166,16 @@
         const l = lu();
         const score = Number(t.score || 0);
         const hasWitness = hasAnyDockWitness();
+        const hiddenGate = schoolHiddenGatePassed() || hasActualLuOutcome();
+        const trueHiddenGate = schoolHiddenGatePassed() || hasFormalLuOutcome();
 
         if (h.key === 'unstable') {
           if (hasWitness) return 'end_rescue';
           return score >= 6 ? 'end_partial_truth' : 'end_archive';
         }
 
-        if (score >= 10 && (h.key === 'stable' || h.key === 'controlled') && l.key === 'formal' && !soloMode()) return 'end_true_hidden';
-        if (score >= 8 && h.key !== 'unstable') {
+        if (trueHiddenGate && score >= 10 && (h.key === 'stable' || h.key === 'controlled') && l.key === 'formal' && !soloMode()) return 'end_true_hidden';
+        if (hiddenGate && score >= 8 && h.key !== 'unstable') {
           if (l.key === 'formal' || l.key === 'private' || l.key === 'informant') return 'end_hidden_truth';
           return 'end_conspiracy_detail';
         }
