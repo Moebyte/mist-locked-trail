@@ -67,7 +67,7 @@ reset({
 });
 let list = choices('ch4_revisit_zhou');
 assertValidChoiceTargets('ch4_revisit_zhou/full', list);
-for (const fragment of ['翡翠镯', '陈明远', '半张烟盒纸', '恐吓信']) {
+for (const fragment of ['陆念', '陈明远', '半张烟盒纸', '恐吓信']) {
   const choice = list.find(choice => choice.text.includes(fragment));
   assert(choice, `完整路线周怀安面板应显示「${fragment}」选项，实际 ${JSON.stringify(list)}`);
   if (!choice) continue;
@@ -94,17 +94,17 @@ for (const fragment of ['翡翠镯', '陈明远', '半张烟盒纸', '恐吓信'
   list = choices('ch4_revisit_zhou');
 }
 
-// 翡翠镯完整路线目标必须是正常节点。
-let jade = list.find(choice => choice.text.includes('翡翠镯'));
-assert(jade?.goto === 'ch4_zhou_present_jade', `完整路线翡翠镯应跳正常节点，实际 ${jade?.goto}`);
-if (jade) {
-  jade.effect?.(E.state);
-  const normalText = textOf(jade.goto);
-  assert(normalText.includes('陆念'), `正常翡翠镯举证应提到陆念，实际：${normalText}`);
-  assert(E.getFlag('presented_jade_to_zhou'), '正常翡翠镯举证应设置 presented_jade_to_zhou');
+// 陆念追问完整路线目标必须是正常节点。
+let luNian = list.find(choice => choice.text.includes('陆念'));
+assert(luNian?.goto === 'ch4_zhou_present_jade', `完整路线陆念追问应跳正常节点，实际 ${luNian?.goto}`);
+if (luNian) {
+  luNian.effect?.(E.state);
+  const normalText = textOf(luNian.goto);
+  assert(normalText.includes('苏小姐失踪前，有没有对你提过这个名字'), `正常陆念追问应说明不是鉴定手镯，实际：${normalText}`);
+  assert(E.getFlag('presented_jade_to_zhou'), '正常陆念追问应设置 presented_jade_to_zhou');
 }
 
-// 早期坏路线/前置不足：出示翡翠镯应进入 premature 节点，也不应场景丢失。
+// 早期坏路线/前置不足：追问陆念应进入 premature 节点，也不应场景丢失。
 reset({
   flags: {
     deduced_chen: true,
@@ -118,15 +118,15 @@ reset({
 });
 list = choices('ch4_revisit_zhou');
 assertValidChoiceTargets('ch4_revisit_zhou/premature', list);
-jade = list.find(choice => choice.text.includes('翡翠镯'));
-assert(jade, `早期路线回访周怀安应显示翡翠镯选项，实际 ${JSON.stringify(list)}`);
-const prematureTarget = jade?.goto;
-assert(prematureTarget === 'ch4_zhou_present_jade_premature', `早期路线翡翠镯应跳 premature 节点，实际 ${prematureTarget}`);
-if (jade) {
-  jade.effect?.(E.state);
+luNian = list.find(choice => choice.text.includes('陆念'));
+assert(luNian, `早期路线回访周怀安应显示陆念追问选项，实际 ${JSON.stringify(list)}`);
+const prematureTarget = luNian?.goto;
+assert(prematureTarget === 'ch4_zhou_present_jade_premature', `早期路线陆念追问应跳 premature 节点，实际 ${prematureTarget}`);
+if (luNian) {
+  luNian.effect?.(E.state);
   const prematureText = textOf(prematureTarget);
-  assert(prematureText.includes('我要知道晚亭在哪里'), `早期翡翠镯举证应说明它回答不了苏晚亭去向，实际：${prematureText}`);
-  assert(E.getFlag('presented_jade_to_zhou_premature'), '早期翡翠镯举证应设置 presented_jade_to_zhou_premature');
+  assert(prematureText.includes('我要知道晚亭在哪里'), `早期陆念追问应说明它回答不了苏晚亭去向，实际：${prematureText}`);
+  assert(E.getFlag('presented_jade_to_zhou_premature'), '早期陆念追问应设置 presented_jade_to_zhou_premature');
   assertValidChoiceTargets(prematureTarget, choices(prematureTarget));
 }
 
