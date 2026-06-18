@@ -19,7 +19,7 @@
       return E.getFlag('dock_solo_entry')
         || E.getFlag('dock_force_solo_entry')
         || E.getFlag('dock_solo_entry_requested')
-        || (typeof E.dockSupportMode === 'function' && E.dockSupportMode() === 'solo');
+        || E.getFlag('dock_solo_search_committed');
     }
 
     function fastSupportMode() {
