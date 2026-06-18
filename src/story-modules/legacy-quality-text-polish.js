@@ -52,8 +52,8 @@
       node.__legacyQualityTextPatched = true;
     }
 
-    // ch3_wrapup 是光华小学之后最常见的细节整理页。
-    patchText('ch3_wrapup', () => E.getFlag('deduced_chen') || E.getFlag('deduced_lu_zhao') || E.getFlag('school_wu_three_proofs') || E.hasClue?.('推理结论：陈明远被灭口'));
+    // ch3_wrapup 是光华小学之后最常见的细节整理页；第三段完成后也必须显示终局判定切换提示。
+    patchText('ch3_wrapup', () => E.getFlag('deduced_fusheng') || E.getFlag('deduced_chen') || E.getFlag('deduced_lu_zhao') || E.getFlag('school_wu_three_proofs') || E.hasClue?.('推理结论：陈明远被灭口'));
 
     // ch4_conclusion 仍保留兼容，但文案必须说明旧分不再决定终局。
     patchText('ch4_conclusion', () => true);
