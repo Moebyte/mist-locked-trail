@@ -22,6 +22,17 @@ function present(rt, sceneId, itemName, desc = '') {
   return scene.onPresent?.({ name: itemName, desc }, rt.E.state);
 }
 
+function runChoiceByText(rt, sceneId, textFragment) {
+  rt.renderNode(sceneId);
+  const choice = rt.choicesOf(sceneId).find(c => c.text && c.text.includes(textFragment));
+  assert(!!choice, `${sceneId} 应出现选项：${textFragment}`);
+  if (!choice) return null;
+  if (typeof choice.effect === 'function') choice.effect(rt.E.state);
+  const target = typeof choice.goto === 'function' ? choice.goto(rt.E.state) : choice.goto;
+  if (target) rt.renderNode(target);
+  return target;
+}
+
 const homeTalk = runtime();
 homeTalk.renderNode('ch2_home_talk');
 assert(homeTalk.E.getFlag('su_mother_knows_zhou_fiance'), '问苏母近况后，应记录苏母知道周怀安婚约');
@@ -29,6 +40,21 @@ assert(homeTalk.E.hasClue('苏母知道周怀安婚约'), '问苏母近况后，
 assert(homeTalk.E.hasClue('为情而去说法存疑'), '问苏母近况后，应获得为情而去说法存疑线索');
 const homeTalkText = homeTalk.nodes.ch2_home_talk.text();
 assert(homeTalkText.includes('周先生是个好人') && homeTalkText.includes('这门亲事'), '苏母近况文本应交代周怀安婚约');
+
+const earlyHome = runtime();
+runChoiceByText(earlyHome, 'ch2_home', '最近有没有异常');
+assert(earlyHome.E.getFlag('su_home_early_without_photo'), '过早去苏家问近况，应记录早访未取得信物');
+assert(earlyHome.E.hasClue('苏母的保留'), '过早去苏家应获得苏母有所保留线索');
+assert(!earlyHome.E.hasItem('苏晚亭的银发夹'), '过早去苏家不应获得银发夹');
+const earlyHomeText = earlyHome.nodes.ch2_home.text();
+assert(earlyHomeText.includes('旧柜子') && earlyHomeText.includes('没有拿出来'), '过早去苏家应通过柜子/未拿出物件暗示信物窗口');
+
+earlyHome.E.addItem('苏晚亭的照片', '光启公园留影。');
+runChoiceByText(earlyHome, 'ch2_home', '照片');
+assert(earlyHome.E.hasItem('苏晚亭的银发夹'), '早访后带照片回来，应补拿苏晚亭的银发夹');
+assert(earlyHome.E.hasClue('苏母托付信物'), '早访后带照片回来，应获得苏母托付信物线索');
+const earlyReturnText = earlyHome.nodes.ch2_home.text();
+assert(earlyReturnText.includes('旧柜子') && earlyReturnText.includes('小银发夹'), '补拿信物剧情应打开旧柜子并交出银发夹');
 
 const home = runtime({ items: [{ name: '苏晚亭的照片', desc: '' }] });
 home.renderNode('ch2_home_showphoto');
