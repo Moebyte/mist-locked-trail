@@ -72,24 +72,32 @@ const E = {
 };
 
 const domReadyHandlers = [];
+const locationStub = { href: 'http://localhost/', search: '', hash: '', pathname: '/' };
 const documentStub = {
   head: { appendChild() {} },
   write() {},
+  location: locationStub,
   addEventListener(event, handler) { if (event === 'DOMContentLoaded') domReadyHandlers.push(handler); },
   getElementById() { return { style: {}, innerHTML: '', textContent: '', appendChild() {}, scrollIntoView() {}, addEventListener() {} }; },
   createElement() { return { className: '', textContent: '', title: '', onclick: null, style: {}, appendChild() {} }; },
 };
 
+const windowStub = { location: locationStub };
 const context = vm.createContext({
   console,
   E,
   document: documentStub,
-  window: {},
+  window: windowStub,
+  location: locationStub,
+  URL,
+  URLSearchParams,
   localStorage: { getItem() { return null; }, setItem() {} },
   setTimeout(fn) { if (typeof fn === 'function') fn(); },
   clearTimeout() {},
 });
 context.globalThis = context;
+context.window = context;
+context.location = locationStub;
 
 function runScript(rel, suffix = '') {
   try {
