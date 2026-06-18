@@ -2,7 +2,8 @@
 // 目标：玩家过早从光华小学回到线索整理时，不再用“正常破案”口吻误导。
 // 1) 光华小学后若关键前置断裂，不允许倒回大学 / 苏家 / 巡捕房补课，坏路线成立。
 // 2) 坏路线可通过“陈明远残信 + 苏晚亭疑似遗书”触发《吾爱晚亭》；玩家初见时不知道信封被整理过。
-// 3) 前置线索充足的正常路线不会获得疑似遗书，也不会被周怀安彩蛋截走。
+// 3) 如果苏家线确认苏母知道周怀安婚约，则“为情而去”说法站不稳，不再触发《吾爱晚亭》。
+// 4) 前置线索充足的正常路线不会获得疑似遗书，也不会被周怀安彩蛋截走。
 (function installPrematureConclusionPolish() {
   function applyPrematureConclusionPolish() {
     if (typeof E === 'undefined' || typeof nodes === 'undefined') return;
@@ -52,6 +53,11 @@
       return isBadRouteLocked() || !hasReachedFushengCore();
     }
 
+    function knowsZhouFianceFromSuHome() {
+      if (typeof E.knowsZhouFianceFromSuHome === 'function') return E.knowsZhouFianceFromSuHome();
+      return E.getFlag('su_mother_knows_zhou_fiance') || E.hasClue('苏母知道周怀安婚约') || E.hasClue('为情而去说法存疑');
+    }
+
     function hasChenBadRouteLetter() {
       return E.hasItem('陈明远残信') || E.hasItem('陈明远的信');
     }
@@ -61,7 +67,7 @@
     }
 
     function hasZhouBadRouteLetters() {
-      return hasChenBadRouteLetter() && hasSuLastLetter();
+      return hasChenBadRouteLetter() && hasSuLastLetter() && !knowsZhouFianceFromSuHome();
     }
 
     function missingEvidenceText() {
@@ -165,6 +171,9 @@
       nodes.ch4_pawnshop.choices = function (state) {
         return choicesOf(oldChoices, state).map(choice => {
           if (isBadRouteLocked() && choice.goto === 'ch4_revisit_zhou') {
+            if (knowsZhouFianceFromSuHome()) {
+              return { ...choice, text: '🔙 带着翡翠镯回去整理证据——疑似遗书的说法站不稳', goto: 'ch4_conclusion' };
+            }
             return { ...choice, text: '🏮 回访周怀安——带去翡翠镯、残信和疑似遗书' };
           }
           return choice;
@@ -179,15 +188,18 @@
       const oldText = nodes.ch4_revisit_zhou.text;
 
       nodes.ch4_revisit_zhou.onPresent = function (item, state) {
+        if (knowsZhouFianceFromSuHome() && (item.name === '陈明远的信' || item.name === '陈明远残信' || item.name === '苏晚亭的遗书' || item.name === '苏晚亭的伪造遗书' || item.name === '苏晚亭疑似遗书')) {
+          return { text: '你想起苏母的话：周怀安是晚亭的未婚夫，晚亭若真要离开，不会一句话都不留给他。这两张纸可以作为疑点，但不能再把案子压成“为情而去”。' };
+        }
         if (isBadRouteLocked() && item.name === '翡翠镯' && !E.getFlag('presented_jade_to_zhou_premature')) {
           E.setFlag('presented_jade_to_zhou_premature', true);
           return { goto: 'ch4_zhou_present_jade_premature' };
         }
-        if (isBadRouteLocked() && (item.name === '陈明远的信' || item.name === '陈明远残信') && !E.getFlag('presented_chen_letter_to_zhou')) {
+        if (isBadRouteLocked() && hasZhouBadRouteLetters() && (item.name === '陈明远的信' || item.name === '陈明远残信') && !E.getFlag('presented_chen_letter_to_zhou')) {
           E.setFlag('presented_chen_letter_to_zhou', true);
           return { goto: E.getFlag('presented_su_last_letter_to_zhou') ? 'end_zhou_chen_letter' : 'ch4_zhou_present_chen_letter' };
         }
-        if (isBadRouteLocked() && (item.name === '苏晚亭的遗书' || item.name === '苏晚亭的伪造遗书' || item.name === '苏晚亭疑似遗书') && !E.getFlag('presented_su_last_letter_to_zhou')) {
+        if (isBadRouteLocked() && hasZhouBadRouteLetters() && (item.name === '苏晚亭的遗书' || item.name === '苏晚亭的伪造遗书' || item.name === '苏晚亭疑似遗书') && !E.getFlag('presented_su_last_letter_to_zhou')) {
           E.setFlag('presented_su_last_letter_to_zhou', true);
           return { goto: E.getFlag('presented_chen_letter_to_zhou') ? 'end_zhou_chen_letter' : 'ch4_zhou_present_su_last_letter' };
         }
@@ -198,6 +210,9 @@
         const base = typeof oldText === 'function' ? oldText(state) : oldText;
         if (isBadRouteLocked() && hasZhouBadRouteLetters()) {
           return `${base}<br><br><span class="sys">你怀里有一只被重新压平过的信封：一封残信写着“晚亭吾爱”，让苏晚亭重新成为一个会爱、会怕、会选择的人；另一张纸像是她的遗书，把她压成一句“为情而去”的遗言。周怀安必须看见它们并在一起的样子。</span>`;
+        }
+        if (isBadRouteLocked() && knowsZhouFianceFromSuHome() && hasChenBadRouteLetter() && hasSuLastLetter()) {
+          return `${base}<br><br><span class="sys">你怀里有残信和那封疑似遗书。可苏母已经说过，周怀安是晚亭的未婚夫，晚亭若真要离开，不会一句话都不留给他。现在把这两张纸递出去，只会制造一个太容易被接受的误会。</span>`;
         }
         return base;
       };
