@@ -17,8 +17,16 @@ function texts(id) {
   return rt.choicesOf(id).map(choice => choice.text || choice.fogText || '');
 }
 
+function gotos(id) {
+  return rt.choicesOf(id).map(choice => typeof choice.goto === 'function' ? choice.goto(rt.E.state) : choice.goto).filter(Boolean);
+}
+
 function has(id, fragment) {
   return texts(id).some(text => text.includes(fragment));
+}
+
+function hasGoto(id, goto) {
+  return gotos(id).includes(goto);
 }
 
 function hasOldReturn22(id) {
@@ -74,8 +82,21 @@ reset({
   clues: [{ name: '福生仓标识', desc: '' }, { name: '王巡官遗留纸条', desc: '' }],
   items: [{ name: '恐吓信', desc: '' }, { name: '半张烟盒纸', desc: '' }],
 });
-assert(has('ch2_203_search', '光华小学'), '拿到王巡官纸条后，203线才应引导去光华小学');
-assert(!has('ch2_203_search', '回巡捕房'), '拿到王巡官纸条后，不应继续要求回巡捕房');
+assert(has('ch2_203_search', '光华小学'), '拿到王巡官纸条后，203线应能去光华小学');
+assert(has('ch2_203_search', '去巡捕房'), '拿到王巡官纸条后，203线仍应能回巡捕房 hub');
+assert(has('ch2_203_search', '去苏家'), '苏家线未完成时，203线仍应能去苏家');
+assert(hasGoto('ch2_203_search', 'ch3_school'), '拿到王巡官纸条后，应保留 ch3_school goto');
+assert(hasGoto('ch2_203_search', 'ch2_police_alt'), '拿到王巡官纸条后，应保留 ch2_police_alt goto');
+assert(hasGoto('ch2_203_search', 'ch2_home'), '苏家线未完成时，应保留 ch2_home goto');
+
+reset({
+  flags: { saw_man: true, asked_landlord: true, shown_map_to_landlord: true, got_wang_note: true, asked_photo: true },
+  clues: [{ name: '福生仓标识', desc: '' }, { name: '王巡官遗留纸条', desc: '' }, { name: '母亲证词', desc: '' }],
+  items: [{ name: '恐吓信', desc: '' }, { name: '半张烟盒纸', desc: '' }],
+});
+assert(has('ch2_203_search', '光华小学'), '苏家线完成后，203线仍应保留光华小学');
+assert(has('ch2_203_search', '去巡捕房'), '苏家线完成后，203线仍应保留巡捕房 hub');
+assert(!hasGoto('ch2_203_search', 'ch2_home'), '苏家线完成后，应隐藏 ch2_home goto');
 
 reset({
   flags: { visited_pawn: true },
