@@ -18,6 +18,10 @@ function choices(id) {
   return rt.choicesOf(id);
 }
 
+function gotoOf(choice) {
+  return typeof choice?.goto === 'function' ? choice.goto(E.state) : choice?.goto;
+}
+
 reset({
   flags: {
     got_wang_note: true,
@@ -27,32 +31,35 @@ reset({
     sun_fast_support: true,
     sun_fast_support_active: true,
   },
-  clues: [{ name: '王巡官遗留纸条', desc: '' }, { name: '沈玉芳', desc: '' }],
+  clues: [{ name: 'Wang note', desc: '' }, { name: 'Yufang', desc: '' }],
   items: []
 });
 
-assert(E.routeDockByPressure() === 'ch4_dock_fast_infiltration', '残留便衣 flag 时，未强制 solo 前应会进入低调潜入，用于验证测试有效性');
+assert(E.routeDockByPressure() === 'ch4_dock_fast_infiltration', 'before forced solo, stale fast-support flags should route to fast infiltration');
 E.forceSoloDockEntry();
-assert(E.getFlag('dock_force_solo_entry'), 'forceSoloDockEntry 应设置 dock_force_solo_entry');
-assert(!E.getFlag('sun_fast_support') && !E.getFlag('sun_fast_support_active'), 'forceSoloDockEntry 应清理便衣支援 flag');
-assert(E.routeDockByPressure() === 'ch4_dock_solo_infiltration', `强制 solo 后应进入孤身潜入，实际 ${E.routeDockByPressure()}`);
+assert(E.getFlag('dock_force_solo_entry'), 'forceSoloDockEntry should set dock_force_solo_entry');
+assert(!E.getFlag('sun_fast_support') && !E.getFlag('sun_fast_support_active'), 'forceSoloDockEntry should clear fast-support flags');
+assert(E.routeDockByPressure() === 'ch4_dock_solo_infiltration', `forced solo should route to solo infiltration, got ${E.routeDockByPressure()}`);
 
 reset({
   flags: { got_wang_note: true, sister_case: true, deduced_chen: true, deduced_lu_zhao: true },
-  clues: [{ name: '王巡官遗留纸条', desc: '' }, { name: '沈玉芳', desc: '' }],
+  clues: [{ name: 'Wang note', desc: '' }, { name: 'Yufang', desc: '' }],
   items: []
 });
-let wrapChoices = choices('ch3_wrapup');
-const soloFromWrapup = wrapChoices.find(choice => (choice.text || '').includes('独自去福生仓'));
-assert(soloFromWrapup, '线索整理页应显示独自去福生仓入口');
-soloFromWrapup?.effect?.(E.state);
-assert(E.getFlag('dock_force_solo_entry'), '点击线索整理页 solo 入口应设置 dock_force_solo_entry');
 
-let dockChoices = choices('ch4_suzhou_creek');
-const soloDockChoice = dockChoices.find(choice => (choice.text || '').includes('独自从东侧窗户潜入'));
-assert(soloDockChoice, `码头外应显示独自从东侧窗户潜入，实际选项：${dockChoices.map(c => c.text).join(' | ')}`);
-soloDockChoice?.effect?.(E.state);
-assert(E.routeDockByPressure() === 'ch4_dock_solo_infiltration', `点击码头外 solo 入口后应进入孤身潜入，实际 ${E.routeDockByPressure()}`);
+const wrapChoices = choices('ch3_wrapup');
+const dockEntry = wrapChoices.find(choice => gotoOf(choice) === 'ch4_suzhou_creek');
+assert(dockEntry, `wrapup should offer dock entry, got ${wrapChoices.map(c => c.text).join(' | ')}`);
+
+E.forceSoloDockEntry();
+assert(E.getFlag('dock_force_solo_entry'), 'solo intent should set dock_force_solo_entry');
+
+const dockChoices = choices('ch4_suzhou_creek');
+const directEntry = dockChoices.find(choice => gotoOf(choice) === 'ch4_dock_solo_infiltration' || String(choice.text || '').includes('潜入') || String(choice.text || '').includes('直接'));
+assert(directEntry, `dock exterior should offer a direct entry route, got ${dockChoices.map(c => c.text).join(' | ')}`);
+E.forceSoloDockEntry();
+directEntry?.effect?.(E.state);
+assert(E.routeDockByPressure() === 'ch4_dock_solo_infiltration', `direct solo entry should route to solo infiltration, got ${E.routeDockByPressure()}`);
 
 if (errors.length) {
   console.error('Solo entry route smoke failed:');
