@@ -25,7 +25,7 @@ function runEffect(id) {
 }
 
 function assertNoEarlySpoilers(text, label) {
-  for (const word of ['傅启元', '管制药品', '走私', '军用纱布', '最上面的人']) {
+  for (const word of ['傅启元', '管制药品', '走私', '军用纱布', '最上面的人', '上面的人', '公董局']) {
     assert(!text.includes(word), `${label} 不应提前出现完整真相词：${word}，实际：${text}`);
   }
 }
@@ -57,7 +57,29 @@ assert(E.hasClue('光华小学箱子异常'), '陈明远信应给出软线索：
 assert(!E.hasClue('傅启元夜运教具箱'), '早期陈明远信不应直接给出傅启元夜运教具箱');
 assert(!E.hasClue('管制药品走私'), '早期陈明远信不应直接给出管制药品走私');
 
+// 第一段推理成功只能说明陈明远因学校箱子异常被灭口，不能提前点名后续地点/组织。
+reset({});
+text = textOf('deduc_success');
+assert(text.includes('陈明远撞见了光华小学后楼的箱子'), `第一段推理应聚焦箱子异常，实际：${text}`);
+assert(text.includes('还没有告诉你终点在哪里'), `第一段推理应保留未知终点，实际：${text}`);
+assert(!text.includes('还缺一块：福生仓'), `第一段推理不应直接点名福生仓，实际：${text}`);
+assertNoEarlySpoilers(text, '第一段推理成功');
+runEffect('deduc_success');
+assert(E.hasClue('推理结论：陈明远被灭口'), '第一段推理应加入陈明远被灭口结论');
+assert(!E.hasClue('管制药品走私'), '第一段推理不应直接加入管制药品走私');
+
+// 第二段推理成功只能确认赵先生盯陆小姐和旧案牵制，不能提前总结层级与公董局。
+reset({});
+text = textOf('deduc_lu_zhao_ok');
+assert(text.includes('他更像是在盯陆小姐'), `第二段推理应聚焦黑衣男人盯陆小姐，实际：${text}`);
+assert(text.includes('你还不知道那只手从哪里伸来'), `第二段推理应保留幕后未知，实际：${text}`);
+assertNoEarlySpoilers(text, '第二段推理成功');
+runEffect('deduc_lu_zhao_ok');
+assert(E.hasClue('推理结论：黑衣男是暗线'), '第二段推理应加入黑衣男暗线结论');
+
 // 软线索仍应满足第一段推理需要，避免去剧透后卡死。
+reset({});
+runEffect('ch3_chen_letter');
 E.addClue('陈明远的退缩', '');
 E.addClue('203 室恐吓信', '');
 assert(E.canDeduce('deduce_chen'), `软线索应允许开启第一段推理，缺：${E.deductionMissingFor?.('deduce_chen')?.join('、')}`);
