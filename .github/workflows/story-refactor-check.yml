@@ -1,6 +1,7 @@
 name: Story Refactor Migration Gate
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - v1_refactor
