@@ -53,9 +53,9 @@ assert(E.hasItem('苏晚亭疑似遗书'), '坏路线应获得苏晚亭疑似遗
 assert(E.hasClue('陈明远残信'), '坏路线应加入陈明远残信线索');
 assert(E.hasClue('苏晚亭疑似遗书'), '坏路线应加入苏晚亭疑似遗书线索');
 
-// 回访周怀安入口应使用残信/疑似遗书表述。
+// 没查苏家婚约反证时，回访周怀安入口仍可出现。
 let list = choices('ch3_wrapup');
-assert(hasChoice(list, '残信和那封疑似遗书', 'ch4_revisit_zhou'), `坏路线 wrapup 应提供残信+疑似遗书回访周怀安，实际 ${JSON.stringify(list)}`);
+assert(hasChoice(list, '残信和那封疑似遗书', 'ch4_revisit_zhou'), `未查苏家婚约时应提供吾爱晚亭入口，实际 ${JSON.stringify(list)}`);
 
 // 周怀安读信文本应与残信设定一致。
 text = textOf('ch4_zhou_present_chen_letter');
@@ -70,6 +70,30 @@ text = textOf('end_zhou_chen_letter');
 assert(text.includes('残信和疑似遗书'), `吾爱晚亭结局应并置残信和疑似遗书，实际：${text}`);
 assert(text.includes('没有证明那封疑似遗书是真是假'), `吾爱晚亭不应让玩家当场识破伪造，实际：${text}`);
 assert(text.includes('结局 · 吾爱晚亭'), `应保留四字结局名，实际：${text}`);
+
+// 查过苏家并确认周怀安婚约后，残信 + 疑似遗书不能再导向《吾爱晚亭》。
+reset({
+  flags: {
+    chen_letter_packet_altered: true,
+    su_mother_knows_zhou_fiance: true,
+  },
+  items: [
+    { name: '陈明远残信', desc: '' },
+    { name: '苏晚亭疑似遗书', desc: '' },
+  ],
+  clues: [
+    { name: '陈明远残信', desc: '' },
+    { name: '苏晚亭疑似遗书', desc: '' },
+    { name: '苏母知道周怀安婚约', desc: '' },
+  ],
+});
+list = choices('ch3_wrapup');
+assert(!hasChoice(list, '残信和那封疑似遗书', 'ch4_revisit_zhou'), `查过苏家婚约后不应再从 wrapup 进入吾爱晚亭，实际 ${JSON.stringify(list)}`);
+text = textOf('ch4_revisit_zhou');
+assert(text.includes('苏母已经说过') && text.includes('周怀安是晚亭的未婚夫'), `查过苏家后周怀安页应提示疑似遗书站不稳，实际：${text}`);
+const result = rt.nodes.ch4_revisit_zhou.onPresent({ name: '苏晚亭疑似遗书' }, E.state);
+assert(result?.text?.includes('不能再把案子压成“为情而去”'), `查过苏家后出示疑似遗书应只给反证提示，实际 ${JSON.stringify(result)}`);
+assert(result?.goto !== 'end_zhou_chen_letter', `查过苏家后不能跳吾爱晚亭，实际 ${JSON.stringify(result)}`);
 
 // 正常路线：前置齐全时不应额外得到疑似遗书/残信。
 reset({
