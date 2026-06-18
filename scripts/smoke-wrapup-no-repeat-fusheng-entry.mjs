@@ -13,9 +13,17 @@ function reset(overrides = {}) {
   h.resetState(overrides);
 }
 
-function choiceTexts(sceneId) {
+function choices(sceneId) {
   h.renderNode(sceneId);
-  return h.choicesOf(sceneId).map(choice => choice.text || choice.fogText || '');
+  return h.choicesOf(sceneId).map(choice => ({
+    text: choice.text || choice.fogText || '',
+    goto: typeof choice.goto === 'function' ? choice.goto(E.state) : choice.goto,
+    hasEffect: typeof choice.effect === 'function',
+  }));
+}
+
+function choiceTexts(sceneId) {
+  return choices(sceneId).map(choice => choice.text);
 }
 
 function has(texts, fragment) {
@@ -24,6 +32,10 @@ function has(texts, fragment) {
 
 function notHas(texts, fragment) {
   return !has(texts, fragment);
+}
+
+function hasGoto(list, target) {
+  return list.some(choice => choice.goto === target);
 }
 
 const commonState = {
@@ -64,11 +76,12 @@ reset({
     { name: '苏晚亭学生证', desc: '' },
   ],
 });
-let texts = choiceTexts('ch3_wrapup');
+let list = choices('ch3_wrapup');
+let texts = list.map(choice => choice.text);
 assert(notHas(texts, '不找支援，独自去福生仓'), 'solo 到过暗室后，不应再次显示 solo 福生仓入口');
 assert(notHas(texts, '巡捕房找老孙商量福生仓'), 'solo 到过暗室后，不应再次显示老孙支援入口');
 assert(notHas(texts, '苏州河废弃码头'), 'solo 到过暗室后，不应再次显示码头入口');
-assert(has(texts, '回顾现有证据') || has(texts, '福生仓与公董局'), 'solo 到过暗室后，应进入整理/第三段推理/收束阶段');
+assert(hasGoto(list, 'ch4_hospital_conflict') || has(texts, '医院') || has(texts, '撤离') || has(texts, '逃离'), `solo 到过暗室但医院未处理时，应进入撤离/医院阶段，实际 ${JSON.stringify(list)}`);
 
 reset({
   ...commonState,
@@ -93,10 +106,11 @@ reset({
     { name: '苏晚亭学生证', desc: '' },
   ],
 });
-texts = choiceTexts('ch3_wrapup');
+list = choices('ch3_wrapup');
+texts = list.map(choice => choice.text);
 assert(notHas(texts, '不找支援，独自去福生仓'), '空暗室返回整理页后，不应再次显示 solo 福生仓入口');
 assert(notHas(texts, '巡捕房找老孙商量福生仓'), '空暗室返回整理页后，不应再次显示老孙支援入口');
-assert(has(texts, '福生仓与公董局') || has(texts, '回顾现有证据'), '空暗室返回整理页后，应进入第三段推理或收束阶段');
+assert(has(texts, '福生仓与公董局') || has(texts, '回顾现有证据'), `空暗室返回整理页后，应进入第三段推理或物证整理阶段，实际 ${JSON.stringify(list)}`);
 
 if (errors.length) {
   console.error('Wrapup no-repeat Fusheng entry smoke failed:');
@@ -104,4 +118,4 @@ if (errors.length) {
   process.exit(1);
 }
 
-console.log('Wrapup no-repeat Fusheng entry smoke passed.');
+console.log('Wrapup no-repeat Fusheng entry passed.');
