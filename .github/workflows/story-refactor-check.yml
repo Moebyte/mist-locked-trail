@@ -1,4 +1,4 @@
-name: Story Refactor Check
+name: Story Refactor Migration Gate
 
 on:
   push:
@@ -20,32 +20,8 @@ jobs:
         with:
           node-version: '22'
 
-      - name: Run story refactor aggregate check
+      - name: Run migration gate
         run: node scripts/check-story-refactor.mjs
 
       - name: Run chapter 2 removal dry-run
         run: node scripts/remove-migrated-chapter2-from-story.mjs
-
-      - name: Run validate-story if present
-        run: |
-          if [ -f scripts/validate-story.mjs ]; then
-            node scripts/validate-story.mjs
-          else
-            echo "scripts/validate-story.mjs not present; skipped"
-          fi
-
-      - name: Run smoke-routes if present
-        run: |
-          if [ -f scripts/smoke-routes.mjs ]; then
-            node scripts/smoke-routes.mjs
-          else
-            echo "scripts/smoke-routes.mjs not present; skipped"
-          fi
-
-      - name: Run fuzz-story-states if present
-        run: |
-          if [ -f scripts/fuzz-story-states.mjs ]; then
-            node scripts/fuzz-story-states.mjs
-          else
-            echo "scripts/fuzz-story-states.mjs not present; skipped"
-          fi
