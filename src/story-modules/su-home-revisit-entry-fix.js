@@ -1,7 +1,8 @@
 // ===== 苏家信物回访入口 =====
 // 目标：如果玩家早访苏家未拿到银发夹，之后在大学线拿到苏晚亭近期照片时，
-// 在自然整理/转场节点显式提供“回苏家给苏母看照片”的入口。
-// 注意：203 室与苏母没有直接因果关系，不在 203 搜查后硬插回访入口。
+// 在第二章早期自然转场显式提供“回苏家给苏母看照片”的入口。
+// 注意：203 室与苏母没有直接因果关系，不在 203 搜查后硬插回访入口；
+// 第三章线索整理页也不再补入口，避免过晚“系统补票”。
 (function installSuHomeRevisitEntryFix() {
   function applySuHomeRevisitEntryFix() {
     if (typeof E === 'undefined' || typeof nodes === 'undefined') return;
@@ -42,8 +43,7 @@
 
     [
       'ch2_leave_univ',
-      'ch2_leave_home',
-      'ch3_wrapup'
+      'ch2_leave_home'
     ].forEach(patchChoices);
 
     E.__suHomeRevisitEntryFixPatched = true;
