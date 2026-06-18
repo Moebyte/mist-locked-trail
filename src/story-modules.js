@@ -38,6 +38,7 @@
     'src/story-modules/wrapup-priority-guidance.js',
     'src/story-modules/premature-conclusion-polish.js',
     'src/story-modules/early-ending-continuity-polish.js',
+    'src/story-modules/deduction-retry-no-early-ending-polish.js',
     'src/story-modules/pressure-quality-ending-polish.js',
     'src/story-modules/narrative-clock-polish.js',
     'src/story-modules/true-ending-route-polish.js',
