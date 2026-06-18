@@ -41,10 +41,11 @@ assert(c.some(choice => (choice.text || '').includes('等巡灯')), 'solo 东窗
 assert(c.some(choice => (choice.text || '').includes('油布')), 'solo 东窗应提供油布遮影选项');
 assert(c.some(choice => (choice.text || '').includes('直接翻进仓库')), 'solo 东窗应提供冒险直接进入选项');
 
+const beforeWaitDelay = E.dockDelayScore();
 let wait = c.find(choice => (choice.text || '').includes('等巡灯'));
 wait?.effect?.(E.state);
 assert(E.getFlag('dock_solo_waited_patrol'), '等待巡灯应设置 dock_solo_waited_patrol');
-assert(E.dockDelayScore() === 1, `等待巡灯应增加 solo 拖延，实际 ${E.dockDelayScore()}`);
+assert(E.dockDelayScore() === beforeWaitDelay + 1, `等待巡灯应让 solo 拖延增加 1，之前 ${beforeWaitDelay} 之后 ${E.dockDelayScore()}`);
 
 reset({
   flags: { dock_solo_entry: true, found_su_at_dock: true, found_yufang: true },
