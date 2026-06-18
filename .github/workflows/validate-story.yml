@@ -67,6 +67,9 @@ jobs:
       - name: Smoke test Wuai Wanting altered packet
         run: node scripts/smoke-wuai-wanting-altered-packet.mjs
 
+      - name: Smoke test early ending continuity
+        run: node scripts/smoke-early-ending-continuity.mjs
+
       - name: Smoke test Sun fast support
         run: node scripts/smoke-sun-fast-support.mjs
 
