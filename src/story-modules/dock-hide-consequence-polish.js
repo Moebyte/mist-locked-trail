@@ -17,6 +17,21 @@
       }
     }
 
+    function forcedLockOutcomeRoute() {
+      const tier = typeof E.dockHeatTier === 'function' ? E.dockHeatTier() : { key: 'mid' };
+      // 多个潜入坑叠加到 high 时，仍然是空暗室。
+      if (tier.key === 'high' && (
+        E.getFlag('dock_shelf_shortcut')
+        || E.getFlag('skipped_crates_for_sound')
+        || E.getFlag('skipped_dock_hide')
+        || E.getFlag('dock_guard_chase_no_hide')
+        || E.getFlag('dock_inner_office_rushed')
+        || E.getFlag('dock_reached_crate_area_fast')
+      )) return 'ch4_dock_deep_empty_heat';
+      // 单独“不检查教具箱强行开锁”应由累计风险判为只剩一人，而不是一票否决空暗室。
+      return 'ch4_dock_deep_trace';
+    }
+
     if (nodes.ch4_dock_full_search && !nodes.ch4_dock_full_search.__directSearchWarningPatched) {
       nodes.ch4_dock_full_search.choices = [
         { text: '📦 先检查旁边的教具箱', goto: 'ch4_dock_crates' },
@@ -114,7 +129,7 @@
         E.addClue('强行开锁惊动守卫', '你没有检查教具箱找铁钎，只能强行打开旧锁，潜入热度明显上升。');
       },
       text: () => `你把肩膀撞上旧锁，铁锈和木屑一起落下来。<br><br>第一下，锁没开。<br><br>第二下，仓库另一头已经传来喊声：<span class="sys">“暗门那边有人！”</span><br><br>你咬牙又撞了一下，锁终于断开。可手电光已经从货架缝隙里扫过来，你只能先拖开一排木箱，绕进黑暗里。<br><br>等你甩开追上来的守卫，再回到暗门前，门后的声音还在。<br><br>只是这一次，整个仓库都像醒了。`,
-      choices: [{ text: '🚪 推开暗门', goto: () => E.routeDockDeepByPressure() }]
+      choices: [{ text: '🚪 推开暗门', goto: () => forcedLockOutcomeRoute() }]
     };
 
     if (nodes.ch4_dock_locked_door && !nodes.ch4_dock_locked_door.__breakLockConsequencePatched) {
