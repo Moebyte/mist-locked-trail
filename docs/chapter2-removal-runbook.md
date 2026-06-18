@@ -21,6 +21,12 @@ node scripts/remove-migrated-chapter2-from-story.mjs
 
 The second command is a dry-run. Before physical removal, it must report that all migrated Chapter 2 nodes can be removed and must list non-overlapping ranges.
 
+The same checks also run in GitHub Actions:
+
+```text
+Actions → Story Refactor Migration Gate → Run workflow → v1_refactor
+```
+
 ## Optional full check
 
 Use this when you want a broader refactor health check, not as a blocker for routine migration work:
@@ -33,20 +39,32 @@ Save compatibility, route smoke tests, and fuzz tests may still be useful, but t
 
 ## Perform physical removal
 
-Only after the migration gate and dry-run pass:
+Preferred path: use the manual GitHub Actions workflow.
 
-```bash
-node scripts/remove-migrated-chapter2-from-story.mjs --write
+```text
+Actions → Chapter 2 Physical Removal → Run workflow → v1_refactor
 ```
 
-Then immediately run:
+The workflow will:
+
+1. run the migration gate before removal;
+2. run the Chapter 2 removal dry-run;
+3. execute `node scripts/remove-migrated-chapter2-from-story.mjs --write`;
+4. run the migration gate again;
+5. verify that the removal script is idempotent after removal;
+6. commit the resulting `src/story.js` change back to `v1_refactor`.
+
+Local equivalent:
 
 ```bash
 node scripts/check-story-refactor.mjs
 node scripts/remove-migrated-chapter2-from-story.mjs
+node scripts/remove-migrated-chapter2-from-story.mjs --write
+node scripts/check-story-refactor.mjs
+node scripts/remove-migrated-chapter2-from-story.mjs
 ```
 
-After physical removal, the second command should pass by reporting that no migrated Chapter 2 node definitions remain in `src/story.js`. If only some migrated nodes are missing and others remain, the script treats that as a partial-removal error.
+After physical removal, the final command should pass by reporting that no migrated Chapter 2 node definitions remain in `src/story.js`. If only some migrated nodes are missing and others remain, the script treats that as a partial-removal error.
 
 ## Do not
 
