@@ -5,6 +5,7 @@
 (function loadStoryModules() {
   const modules = [
     'src/story-chapters/index.js',
+    'src/story-chapters/chapter-1-opening.js',
     'src/story-chapters/endings.js',
     'src/story-chapters/endings-contract.js',
     'src/story-modules/runtime-contract.js',
