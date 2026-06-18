@@ -73,6 +73,9 @@ jobs:
       - name: Smoke test deduction retry no early ending
         run: node scripts/smoke-deduction-retry-no-early-ending.mjs
 
+      - name: Smoke test Zhou jade present node
+        run: node scripts/smoke-zhou-jade-present-node.mjs
+
       - name: Smoke test Sun fast support
         run: node scripts/smoke-sun-fast-support.mjs
 
