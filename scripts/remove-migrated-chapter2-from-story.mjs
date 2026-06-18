@@ -75,8 +75,12 @@ function escapeRegExp(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+function nodeDefinitionPattern(id) {
+  return new RegExp(`^\\s*${escapeRegExp(id)}:\\s*{`, 'm');
+}
+
 function findNodeBlock(source, id) {
-  const pattern = new RegExp(`(^\\s*${escapeRegExp(id)}:\\s*{)`, 'm');
+  const pattern = nodeDefinitionPattern(id);
   const match = pattern.exec(source);
   if (!match) return null;
 
@@ -174,10 +178,29 @@ for (const rel of requiredChapterFiles) {
 
 let storySource = read(storyRel);
 const blocks = [];
+const missing = [];
 for (const id of migratedChapter2Ids) {
   const block = findNodeBlock(storySource, id);
-  if (!block) errors.push(`cannot locate ${id} in ${storyRel}`);
+  if (!block) missing.push(id);
   else blocks.push(block);
+}
+
+if (errors.length) {
+  console.error('\nChapter 2 removal preflight failed:');
+  for (const error of errors) console.error(`- ${error}`);
+  process.exit(1);
+}
+
+if (blocks.length === 0) {
+  console.log(`Chapter 2 removal check passed: no migrated Chapter 2 node definitions remain in ${storyRel}.`);
+  process.exit(0);
+}
+
+if (missing.length) {
+  console.error('\nChapter 2 removal preflight failed: partial removal detected.');
+  console.error(`${blocks.length} migrated nodes still exist, but ${missing.length} are already missing.`);
+  for (const id of missing) console.error(`- missing: ${id}`);
+  process.exit(1);
 }
 
 const sorted = [...blocks].sort((a, b) => a.start - b.start);
@@ -198,7 +221,7 @@ for (const block of [...sorted].reverse()) {
   nextSource = nextSource.slice(0, block.start) + nextSource.slice(block.end);
 }
 
-const survivors = migratedChapter2Ids.filter(id => new RegExp(`^\\s*${escapeRegExp(id)}:\\s*{`, 'm').test(nextSource));
+const survivors = migratedChapter2Ids.filter(id => nodeDefinitionPattern(id).test(nextSource));
 if (survivors.length) {
   console.error('\nChapter 2 removal postcheck failed:');
   for (const id of survivors) console.error(`- ${id} would still be defined in ${storyRel}`);
