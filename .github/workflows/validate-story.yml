@@ -58,6 +58,9 @@ jobs:
       - name: Smoke test deduction prerequisite groups
         run: node scripts/smoke-deduction-prereq-groups.mjs
 
+      - name: Smoke test Guanghua incomplete closure
+        run: node scripts/smoke-guanghua-incomplete-closure.mjs
+
       - name: Smoke test Sun fast support
         run: node scripts/smoke-sun-fast-support.mjs
 
