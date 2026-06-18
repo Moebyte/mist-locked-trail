@@ -160,41 +160,6 @@ const nodes = {
   },
 
 
-  ch3_school_teacher: {
-    title: '关于陈老师',
-    onPresent: (item, s) => {
-      if (item.name === '恐吓信' && !E.getFlag('presented_threat_to_wu')) {
-        E.setFlag('presented_threat_to_wu', true);
-        return { goto: 'ch3_wu_present_threat' };
-      }
-      if (item.name === '三人合影' && !E.getFlag('presented_photo_to_wu')) {
-        E.setFlag('presented_photo_to_wu', true);
-        return { goto: 'ch3_wu_present_photo' };
-      }
-      return null;
-    },
-    text: () => `吴校长叹了口气，坐到椅子上。
-
-<span class="sys">"陈老师——陈明远——在我们学校教了五年书，一直是个好老师。语文课讲得好，学生都喜欢他。他出事的那个晚上，是他在学校值夜。第二天早上，工友发现他躺在教学楼后面的水泥地上。"</span>
-
-<span class="sys">"遗书呢？"</span>
-
-吴校长从抽屉里拿出一个证物袋，里面是一张对折的信纸。你接过来看，字迹确实像是陈明远的：
-
-<span class="sys">"愧对学生，无颜苟活。我做了不可原谅的事。所有责任在我一人，与他人无关。"</span>
-
-你盯着这封遗书看了很久。
-
-<span class="sys">"校长，你觉得他是自杀吗？"</span>
-
-吴校长摘下眼镜擦了擦。<span class="sys">"巡捕房说是。但我跟陈老师共事五年——他不是那种人。他出事前一周，我还跟他谈过话，说下学期让他当年级组长。他很高兴。一个准备升职的人，为什么要自杀？"</span>`,
-    effect: (s) => { E.addClue('陈明远坠楼案', '遗书称"做了不可原谅的事"；校长不信是自杀'); E.discoverRelation('陈明远'); E.setFlag('asked_about_chen', true); },
-    choices: [
-      { text: '💬 问陈老师跟苏晚亭的关系', goto: 'ch3_school_chen_su' },
-      { text: '💬 问学校有没有其他异常', goto: 'ch3_school_weird' },
-      { text: '📖 要求看陈老师的办公室', goto: 'ch3_school_office' },
-    ],
-  },
 
 
 
