@@ -29,6 +29,7 @@
     'src/story-modules/opening-intake-polish.js',
     'src/story-modules/guanghua-school-flow-polish.js',
     'src/story-modules/early-mist-perspective-polish.js',
+    'src/story-modules/xuehua-203-route-unlock.js',
     'src/story-modules/guanghua-incomplete-closure-polish.js',
     'src/story-modules/guanghua-confront-choice-cleanup.js',
     'src/story-modules/location-hub-flow-polish.js',
