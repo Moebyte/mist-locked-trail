@@ -62,14 +62,14 @@
       if (E.hasYufangTestimonyBoost()) return null;
       if (p.count <= 0) return null;
       return {
-        text: '🧾 用手头证据帮沈玉芳快速确认关键关系',
+        text: '🧾 低声问沈玉芳：“这些人，你还认得吗？”',
         effect: applyYufangTestimonyBoost,
         goto: 'ch4_yufang_quick_testimony'
       };
     }
 
     nodes.ch4_yufang_quick_testimony = {
-      title: '暗室 · 证词确认',
+      title: '暗室 · 沈玉芳的记忆',
       weather: 2,
       text: () => {
         const p = yufangEvidenceProfile();
@@ -80,7 +80,7 @@
         if (!parts.length) parts.push('你没有多余证物能在暗室里让沈玉芳立刻确认。她仍然能跟你走，但这份证词要等医院里慢慢补全。');
         return `${parts.join('<br><br>')}<br><br>暗室外还有脚步声。沈玉芳没有因此更安全，但她的证词已经不再只是惊恐中的碎片。<br><br>这份证词比什么都没有要好——可你能不能把她活着带出去，才是眼下真正的问题。`;
       },
-      choices: [{ text: '🔙 不能再耽搁，继续处理撤离', goto: 'ch4_dock_who_dual' }]
+      choices: [{ text: '🔙 不能再耽搁，回头看苏晚亭愿不愿走', goto: 'ch4_dock_who_dual' }]
     };
 
     if (nodes.ch4_dock_who_dual && !nodes.ch4_dock_who_dual.__yufangTestimonyChoicePatched) {
@@ -90,10 +90,10 @@
       nodes.ch4_dock_who_dual.text = function (state) {
         const base = typeof oldText === 'function' ? oldText(state) : oldText;
         if (E.hasYufangTestimonyBoost()) {
-          return `${base}<br><br><span class="sys">沈玉芳已经确认了你手里的关键证据。接下来最要紧的是把人带出暗室。</span>`;
+          return `${base}<br><br><span class="sys">沈玉芳已经能把话说完整了。接下来最要紧的是把人带出暗室。</span>`;
         }
         if (yufangEvidenceProfile().count > 0) {
-          return `${base}<br><br><span class="sys">你手里的部分证据可以帮沈玉芳更快说清关系，但暗室外已经有脚步声。多问一句还是先走——你只有几秒决定。</span>`;
+          return `${base}<br><br><span class="sys">你手里有几样东西，或许能让沈玉芳立刻想起那几个人。但暗室外已经有脚步声。多问一句还是先走——你只有几秒决定。</span>`;
         }
         return base;
       };
