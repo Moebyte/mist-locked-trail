@@ -5,6 +5,7 @@
     if (typeof E === 'undefined' || typeof nodes === 'undefined' || typeof document === 'undefined') return;
     if (E.__devDiagnosticExportPatched) return;
 
+    const DIAGNOSTIC_EXPORT_VERSION = 'dev-diagnostic-v2.1-sanitized';
     const params = new URLSearchParams(window.location?.search || '');
     const enabled = params.get('dev') === '1' || window.location?.hash === '#dev' || localStorage.getItem('mlt_dev_mode') === '1';
     if (!enabled) return;
@@ -183,7 +184,7 @@
       sanitizeDiagnosticState();
       repairDeductionRegistryForDiagnostic();
       return {
-        meta: { kind: 'mist-locked-trail-dev-diagnostic', exportedAt: new Date().toISOString(), url: location.href, userAgent: navigator.userAgent, saveVersion: E.state?.saveVersion || null },
+        meta: { kind: 'mist-locked-trail-dev-diagnostic', diagnosticVersion: DIAGNOSTIC_EXPORT_VERSION, exportedAt: new Date().toISOString(), url: location.href, userAgent: navigator.userAgent, saveVersion: E.state?.saveVersion || null },
         diagnosticWarnings: lastWarnings.slice(),
         scene: sceneSummary(),
         counts: {
