@@ -1,5 +1,5 @@
 // ===== 章节剧情：第二章基础调查运行时契约 =====
-// Phase 4b: 验证已迁移的圣约翰大学低风险支线节点在运行时可用。
+// Phase 4b/4c: 验证已迁移的圣约翰大学与巡捕房低风险支线节点在运行时可用。
 
 (function installChapter2HomeXuehuaContract() {
   function applyChapter2HomeXuehuaContract() {
@@ -17,6 +17,14 @@
       ch2_univ_paper: {
         title: '论文草稿',
         gotos: ['ch2_university'],
+      },
+      ch2_police_present: {
+        title: '巡捕房 · 出示烟盒纸',
+        gotos: ['ch2_leave_univ'],
+      },
+      ch2_police_wang: {
+        title: '王巡官的铅笔字',
+        gotos: ['ch2_frenchtown', 'ch2_home', 'ch3_school'],
       },
     };
 
