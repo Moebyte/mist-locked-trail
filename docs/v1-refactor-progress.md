@@ -130,12 +130,18 @@ The second script is now an idempotent regression check. It should report that n
 
 ### Phase 5 — Chapter 3 high-risk migration
 
-Status: first-batch physical removal complete.
+Status: second-batch runtime takeover started.
 
 Completed first batch:
 
 ```text
 ch3_school_chen_su
+```
+
+Second batch in runtime takeover:
+
+```text
+ch3_school_weird
 ```
 
 Runtime takeover files:
@@ -163,7 +169,7 @@ Physical removal workflow:
 .github/workflows/chapter3-first-batch-physical-removal.yml
 ```
 
-`ch3_school_chen_su` has been physically removed from `src/story.js`. The removal script is now an idempotent guard for that first batch.
+`ch3_school_chen_su` has been physically removed from `src/story.js`. `ch3_school_weird` has runtime takeover coverage but has not been physically removed yet.
 
 ## Current gate setup
 
@@ -198,21 +204,19 @@ Also available in GitHub Actions:
 .github/workflows/story-refactor-full-check.yml
 ```
 
-This full check includes the Chapter 3 pre-migration audit, the first-batch Chapter 3 runtime gate, and the first-batch removal guard.
+This full check includes the Chapter 3 pre-migration audit, the Chapter 3 runtime gate, and the first-batch removal guard.
 
 ## Current next step
 
-Next step: select the second Chapter 3 migration batch from the audit output.
+Next step: wait for the full check after the second-batch runtime takeover.
 
-Candidate selection must still avoid high-risk hub / patch-owned nodes unless a focused gate is added first.
-
-Likely next candidates must be reviewed against:
+If it passes, add a dedicated second-batch removal script for:
 
 ```text
-src/story-modules/guanghua-school-flow-polish.js
+ch3_school_weird
 ```
 
-Do not reuse the Chapter 2 removal script for Chapter 3.
+Do not broaden the first-batch removal script without a new batch boundary.
 
 ## Chapter 3 migration rule
 
