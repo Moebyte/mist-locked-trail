@@ -3,6 +3,7 @@
 // 同一阶段只突出当前阶段的关键选择，降低玩家迷路感。
 // 推理入口使用 safe opener，避免“下一步推理”点击无反应。
 // 调整：福生仓行动阶段同时提供 solo 和老孙支援入口，避免 solo 线被隐藏。
+// 修正：光华小学阶段拿到的“教具箱/管制药品/货运线索”不是福生仓现场证据，不能误判为福生仓行动已经发生。
 
 (function installWrapupPriorityGuidance() {
   function applyWrapupPriorityGuidance() {
@@ -69,6 +70,8 @@
     }
 
     function hasDockEvidence() {
+      // 只认真正进入福生仓/暗室之后才可能出现的现场证据或行动 flag。
+      // 光华小学阶段的“傅启元夜运教具箱 / 管制药品走私 / 光华小学采购疑点”只是前置推理线索，不能算作福生仓行动已发生。
       return hasThing('公董局公文纸')
         || hasThing('暗室刚被清空')
         || hasThing('暗室已经转空')
@@ -78,12 +81,21 @@
         || hasThing('苏晚亭手表')
         || hasThing('苏晚亭学生证')
         || hasThing('沈玉芳曾在暗室')
-        || hasThing('教具箱走私')
-        || hasThing('管制药品走私')
-        || hasThing('光华货运单')
         || hasThing('清场指令')
+        || hasThing('暗室刻痕')
+        || hasThing('暗室刻痕拓片')
         || E.getFlag('dock_entry_committed')
         || E.getFlag('dock_solo_entry')
+        || E.getFlag('dock_fast_support_entry')
+        || E.getFlag('dock_full_support_entry')
+        || E.getFlag('dock_full_search')
+        || E.getFlag('dock_limited_search')
+        || E.getFlag('dock_rescue_only')
+        || E.getFlag('dock_entered_by_east_window')
+        || E.getFlag('dock_reached_crate_area')
+        || E.getFlag('scene_confirmed_clearance_order')
+        || E.getFlag('scene_confirmed_waybill_crates')
+        || E.getFlag('scene_confirmed_darkroom_marks')
         || E.getFlag('found_yufang')
         || E.getFlag('rescued_yufang')
         || E.getFlag('found_su_at_dock')
