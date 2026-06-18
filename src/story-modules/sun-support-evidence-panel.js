@@ -58,22 +58,22 @@
       if (E.getFlag('sun_presented_chen_letter')) parts.push('陈明远的信把光华小学教具箱和灭口联系起来');
       if (E.getFlag('sun_presented_fusheng_location')) parts.push('福生仓位置已经能落到行动地点');
       if (E.getFlag('sun_presented_threat_letter')) parts.push('203 室恐吓信说明知情者正在被逼闭嘴');
-      return parts.length ? parts.join('；') : '你还没有把能让老孙动起来的硬证据摆上桌面';
+      return parts.length ? parts.join('；') : '桌上还空着。老孙只听你说，还没看见能让他动起来的东西';
     }
 
     function evidenceChoices() {
       const out = [];
       if (hasWangNote() && !E.getFlag('sun_presented_wang_note')) {
-        out.push({ text: '🧾 拿出王巡官留下的半张烟盒纸', goto: 'ch4_sun_present_wang_note' });
+        out.push({ text: '🧾 把王巡官留下的半张烟盒纸推过去', goto: 'ch4_sun_present_wang_note' });
       }
       if (hasChenLetter() && !E.getFlag('sun_presented_chen_letter')) {
-        out.push({ text: '📩 拿出陈明远的信——学校教具箱不是普通线索', goto: 'ch4_sun_present_chen_letter' });
+        out.push({ text: '📩 把陈明远的信递给老孙', goto: 'ch4_sun_present_chen_letter' });
       }
       if (hasFushengLocation() && !E.getFlag('sun_presented_fusheng_location')) {
-        out.push({ text: '📍 说明福生仓位置——行动地点已经能锁定', goto: 'ch4_sun_present_fusheng_location' });
+        out.push({ text: '📍 在地图上点出福生仓的位置', goto: 'ch4_sun_present_fusheng_location' });
       }
       if (hasThreatLetter() && !E.getFlag('sun_presented_threat_letter')) {
-        out.push({ text: '📄 拿出 203 室恐吓信——有人在威胁知情者', goto: 'ch4_sun_present_threat' });
+        out.push({ text: '📄 把 203 室那封恐吓信摊开', goto: 'ch4_sun_present_threat' });
       }
       return out;
     }
@@ -82,7 +82,7 @@
       const out = evidenceChoices();
       if (hasCoreSupport()) {
         out.push({
-          text: '🚓 说服老孙低调支援——只带一个信得过的便衣',
+          text: '🚓 压低声音：“派一个信得过的人跟我走。”',
           effect: () => {
             E.setFlag('sun_support_available', true);
             E.setFlag('sun_fast_support', true);
@@ -93,7 +93,7 @@
       }
       if (hasStrongSupport()) {
         out.push({
-          text: '🚨 要求老孙调齐人手——封住福生仓',
+          text: '🚨 对老孙说：“今晚得把福生仓两头封住。”',
           effect: () => {
             E.setFlag('sun_support_available', true);
             E.setFlag('sun_full_support', true);
@@ -102,8 +102,8 @@
           goto: 'ch4_dock_wait'
         });
       }
-      out.push({ text: '🔦 不等支援，自己去福生仓', goto: 'ch4_suzhou_creek' });
-      out.push({ text: '🔙 先回去整理线索', goto: 'ch3_wrapup' });
+      out.push({ text: '🔦 不等了，自己先去福生仓', goto: 'ch4_suzhou_creek' });
+      out.push({ text: '🔙 先回去把线索再摊一遍', goto: 'ch3_wrapup' });
       return out;
     }
 
@@ -115,9 +115,9 @@
         const attitude = count === 0
           ? '老孙靠在窗边抽烟，听你说到“福生仓”三个字时，眉头先皱了一下。'
           : count < 3
-            ? '桌上的烟灰已经积了一截。老孙没有打断你，只是把你摆出的证据一件件排开。'
+            ? '桌上的烟灰已经积了一截。老孙没有打断你，只是把你摆出的东西一件件排开。'
             : '老孙把办公室的门反锁，又把窗帘拉严。你知道，他已经认真起来了。';
-        return `${attitude}<br><br><span class="sys">“沈先生，去码头不是查一间空屋子。你要我带人，就得让我知道：第一，地方在哪；第二，为什么现在就得动；第三，这事不能按普通失踪案办。”</span><br><br><b>已说明：</b>${supportSummary()}。<br><br>你要先拿什么给他看？`;
+        return `${attitude}<br><br><span class="sys">“沈先生，去码头不是查一间空屋子。你要我带人，就得让我知道：第一，地方在哪；第二，为什么现在就得动；第三，这事不能按普通失踪案办。”</span><br><br><b>桌上已经摆出的东西：</b>${supportSummary()}。<br><br>接下来，你把什么推过去？`;
       },
       choices: supportChoices
     };
