@@ -55,7 +55,14 @@
         this.toast('推理题尚未登记，请刷新页面后重试。');
         return false;
       }
-      if (oldOpenDeductionSafe) return oldOpenDeductionSafe(id);
+      if (oldOpenDeductionSafe) {
+        const result = oldOpenDeductionSafe(id);
+        const opened = !!(this.deducEl && this.deducEl.style && this.deducEl.style.display === 'flex');
+        if (result || opened) return result || true;
+        if (typeof this.canDeduce === 'function' && !this.canDeduce(id)) return false;
+        if (typeof this.openDeduction === 'function') return this.openDeduction(id);
+        return false;
+      }
       if (typeof this.openDeduction === 'function') return this.openDeduction(id);
       return false;
     };
