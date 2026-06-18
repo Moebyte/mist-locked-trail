@@ -37,7 +37,7 @@
         if (!hasUniversityXuehuaLead() || hasPoliceCaseFile()) return choices;
         return choices.map(choice => {
           if (choice.goto === 'ch2_police' || choice.goto === 'ch2_police_alt' || (choice.text || '').includes('巡捕房')) {
-            return { ...choice, text: '📋 先去巡捕房查卷宗（补齐案卷关键线）' };
+            return { ...choice, text: '📋 去巡捕房，把光华小学那桩旧案查清楚' };
           }
           return choice;
         });
