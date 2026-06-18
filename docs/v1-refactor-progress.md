@@ -143,12 +143,14 @@ ch3_school_weird
 ch3_school_yufang
 ch3_school_office
 ch3_chen_letter
+ch3_wu_present_threat
+ch3_wu_present_photo
 ```
 
 Current `src/story.js` physical removal footprint:
 
 ```text
-src/story.js: -748 lines
+src/story.js: -791 lines
 ```
 
 ### Completed Chapter 3 Chen letter migration
@@ -174,9 +176,9 @@ The focused gate therefore verifies the owned effect and verifies that all emitt
 runtime targets exist, instead of hard-coding a single final outbound pair.
 ```
 
-### Current Chapter 3 runtime takeover
+### Completed Chapter 3 Wu present migration
 
-`ch3_wu_present_threat` and `ch3_wu_present_photo` have completed runtime takeover, focused runtime gate wiring, and removal dry-run guard wiring.
+`ch3_wu_present_threat` and `ch3_wu_present_photo` have completed runtime takeover, focused runtime gate wiring, removal dry-run, physical removal, and workflow收口.
 
 Files:
 
@@ -185,6 +187,7 @@ src/story-chapters/chapter-3-guanghua.js
 src/story-chapters/chapter-3-guanghua-contract.js
 scripts/check-story-chapter3-wu-present-runtime.mjs
 scripts/remove-migrated-chapter3-wu-present-from-story.mjs
+.github/workflows/chapter3-wu-present-physical-removal.yml
 ```
 
 Important behavior note:
@@ -195,8 +198,6 @@ guanghua-school-flow-polish.js and guanghua-confront-choice-cleanup.js.
 The focused gate verifies the owned effects plus the final emitted runtime targets
 after the confrontation cleanup patch rewrites the choices.
 ```
-
-Legacy definitions remain in `src/story.js`. Do not physically remove them until the removal dry-run passes green in GitHub Actions.
 
 ### Current Chapter 3 gates and removal guards
 
@@ -229,6 +230,7 @@ Manual verification workflows already收口:
 .github/workflows/chapter3-yufang-physical-removal.yml
 .github/workflows/chapter3-office-physical-removal.yml
 .github/workflows/chapter3-chen-letter-physical-removal.yml
+.github/workflows/chapter3-wu-present-physical-removal.yml
 ```
 
 ## Current gate setup
@@ -264,36 +266,37 @@ Also available in GitHub Actions:
 .github/workflows/story-refactor-full-check.yml
 ```
 
-This full check currently includes Chapter 3 runtime gates and all existing Chapter 3 removal guards, including the Wu present runtime and removal dry-run gates.
+This full check currently includes Chapter 3 runtime gates and all existing Chapter 3 removal guards, including the Wu present runtime and removal idempotency gates.
 
 ## Current next step
 
 Next safe step:
 
 ```text
-Wait for GitHub Actions to go green on the ch3_wu_present_threat / ch3_wu_present_photo removal dry-run.
+Begin runtime takeover for ch3_school_teacher.
 ```
 
-After that:
+Recommended discipline for the next batch:
 
 ```text
-1. create temporary ch3_wu_present physical-removal workflow;
-2. let it run full check -> --write -> full check -> commit src/story.js;
-3. verify src/story.js deletion footprint increases;
-4. convert the temporary workflow to manual idempotent verification only.
+1. confirm patch sources affecting ch3_school_teacher;
+2. migrate runtime definition into the target Chapter 3 module;
+3. add or update a focused runtime audit for ch3_school_teacher;
+4. keep legacy story.js definition until the focused runtime gate passes;
+5. add a dedicated removal script and wire it into check-story-refactor-full.mjs as dry-run only;
+6. only after GitHub Actions is green, enter the physical removal workflow.
 ```
 
-Do not physically remove `ch3_wu_present_threat` or `ch3_wu_present_photo` until the removal dry-run has passed green.
+Do not physically remove `ch3_school_teacher` until runtime takeover, focused gate, and removal dry-run have all passed green.
 
 ## Remaining Chapter 3 migration order
 
 Recommended remaining order:
 
 ```text
-1. ch3_wu_present_threat / ch3_wu_present_photo physical removal
-2. ch3_school_teacher
-3. ch3_school
-4. ch3_wrapup
+1. ch3_school_teacher
+2. ch3_school
+3. ch3_wrapup
 ```
 
 Do not migrate `ch3_wrapup` yet. It must remain the final Chapter 3 专项迁移对象.
