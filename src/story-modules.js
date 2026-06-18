@@ -62,6 +62,7 @@
     'src/story-modules/solo-reward-ending-polish.js',
     'src/story-modules/final-closure-flow-polish.js',
     'src/story-modules/legacy-quality-scope-polish.js',
+    'src/story-modules/legacy-quality-text-polish.js',
     'src/story-modules/yufang-testimony-polish.js',
     'src/story-modules/conclusion-summary-polish.js',
     'src/story-modules/status-polish.js',
