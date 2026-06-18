@@ -61,6 +61,9 @@ jobs:
       - name: Smoke test Guanghua incomplete closure
         run: node scripts/smoke-guanghua-incomplete-closure.mjs
 
+      - name: Smoke test early mist spoiler redaction
+        run: node scripts/smoke-early-mist-spoiler-redaction.mjs
+
       - name: Smoke test Sun fast support
         run: node scripts/smoke-sun-fast-support.mjs
 
