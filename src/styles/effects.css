@@ -1,0 +1,44 @@
+@keyframes fadeIn{
+  from{opacity:0;transform:translateY(8px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+@keyframes rainDrop{
+  0%{transform:translateY(-10vh) translateX(0);opacity:0}
+  10%{opacity:.3}
+  100%{transform:translateY(110vh) translateX(-30px);opacity:0}
+}
+
+body.w0.theme-night::before{
+  content:'';
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:9998;
+  background-image:
+    radial-gradient(1px 1px at 10% 0%, rgba(200,220,240,.15) 50%, transparent 50%),
+    radial-gradient(1px 1px at 30% 0%, rgba(200,220,240,.12) 50%, transparent 50%),
+    radial-gradient(1px 1px at 50% 0%, rgba(200,220,240,.1) 50%, transparent 50%);
+  background-size:100% 100%;
+  background-repeat:no-repeat;
+  animation:rainDrop 1.2s linear infinite;
+}
+
+body.w1::after{
+  content:'';
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:9998;
+  background:radial-gradient(ellipse at 30% 50%, rgba(160,180,200,.03) 0%, transparent 60%);
+}
+
+body.vintage{
+  filter:sepia(.18) saturate(.85) brightness(.93);
+  transition:filter .6s;
+}
+
+@keyframes cardIn{
+  from{opacity:.3;transform:translateY(12px)}
+  to{opacity:1;transform:translateY(0)}
+}
