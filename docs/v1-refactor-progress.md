@@ -223,9 +223,9 @@ disables direct evidence presentation, and rewrites choices based on the state o
 school questioning and confrontation closure.
 ```
 
-### Current Chapter 3 removal dry-run
+### Current Chapter 3 physical removal
 
-`ch3_school` has completed runtime takeover, focused runtime gate wiring, and removal dry-run guard wiring.
+`ch3_school` has completed runtime takeover, focused runtime gate wiring, and removal dry-run guard wiring. The temporary physical-removal workflow has been created and is waiting for manual run.
 
 Files:
 
@@ -234,6 +234,7 @@ src/story-chapters/chapter-3-guanghua.js
 src/story-chapters/chapter-3-guanghua-contract.js
 scripts/check-story-chapter3-school-hub-runtime.mjs
 scripts/remove-migrated-chapter3-school-hub-from-story.mjs
+.github/workflows/chapter3-school-hub-physical-removal.yml
 ```
 
 Important behavior note:
@@ -244,7 +245,7 @@ the final polished hub behavior, including loop-in-place questioning choices,
 Wu confrontation unlock, and wrapup exit after the confrontation is closed.
 ```
 
-Legacy definition remains in `src/story.js`. Do not physically remove it until the removal dry-run passes green in GitHub Actions.
+Legacy definition remains in `src/story.js` until the physical-removal workflow runs and commits the deletion.
 
 ### Current Chapter 3 gates and removal guards
 
@@ -283,6 +284,12 @@ Manual verification workflows already收口:
 .github/workflows/chapter3-chen-letter-physical-removal.yml
 .github/workflows/chapter3-wu-present-physical-removal.yml
 .github/workflows/chapter3-school-teacher-physical-removal.yml
+```
+
+Temporary physical-removal workflows waiting to run:
+
+```text
+.github/workflows/chapter3-school-hub-physical-removal.yml
 ```
 
 ## Current gate setup
@@ -325,19 +332,19 @@ This full check currently includes Chapter 2 route smoke, Chapter 3 runtime gate
 Next safe step:
 
 ```text
-Wait for GitHub Actions to go green on the ch3_school removal dry-run.
+Manually run Chapter 3 School Hub Physical Removal in GitHub Actions.
 ```
 
-After that:
+The temporary workflow will:
 
 ```text
-1. create temporary ch3_school physical-removal workflow;
-2. let it run full check -> --write -> full check -> commit src/story.js;
-3. verify src/story.js deletion footprint increases;
-4. convert the temporary workflow to manual idempotent verification only.
+1. run node scripts/check-story-refactor-full.mjs;
+2. run node scripts/remove-migrated-chapter3-school-hub-from-story.mjs --write;
+3. run node scripts/check-story-refactor-full.mjs again;
+4. commit the src/story.js deletion back to v1_refactor.
 ```
 
-Do not physically remove `ch3_school` until runtime takeover, focused gate, and removal dry-run have all passed green.
+After that workflow is green and the bot commit appears, convert the workflow to manual idempotent verification only.
 
 ## Remaining Chapter 3 migration order
 
