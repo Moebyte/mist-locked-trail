@@ -25,6 +25,7 @@ const checks = [
   'scripts/remove-migrated-chapter3-chen-letter-from-story.mjs',
   'scripts/remove-migrated-chapter3-wu-present-from-story.mjs',
   'scripts/remove-migrated-chapter3-school-teacher-from-story.mjs',
+  'scripts/remove-migrated-chapter3-school-hub-from-story.mjs',
 ];
 
 const failures = [];
