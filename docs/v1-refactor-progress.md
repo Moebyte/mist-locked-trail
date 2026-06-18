@@ -142,17 +142,18 @@ ch3_school_chen_su
 ch3_school_weird
 ch3_school_yufang
 ch3_school_office
+ch3_chen_letter
 ```
 
 Current `src/story.js` physical removal footprint:
 
 ```text
-src/story.js: -716 lines
+src/story.js: -748 lines
 ```
 
-### Current Chapter 3 runtime takeover
+### Completed Chapter 3 Chen letter migration
 
-`ch3_chen_letter` has completed runtime takeover and focused runtime gate alignment.
+`ch3_chen_letter` has completed runtime takeover, focused runtime gate alignment, removal dry-run, physical removal, and workflow收口.
 
 Files:
 
@@ -160,13 +161,8 @@ Files:
 src/story-chapters/chapter-3-guanghua.js
 src/story-chapters/chapter-3-guanghua-contract.js
 scripts/check-story-chapter3-chen-letter-runtime.mjs
-```
-
-Verified green checks:
-
-```text
-#86
-#87
+scripts/remove-migrated-chapter3-chen-letter-from-story.mjs
+.github/workflows/chapter3-chen-letter-physical-removal.yml
 ```
 
 Important behavior note:
@@ -196,6 +192,7 @@ scripts/remove-migrated-chapter3-first-batch-from-story.mjs
 scripts/remove-migrated-chapter3-second-batch-from-story.mjs
 scripts/remove-migrated-chapter3-yufang-batch-from-story.mjs
 scripts/remove-migrated-chapter3-office-from-story.mjs
+scripts/remove-migrated-chapter3-chen-letter-from-story.mjs
 ```
 
 Manual verification workflows already收口:
@@ -205,6 +202,7 @@ Manual verification workflows already收口:
 .github/workflows/chapter3-second-batch-physical-removal.yml
 .github/workflows/chapter3-yufang-physical-removal.yml
 .github/workflows/chapter3-office-physical-removal.yml
+.github/workflows/chapter3-chen-letter-physical-removal.yml
 ```
 
 ## Current gate setup
@@ -240,37 +238,38 @@ Also available in GitHub Actions:
 .github/workflows/story-refactor-full-check.yml
 ```
 
-This full check currently includes Chapter 3 runtime gates and all existing Chapter 3 removal guards.
+This full check currently includes Chapter 3 runtime gates and all existing Chapter 3 removal guards, including `ch3_chen_letter`.
 
 ## Current next step
 
 Next safe step:
 
 ```text
-Add a dedicated ch3_chen_letter removal script and wire it into check-story-refactor-full.mjs as a dry-run only.
+Begin runtime takeover for ch3_wu_present_threat / ch3_wu_present_photo.
 ```
 
-Do not physically remove `ch3_chen_letter` until the dry-run passes green in GitHub Actions.
-
-After that:
+Recommended discipline for the next batch:
 
 ```text
-1. create temporary ch3_chen_letter physical-removal workflow;
-2. let it run full check -> --write -> full check -> commit src/story.js;
-3. verify src/story.js deletion footprint increases;
-4. convert the temporary workflow to manual idempotent verification only.
+1. confirm patch sources affecting the two present-time Wu nodes;
+2. migrate runtime definitions into the target Chapter 3 module;
+3. add or update a focused runtime audit for the selected batch;
+4. keep legacy story.js definitions until the focused runtime gate passes;
+5. add a dedicated removal script and wire it into check-story-refactor-full.mjs as dry-run only;
+6. only after GitHub Actions is green, enter the physical removal workflow.
 ```
+
+Do not physically remove `ch3_wu_present_threat` or `ch3_wu_present_photo` until runtime takeover, focused gate, and removal dry-run have all passed green.
 
 ## Remaining Chapter 3 migration order
 
 Recommended remaining order:
 
 ```text
-1. ch3_chen_letter physical removal
-2. ch3_wu_present_threat / ch3_wu_present_photo
-3. ch3_school_teacher
-4. ch3_school
-5. ch3_wrapup
+1. ch3_wu_present_threat / ch3_wu_present_photo
+2. ch3_school_teacher
+3. ch3_school
+4. ch3_wrapup
 ```
 
 Do not migrate `ch3_wrapup` yet. It must remain the final Chapter 3 专项迁移对象.
