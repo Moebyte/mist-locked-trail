@@ -193,10 +193,11 @@ for (const item of ['永昌当票', '未寄出的信']) {
 assert(E.state.flags.got_chen_evidence === true, 'ch3_school_office should set got_chen_evidence flag');
 
 const targets = choiceTargets('ch3_school_office');
-for (const target of ['ch3_chen_letter', 'ch3_wrapup']) {
-  assert(targets.includes(target), `ch3_school_office should keep outbound target ${target}`);
+for (const target of ['ch3_chen_letter', 'ch3_school_confront_wu']) {
+  assert(targets.includes(target), `ch3_school_office should keep polished outbound target ${target}`);
   assert(Boolean(context.nodes?.[target]), `ch3_school_office has missing goto target ${target}`);
 }
+assert(Boolean(context.nodes?.ch3_wrapup), 'ch3_wrapup should remain available as a later flow target');
 
 if (errors.length) {
   console.error('\nChapter 3 office runtime gate failed:');
