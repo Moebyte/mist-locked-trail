@@ -76,6 +76,9 @@ jobs:
       - name: Smoke test Zhou jade present node
         run: node scripts/smoke-zhou-jade-present-node.mjs
 
+      - name: Smoke test dev mode panel
+        run: node scripts/smoke-dev-mode-panel.mjs
+
       - name: Smoke test Sun fast support
         run: node scripts/smoke-sun-fast-support.mjs
 
