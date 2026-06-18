@@ -20,8 +20,8 @@ function choices(id) {
     effect: choice.effect,
   }));
 }
-function hasChoice(list, fragment, goto) {
-  return list.some(choice => choice.text.includes(fragment) && (!goto || choice.goto === goto));
+function hasRoute(list, goto) {
+  return list.some(choice => choice.goto === goto);
 }
 function assertValidTargets(sceneId, list) {
   for (const choice of list) {
@@ -32,7 +32,7 @@ function assertValidTargets(sceneId, list) {
 
 assert(rt.context.window.MLT_STORY_MODULES?.includes('src/story-modules/fusheng-scene-evidence-panel.js'), 'story-modules.js 应加载 fusheng-scene-evidence-panel.js');
 
-for (const id of ['ch4_dock_inside', 'ch4_dock_crates', 'ch4_dock_shelf_approach', 'ch4_dock_deep', 'ch4_dock_escape']) {
+for (const id of ['ch4_dock_inside', 'ch4_dock_crates', 'ch4_dock_shelf_approach', 'ch4_dock_deep', 'ch4_fu_confront', 'ch4_dock_escape']) {
   assert(rt.nodes[id], `必须存在 ${id}`);
 }
 
@@ -56,38 +56,45 @@ assert(E.hasClue('现场确认：光华货运单'), '确认教具箱后应获得
 list = choices('ch4_dock_crates');
 assertValidTargets('ch4_dock_crates', list);
 
-// 货架核心区应提供回头确认清场纸/确认教具箱选项，目标必须存在。
+// 货架核心区应提供回头确认清场纸/确认教具箱路线；玩家文案允许保持现场动作描述。
 reset({ flags: {} });
 text = textOf('ch4_dock_shelf_approach');
 assert(text.includes('福生仓现场确认'), `ch4_dock_shelf_approach 应显示现场确认面板，实际：${text}`);
 list = choices('ch4_dock_shelf_approach');
 assertValidTargets('ch4_dock_shelf_approach', list);
-assert(hasChoice(list, '确认教具箱和货运单', 'ch4_dock_crates'), `货架区应可确认教具箱/货运单，实际 ${JSON.stringify(list)}`);
-assert(hasChoice(list, '蓝封清场纸', 'ch4_dock_inner_office'), `货架区应可回头确认清场纸，实际 ${JSON.stringify(list)}`);
+assert(hasRoute(list, 'ch4_dock_crates'), `货架区应可进入教具箱/货运单确认路线，实际 ${JSON.stringify(list)}`);
+assert(hasRoute(list, 'ch4_dock_inner_office'), `货架区应可回头确认蓝封纸路线，实际 ${JSON.stringify(list)}`);
 
-// 暗室节点应提供关押痕迹确认。
+// 暗室节点应提供关押痕迹确认；不强制按钮写成测试标签。
 reset({ flags: {} });
 text = textOf('ch4_dock_deep');
 assert(text.includes('福生仓现场确认'), `ch4_dock_deep 应显示现场确认面板，实际：${text}`);
 list = choices('ch4_dock_deep');
 assertValidTargets('ch4_dock_deep', list);
-const dark = list.find(choice => choice.text.includes('暗室关押痕迹'));
-assert(dark?.goto === 'ch4_dock_deep', `暗室节点应能现场确认关押痕迹，实际 ${JSON.stringify(dark)}`);
+const dark = list.find(choice => choice.goto === 'ch4_dock_deep' && typeof choice.effect === 'function');
+assert(dark, `暗室节点应能现场确认关押痕迹，实际 ${JSON.stringify(list)}`);
 dark?.effect?.(E.state);
 assert(E.getFlag('scene_confirmed_darkroom_marks'), '确认暗室后应设置 scene_confirmed_darkroom_marks');
 assert(E.hasClue('现场确认：暗室关押痕迹'), '确认暗室后应获得现场确认暗室线索');
 
-// 码头逃离/对峙节点应能记录人物链条。
+// 码头对话链条只应在真正对峙节点确认，避免普通逃离页提前点名人物。
+reset({ flags: {} });
+text = textOf('ch4_fu_confront');
+assert(text.includes('福生仓现场确认'), `ch4_fu_confront 应显示现场确认面板，实际：${text}`);
+list = choices('ch4_fu_confront');
+assertValidTargets('ch4_fu_confront', list);
+const conv = list.find(choice => choice.goto === 'ch4_fu_confront' && typeof choice.effect === 'function');
+assert(conv, `码头对峙节点应能记录人物链条，实际 ${JSON.stringify(list)}`);
+conv?.effect?.(E.state);
+assert(E.getFlag('scene_confirmed_fu_lu_conversation'), '记录对话链条后应设置 scene_confirmed_fu_lu_conversation');
+assert(E.hasClue('现场确认：码头对话'), '记录对话链条后应获得现场确认人物链条线索');
+
 reset({ flags: {} });
 text = textOf('ch4_dock_escape');
 assert(text.includes('福生仓现场确认'), `ch4_dock_escape 应显示现场确认面板，实际：${text}`);
 list = choices('ch4_dock_escape');
 assertValidTargets('ch4_dock_escape', list);
-const conv = list.find(choice => choice.text.includes('傅启元') || choice.text.includes('对话链条'));
-assert(conv?.goto === 'ch4_dock_escape', `码头逃离节点应能记录人物链条，实际 ${JSON.stringify(conv)}`);
-conv?.effect?.(E.state);
-assert(E.getFlag('scene_confirmed_fu_lu_conversation'), '记录对话链条后应设置 scene_confirmed_fu_lu_conversation');
-assert(E.hasClue('现场确认：傅启元与陆念薇对话'), '记录对话链条后应获得现场确认人物链条线索');
+assert(!list.some(choice => String(choice.text || '').includes('傅启元') || String(choice.text || '').includes('陆念薇')), `普通逃离页不应提前点名人物链条，实际 ${JSON.stringify(list)}`);
 
 if (errors.length) {
   console.error('Fusheng scene evidence panel smoke failed:');
@@ -95,4 +102,4 @@ if (errors.length) {
   process.exit(1);
 }
 
-console.log('Fusheng scene evidence panel smoke passed.');
+console.log('Fusheng scene evidence panel passed.');
