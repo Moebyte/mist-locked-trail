@@ -28,6 +28,10 @@
         || E.getFlag('dock_fast_support_entry');
     }
 
+    function fastSupportActiveInWarehouse() {
+      return E.getFlag('sun_fast_support_active') || E.getFlag('dock_fast_support_entry') || E.getFlag('dock_fast_support_low_profile');
+    }
+
     function committedDockEntry() {
       return E.getFlag('dock_entry_committed')
         || E.getFlag('dock_solo_entry')
@@ -104,6 +108,7 @@
 
     E.dockExposureScore = function () {
       let score = baseExposure();
+      const fastActive = fastSupportActiveInWarehouse();
 
       if (this.getFlag('dock_sun_outer_quiet')) score -= 2;
       if (this.getFlag('dock_sun_close_pressure')) score += 2;
@@ -115,10 +120,10 @@
       if (this.getFlag('heard_fu_lu')) score += 1;
       if (this.getFlag('skipped_crates_for_sound')) score += 1;
       if (this.getFlag('skipped_dock_hide')) score += 1;
-      // 单次守卫追击不是“一票否决”，但应把低风险推到中风险，只剩一人。
-      if (this.getFlag('dock_guard_chase_no_hide')) score += 3;
-      // 不找工具强行开锁同理：声响会明显抬高累计风险，但不直接空暗室。
-      if (this.getFlag('dock_broke_lock_no_tool')) score += 4;
+      // 单次守卫追击不是“一票否决”。便衣已实际入仓时能吸收一部分追击风险；未入仓/solo 则推到中风险。
+      if (this.getFlag('dock_guard_chase_no_hide')) score += fastActive ? 1 : 3;
+      // 强行开锁同理：便衣低调掩护能压住部分声响，但仍是明显冒进。
+      if (this.getFlag('dock_broke_lock_no_tool')) score += fastActive ? 2 : 4;
 
       return Math.max(0, Math.min(8, score));
     };
