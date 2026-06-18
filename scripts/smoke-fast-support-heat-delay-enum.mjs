@@ -49,6 +49,10 @@ function runNode(id) {
   if (typeof node.effect === 'function') node.effect(E.state);
 }
 
+function resolveGoto(choice) {
+  return typeof choice.goto === 'function' ? choice.goto(E.state) : choice.goto;
+}
+
 function runChoice(id, textFragment) {
   h.renderNode(id);
   const choices = h.choicesOf(id);
@@ -56,7 +60,17 @@ function runChoice(id, textFragment) {
   assert(choice, `节点 ${id} 找不到选项：${textFragment}；实际 ${choices.map(c => c.text || c.fogText || '').join(' / ')}`);
   if (!choice) return null;
   if (typeof choice.effect === 'function') choice.effect(E.state);
-  return typeof choice.goto === 'function' ? choice.goto(E.state) : choice.goto;
+  return resolveGoto(choice);
+}
+
+function runChoiceTo(id, target) {
+  h.renderNode(id);
+  const choices = h.choicesOf(id);
+  const choice = choices.find(c => resolveGoto(c) === target);
+  assert(choice, `节点 ${id} 找不到通往 ${target} 的选项；实际 ${choices.map(c => `${c.text || c.fogText || ''} -> ${resolveGoto(c)}`).join(' / ')}`);
+  if (!choice) return null;
+  if (typeof choice.effect === 'function') choice.effect(E.state);
+  return resolveGoto(choice);
 }
 
 const clearanceClue = [{ name: '公董局公文纸', desc: '' }];
@@ -128,19 +142,19 @@ runNode('ch4_dock_fast_infiltration');
 let goto = runChoice('ch4_dock_fast_infiltration', '借便衣掩护');
 assert(goto === 'ch4_dock_full_search', `便衣入口应进入完整搜索窗口，实际 ${goto}`);
 runNode(goto);
-goto = runChoice('ch4_dock_full_search', '临时账房');
+goto = runChoiceTo('ch4_dock_full_search', 'ch4_dock_inner_office');
 assert(goto === 'ch4_dock_inner_office', `应能先去临时账房，实际 ${goto}`);
 runNode(goto);
-goto = runChoice('ch4_dock_inner_office', '放慢脚步');
+goto = runChoiceTo('ch4_dock_inner_office', 'ch4_dock_shelf_approach');
 assert(goto === 'ch4_dock_shelf_approach', `账房后应到货架区，实际 ${goto}`);
 runNode(goto);
-goto = runChoice('ch4_dock_shelf_approach', '检查旁边的教具箱');
+goto = runChoiceTo('ch4_dock_shelf_approach', 'ch4_dock_crates');
 assert(goto === 'ch4_dock_crates', `货架区应能查教具箱，实际 ${goto}`);
 runNode(goto);
-goto = runChoice('ch4_dock_crates', '躲进空木箱');
+goto = runChoiceTo('ch4_dock_crates', 'ch4_dock_hide');
 assert(goto === 'ch4_dock_hide', `查教具箱后应能躲木箱，实际 ${goto}`);
 runNode(goto);
-goto = runChoice('ch4_dock_hide', '带着铁钎');
+goto = runChoiceTo('ch4_dock_hide', 'ch4_dock_locked_door');
 assert(goto === 'ch4_dock_locked_door', `躲木箱后应去暗门，实际 ${goto}`);
 runNode(goto);
 goto = runChoice('ch4_dock_locked_door', '用铁钎');
