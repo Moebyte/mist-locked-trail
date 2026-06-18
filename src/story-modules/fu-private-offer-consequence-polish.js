@@ -167,17 +167,17 @@
       };
       nodes.ch4_fu_private_offer.choices = [
         {
-          text: '💼 接下名片，假装答应交易，先看他还会露出什么',
+          text: '💼 接下名片，假装答应交易，先看他还会露出什么，再回事务所整理结案材料',
           effect: () => applyFuOutcome('accept'),
           goto: 'ch4_conclusion'
         },
         {
-          text: '🧾 当面拒绝交易，把货运单和清场指令压回他手里',
+          text: '🧾 当面拒绝交易，把货运单和清场指令压回他手里，再回事务所整理结案材料',
           effect: () => applyFuOutcome('reject'),
           goto: 'ch4_conclusion'
         },
         {
-          text: '📰 告诉他材料已寄给《申报》和老孙，反压公董局',
+          text: '📰 告诉他材料已寄给《申报》和老孙，反压公董局，再回事务所整理结案材料',
           when: () => hasWaybill() || hasClearance() || E.getFlag('v07_lu_statement') || E.getFlag('v07_lu_to_sun') || E.getFlag('hospital_doctor_record'),
           effect: () => applyFuOutcome('press'),
           goto: 'ch4_conclusion'
