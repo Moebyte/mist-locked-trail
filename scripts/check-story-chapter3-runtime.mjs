@@ -106,16 +106,18 @@ function runScript(rel, suffix = '') {
   }
 }
 
-function resetEvidence() {
-  E.state = freshState();
+function resetState(overrides = {}) {
+  E.state = freshState(overrides);
 }
 
-function choicesOf(id) {
-  resetEvidence();
+function choiceTargets(id, overrides = {}) {
+  resetState(overrides);
   const node = context.nodes && context.nodes[id];
   if (!node) return [];
   const choices = typeof node.choices === 'function' ? node.choices(E.state) : node.choices;
-  return Array.isArray(choices) ? choices : [];
+  return (Array.isArray(choices) ? choices : [])
+    .map(choice => typeof choice.goto === 'function' ? choice.goto(E.state) : choice.goto)
+    .filter(Boolean);
 }
 
 function assert(condition, message) {
@@ -123,7 +125,7 @@ function assert(condition, message) {
 }
 
 function runEffect(id) {
-  resetEvidence();
+  resetState();
   const node = context.nodes && context.nodes[id];
   if (node && typeof node.effect === 'function') node.effect(E.state);
   return E.state;
@@ -147,8 +149,8 @@ if (!context.nodes || typeof context.nodes !== 'object') {
   process.exit(1);
 }
 
-const ownedNodes = ['ch3_school_chen_su'];
-const requiredTargets = ['ch3_school_weird', 'ch3_school_office', 'ch3_school'];
+const ownedNodes = ['ch3_school_chen_su', 'ch3_school_weird'];
+const requiredTargets = ['ch3_school_weird', 'ch3_school_office', 'ch3_school', 'ch3_school_confront_wu'];
 
 assert(context.window.MLT_STORY_CHAPTER_3_GUANGHUA_READY === true, 'chapter 3 Guanghua module readiness flag missing');
 assert(Array.isArray(context.window.MLT_STORY_CHAPTER_3_GUANGHUA_NODES), 'chapter 3 Guanghua owned node list missing');
@@ -156,31 +158,44 @@ for (const id of ownedNodes) {
   assert(context.window.MLT_STORY_CHAPTER_3_GUANGHUA_NODES.includes(id), `chapter 3 Guanghua owned node list should include ${id}`);
 }
 assert(context.window.MLT_STORY_CHAPTER_3_GUANGHUA_CONTRACT, 'chapter 3 Guanghua contract missing');
+for (const id of ownedNodes) {
+  assert(context.window.MLT_STORY_CHAPTER_3_GUANGHUA_CONTRACT.nodes.includes(id), `chapter 3 Guanghua contract should include ${id}`);
+}
 
 for (const id of ownedNodes) {
   const node = context.nodes[id];
   assert(Boolean(node), `missing chapter 3 runtime node: ${id}`);
   if (!node) continue;
   assert(typeof node.text === 'function' || typeof node.text === 'string', `${id} has no renderable text`);
-  assert(!node.onPresent, `${id} should remain a simple first-batch node without onPresent`);
+  assert(!node.onPresent, `${id} should remain a simple migrated node without onPresent`);
 }
 
 for (const target of requiredTargets) {
   assert(Boolean(context.nodes[target]), `missing chapter 3 outbound target: ${target}`);
 }
 
-const state = runEffect('ch3_school_chen_su');
+let state = runEffect('ch3_school_chen_su');
 assert(state.clues.some(clue => clue.name === '苏晚亭与陈明远'), 'ch3_school_chen_su should grant 苏晚亭与陈明远 clue');
 assert(state.flags.chen_su_link === true, 'ch3_school_chen_su should set chen_su_link flag');
 
-const gotos = choicesOf('ch3_school_chen_su')
-  .map(choice => typeof choice.goto === 'function' ? choice.goto(E.state) : choice.goto)
-  .filter(Boolean);
-for (const target of requiredTargets) {
-  assert(gotos.includes(target), `ch3_school_chen_su should keep outbound target ${target}`);
+state = runEffect('ch3_school_weird');
+assert(state.clues.some(clue => clue.name === '陈老师与女子争吵'), 'ch3_school_weird should grant 陈老师与女子争吵 clue');
+
+const chenSuTargets = choiceTargets('ch3_school_chen_su');
+for (const target of ['ch3_school_weird', 'ch3_school_office', 'ch3_school']) {
+  assert(chenSuTargets.includes(target), `ch3_school_chen_su should keep outbound target ${target}`);
 }
-for (const target of gotos) {
-  assert(Boolean(context.nodes[target]), `ch3_school_chen_su has missing goto target: ${target}`);
+
+const weirdBaseTargets = choiceTargets('ch3_school_weird');
+assert(weirdBaseTargets.includes('ch3_school_office'), 'ch3_school_weird should route to office when evidence is missing');
+assert(weirdBaseTargets.includes('ch3_school'), 'ch3_school_weird should allow returning to school hub');
+
+const weirdEvidenceTargets = choiceTargets('ch3_school_weird', { flags: { got_chen_evidence: true } });
+assert(weirdEvidenceTargets.includes('ch3_school_confront_wu'), 'ch3_school_weird should route to Wu confrontation after evidence via polish');
+assert(weirdEvidenceTargets.includes('ch3_school'), 'ch3_school_weird should keep school hub return after evidence');
+
+for (const target of [...chenSuTargets, ...weirdBaseTargets, ...weirdEvidenceTargets]) {
+  assert(Boolean(context.nodes[target]), `chapter 3 migrated node has missing goto target: ${target}`);
 }
 
 if (errors.length) {
@@ -189,4 +204,4 @@ if (errors.length) {
   process.exit(1);
 }
 
-console.log(`Chapter 3 runtime gate passed: ${ownedNodes.length} first-batch node checked after full module load.`);
+console.log(`Chapter 3 runtime gate passed: ${ownedNodes.length} migrated node(s) checked after full module load.`);
