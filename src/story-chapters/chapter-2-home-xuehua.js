@@ -1,6 +1,6 @@
 // ===== 章节剧情：第二章基础调查 =====
-// Phase 4b: 迁移圣约翰大学低风险调查支线节点。
-// 约束：只登记既有 ch2_univ_matron / ch2_univ_door / ch2_univ_paper；不迁移动态 hub。
+// Phase 4b/4c: 迁移圣约翰大学与巡捕房低风险调查支线节点。
+// 约束：只登记既有固定支线节点；不迁移动态 hub。
 
 (function installChapter2HomeXuehua() {
   function applyChapter2HomeXuehua() {
@@ -111,11 +111,57 @@
           { text: '🔙 回到宿舍继续调查', goto: 'ch2_university' },
         ],
       },
+
+      ch2_police_present: {
+        title: '巡捕房 · 出示烟盒纸',
+        time: {d:1, h:16, m:15},
+        weather: 1,
+        effect: (s) => { E.addClue('老孙承认暗查', '巡捕房也在秘密调查福生仓——那是公董局的人插手的线。王巡官的调离不是巧合。'); },
+        text: () => `你把王巡官留下的半张烟盒纸放在老孙桌上。<br><br>老孙低头看了一眼，表情凝固了一瞬。然后他叹了口气，把烟掐灭。<br><br><span class="sys">"你见到王巡官了？"</span><br><br><span class="sys">"他调走了。这是他留在卷宗里的。"</span><br><br>老孙拿起烟盒纸，翻来覆去看了两遍。然后他把纸折好，揣进自己口袋里。<br><span class="sys">"这件事……我本来不想让你卷进去。"</span><br><br>他告诉你，王巡官是他的老部下。光华小学出事之后，王巡官一直觉得不对劲，私下在查福生仓这条线。查了一个月，被公董局的人知道了。<br><br><span class="sys">"他没有被调走。他是被调走的。你明白我的意思吗？"</span><br><br>你明白。明升暗降，把人从案子上挪开。<br><br><span class="sys">"福生仓的事，你最好别碰。"</span>老孙的声音很低。<span class="sys">"但如果你碰了……查到什么，别走官方渠道。直接来找我。私下。"</span><br><br>你点了点头。老孙拿起烟盒纸，划了一根火柴，把它烧了。<br><br>灰烬飘进废纸篓里。`,
+        choices: [
+          { text: '🔙 离开巡捕房', goto: 'ch2_leave_univ' },
+        ],
+      },
+
+      ch2_police_wang: {
+        title: '王巡官的铅笔字',
+        text: () => `你把卷宗边角那行铅笔批注推到老孙面前。
+
+<span class="sys">"这个王巡官，为什么会觉得苏晚亭的案子和光华小学有关？"</span>
+
+老孙皱了皱眉，像是不太愿意谈。过了一会儿，他起身走到铁皮档案柜前，从最底层抽出一个薄薄的牛皮纸袋。
+
+<span class="sys">"老王调走前，确实留过一点东西。他说这案子不干净，让我有机会就烧了。我没烧，也没敢往上报。"</span>
+
+纸袋里只有半张烟盒纸，上面写着三行字：
+
+<span class="sys">"光华夜值。"</span>
+<span class="sys">"福生仓。三日清。"</span>
+<span class="sys">"别信公董局来的电话。"</span>
+
+你问老孙福生仓是什么地方。
+
+<span class="sys">"苏州河边一个旧仓库，早年囤棉纱的。后来荒了。"</span>
+
+老孙把烟盒纸重新推给你。<span class="sys">"拿走吧。我没见过这东西。"</span>`,
+        effect: (s) => { E.addClue('王巡官遗留纸条', '光华夜值；福生仓，三日清；别信公董局来的电话'); E.addItem('半张烟盒纸', '王巡官调离前留下的纸条：光华夜值；福生仓，三日清；别信公董局来的电话。'); E.setFlag('got_wang_note', true); },
+        choices: [
+          { text: '🏛️ 去薛华立路 22 号——王巡官的线索指向这里', goto: 'ch2_frenchtown' },
+          { text: '🏠 去苏家', goto: 'ch2_home' },
+          { text: '📚 去光华小学', goto: 'ch3_school' },
+        ],
+      },
     });
 
     if (typeof window !== 'undefined') {
       window.MLT_STORY_CHAPTER_2_HOME_XUEHUA_READY = true;
-      window.MLT_STORY_CHAPTER_2_HOME_XUEHUA_NODES = ['ch2_univ_matron', 'ch2_univ_door', 'ch2_univ_paper'];
+      window.MLT_STORY_CHAPTER_2_HOME_XUEHUA_NODES = [
+        'ch2_univ_matron',
+        'ch2_univ_door',
+        'ch2_univ_paper',
+        'ch2_police_present',
+        'ch2_police_wang',
+      ];
     }
   }
 
