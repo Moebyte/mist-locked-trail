@@ -80,42 +80,12 @@ ch3_wu_present_university
 ch3_school_after_confront
 ```
 
-The safest first target was therefore a single unpatched node:
-
-```text
-ch3_school_chen_su
-```
-
 ## Batch meaning
 
 ```text
 batch-1: low-risk nodes, usually no dynamic choices, no onPresent, no multi-patch ownership
 batch-2: medium-risk nodes, possible effect or one patch source, but not a major hub
 batch-3: high-risk nodes, dynamic choices, onPresent, hub behavior, or multiple patch sources
-```
-
-## First batch selection rule
-
-The first Chapter 3 migration batch should be small and boring.
-
-Prefer nodes that satisfy:
-
-```text
-risk=low or small medium
-patchSources=none
-onPresent=no
-dynamicChoices=no
-goto count <= 3
-```
-
-Avoid in the first batch:
-
-```text
-ch3_wrapup
-hub nodes
-nodes with deduction or conclusion routing
-nodes patched by story-modules
-nodes that write core truth flags
 ```
 
 ## Completed first batch
@@ -157,8 +127,52 @@ focused runtime gate complete
 physical removal complete
 ```
 
-## Next batch selection
+## Selected second batch
 
-The next batch must be selected from the remaining `ch3_*` nodes after re-running the audit.
+```text
+ch3_school_weird
+```
 
-Because most remaining Chapter 3 nodes are patch-owned by `guanghua-school-flow-polish.js`, the next batch should not be physically removed until its final runtime behavior has been made explicit in `src/story-chapters/chapter-3-guanghua.js` and covered by `scripts/check-story-chapter3-runtime.mjs`.
+Reason:
+
+```text
+1. no onPresent;
+2. no dynamic choices in the legacy base node;
+3. not a hub;
+4. writes one localized clue: 陈老师与女子争吵;
+5. choices are patch-owned by guanghua-school-flow-polish.js, so final runtime choices must be checked after the full module load;
+6. physical removal is not allowed until the focused runtime gate passes with the polished choices active.
+```
+
+Target file:
+
+```text
+src/story-chapters/chapter-3-guanghua.js
+```
+
+Companion files:
+
+```text
+src/story-chapters/chapter-3-guanghua-contract.js
+scripts/check-story-chapter3-runtime.mjs
+```
+
+Status:
+
+```text
+runtime takeover complete
+focused runtime gate updated
+physical removal pending
+```
+
+## Next physical removal rule
+
+The next removal script must only target `ch3_school_weird`.
+
+Do not broaden the existing first-batch removal script without renaming or documenting the batch boundary. The safer path is a dedicated second-batch removal script.
+
+## Remaining caution
+
+The next batch after `ch3_school_weird` must be selected from the remaining `ch3_*` nodes after re-running the audit.
+
+Because most remaining Chapter 3 nodes are patch-owned by `guanghua-school-flow-polish.js`, no remaining node should be physically removed until its final runtime behavior has been made explicit in `src/story-chapters/chapter-3-guanghua.js` and covered by `scripts/check-story-chapter3-runtime.mjs`.
