@@ -3,8 +3,8 @@
     if (typeof window === 'undefined') return;
     window.MLT_STORY_CHAPTER_3_GUANGHUA_CONTRACT = {
       module: 'chapter-3-guanghua',
-      phase: 'office-runtime-takeover',
-      nodes: ['ch3_school_chen_su', 'ch3_school_yufang', 'ch3_school_weird', 'ch3_school_office'],
+      phase: 'chen-letter-runtime-takeover',
+      nodes: ['ch3_school_chen_su', 'ch3_school_yufang', 'ch3_school_weird', 'ch3_school_office', 'ch3_chen_letter'],
       ownedEffects: {
         ch3_school_chen_su: {
           clues: ['苏晚亭与陈明远'],
@@ -23,12 +23,18 @@
           items: ['永昌当票', '未寄出的信'],
           flags: ['got_chen_evidence'],
         },
+        ch3_chen_letter: {
+          clues: ['陈明远的信'],
+          items: ['陈明远的信'],
+          flags: ['read_letter'],
+        },
       },
       outboundTargets: {
         ch3_school_chen_su: ['ch3_school_weird', 'ch3_school_office', 'ch3_school'],
         ch3_school_yufang: ['ch3_school_teacher', 'ch3_school_weird', 'ch3_school_office', 'ch3_school', 'ch3_school_confront_wu'],
         ch3_school_weird: ['ch3_school_office', 'ch3_school', 'ch3_school_confront_wu'],
         ch3_school_office: ['ch3_chen_letter', 'ch3_school_confront_wu'],
+        ch3_chen_letter: ['ch3_school_confront_wu', 'ch3_school'],
       },
       physicalRemovalAllowed: false,
     };
