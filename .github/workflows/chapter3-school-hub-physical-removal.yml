@@ -1,53 +1,24 @@
-name: Chapter 3 School Hub Physical Removal
+name: Chapter 3 School Hub Removal Verification
 
 on:
-  push:
-    branches:
-      - v1_refactor
-    paths:
-      - '.github/workflows/chapter3-school-hub-physical-removal.yml'
-      - 'scripts/remove-migrated-chapter3-school-hub-from-story.mjs'
-      - 'scripts/check-story-refactor-full.mjs'
-      - 'src/story-chapters/chapter-3-guanghua.js'
-      - 'src/story-chapters/chapter-3-guanghua-contract.js'
-      - 'src/story.js'
   workflow_dispatch:
 
-permissions:
-  contents: write
-
 jobs:
-  remove-chapter-3-school-hub:
+  verify-chapter-3-school-hub:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           ref: v1_refactor
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '22'
 
-      - name: Run full check before removal
+      - name: Run full check
         run: node scripts/check-story-refactor-full.mjs
 
-      - name: Remove migrated school hub from story.js
-        run: node scripts/remove-migrated-chapter3-school-hub-from-story.mjs --write
-
-      - name: Run full check after removal
-        run: node scripts/check-story-refactor-full.mjs
-
-      - name: Commit removal
-        run: |
-          if git diff --quiet; then
-            echo "No changes to commit."
-            exit 0
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add src/story.js
-          git commit -m "Remove migrated Chapter 3 school hub from story"
-          git push origin HEAD:v1_refactor
+      - name: Verify school hub removal is idempotent
+        run: node scripts/remove-migrated-chapter3-school-hub-from-story.mjs
