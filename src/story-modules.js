@@ -28,6 +28,7 @@
     'src/story-modules/player-perspective-polish.js',
     'src/story-modules/opening-intake-polish.js',
     'src/story-modules/guanghua-school-flow-polish.js',
+    'src/story-modules/guanghua-incomplete-closure-polish.js',
     'src/story-modules/guanghua-confront-choice-cleanup.js',
     'src/story-modules/location-hub-flow-polish.js',
     'src/story-modules/location-hub-detail-text-polish.js',
