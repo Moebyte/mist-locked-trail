@@ -40,6 +40,8 @@ src/styles/panel.css
 src/styles/modals.css
 src/styles/responsive.css
 src/styles/effects.css
+src/styles/status.css
+src/styles/title.css
 ```
 
 ### Phase 2 — chapter loading scaffold
@@ -77,14 +79,14 @@ scripts/audit-story-endings.mjs
 
 Status: partially complete.
 
-Completed:
+Completed Chapter 1 runtime takeover:
 
 ```text
 src/story-chapters/chapter-1-opening.js
 src/story-chapters/chapter-1-opening-contract.js
 ```
 
-Chapter 2 has moved beyond runtime takeover and has completed physical removal from `src/story.js`.
+Chapter 2 has completed runtime takeover and physical removal from `src/story.js`.
 
 Migrated Chapter 2 files:
 
@@ -113,63 +115,97 @@ src/story-chapters/chapter-2-xuehua-203.js
 src/story-chapters/chapter-2-xuehua-203-contract.js
 ```
 
-Physical removal result:
+Chapter 2 physical removal guard:
 
 ```text
-src/story.js: -619 lines
+scripts/remove-migrated-chapter2-from-story.mjs
 ```
 
-Post-removal guard:
+The script is now an idempotent regression check. It should report that no migrated Chapter 2 node definitions remain in `src/story.js`.
+
+## Phase 5 — Chapter 3 high-risk migration
+
+Status: in progress.
+
+Chapter 3 must continue to use the high-risk migration discipline:
 
 ```text
-node scripts/check-story-refactor.mjs
-node scripts/remove-migrated-chapter2-from-story.mjs
+runtime takeover -> focused runtime gate -> removal dry-run -> physical removal -> workflow收口
 ```
 
-The second script is now an idempotent regression check. It should report that no migrated Chapter 2 node definitions remain in `src/story.js`.
+### Completed Chapter 3 physical removals
 
-### Phase 5 — Chapter 3 high-risk migration
-
-Status: second-batch runtime takeover started.
-
-Completed first batch:
+These Chapter 3 nodes have completed runtime takeover, focused gate coverage, removal dry-run, physical removal, and workflow收口:
 
 ```text
 ch3_school_chen_su
+ch3_school_weird
+ch3_school_yufang
+ch3_school_office
 ```
 
-Second batch in runtime takeover:
+Current `src/story.js` physical removal footprint:
 
 ```text
-ch3_school_weird
+src/story.js: -716 lines
 ```
 
-Runtime takeover files:
+### Current Chapter 3 runtime takeover
+
+`ch3_chen_letter` has completed runtime takeover and focused runtime gate alignment.
+
+Files:
 
 ```text
 src/story-chapters/chapter-3-guanghua.js
 src/story-chapters/chapter-3-guanghua-contract.js
+scripts/check-story-chapter3-chen-letter-runtime.mjs
 ```
 
-Focused runtime gate:
+Verified green checks:
+
+```text
+#86
+#87
+```
+
+Important behavior note:
+
+```text
+ch3_chen_letter is affected by guanghua-school-flow-polish.js,
+region-gates.js, and premature-conclusion-polish.js.
+The focused gate therefore verifies the owned effect and verifies that all emitted
+runtime targets exist, instead of hard-coding a single final outbound pair.
+```
+
+### Current Chapter 3 gates and removal guards
+
+Focused runtime gates:
 
 ```text
 scripts/check-story-chapter3-runtime.mjs
+scripts/check-story-chapter3-yufang-runtime.mjs
+scripts/check-story-chapter3-office-runtime.mjs
+scripts/check-story-chapter3-chen-letter-runtime.mjs
 ```
 
-Dedicated first-batch removal script:
+Idempotent removal guards:
 
 ```text
 scripts/remove-migrated-chapter3-first-batch-from-story.mjs
+scripts/remove-migrated-chapter3-second-batch-from-story.mjs
+scripts/remove-migrated-chapter3-yufang-batch-from-story.mjs
+scripts/remove-migrated-chapter3-office-from-story.mjs
 ```
 
-Physical removal workflow:
+Manual verification workflows already收口:
 
 ```text
 .github/workflows/chapter3-first-batch-physical-removal.yml
+.github/workflows/chapter3-second-batch-physical-removal.yml
+.github/workflows/chapter3-yufang-physical-removal.yml
+.github/workflows/chapter3-office-physical-removal.yml
 ```
-
-`ch3_school_chen_su` has been physically removed from `src/story.js`. `ch3_school_weird` has runtime takeover coverage but has not been physically removed yet.
 
 ## Current gate setup
 
@@ -192,7 +228,7 @@ This gate is intentionally narrow and focused on migration safety.
 
 ### Full refactor health check
 
-Available but not used as the routine migration blocker:
+Available through:
 
 ```bash
 node scripts/check-story-refactor-full.mjs
@@ -204,40 +240,37 @@ Also available in GitHub Actions:
 .github/workflows/story-refactor-full-check.yml
 ```
 
-This full check includes the Chapter 3 pre-migration audit, the Chapter 3 runtime gate, and the first-batch removal guard.
+This full check currently includes Chapter 3 runtime gates and all existing Chapter 3 removal guards.
 
 ## Current next step
 
-Next step: migrate the remaining Chapter 3 nodes in high-risk order.
-
-Current completed Chapter 3 physical removals:
+Next safe step:
 
 ```text
-ch3_school_chen_su
-ch3_school_weird
-ch3_school_yufang
+Add a dedicated ch3_chen_letter removal script and wire it into check-story-refactor-full.mjs as a dry-run only.
 ```
 
-Current story.js physical removal footprint:
+Do not physically remove `ch3_chen_letter` until the dry-run passes green in GitHub Actions.
+
+After that:
 
 ```text
-src/story.js: -693 lines
+1. create temporary ch3_chen_letter physical-removal workflow;
+2. let it run full check -> --write -> full check -> commit src/story.js;
+3. verify src/story.js deletion footprint increases;
+4. convert the temporary workflow to manual idempotent verification only.
 ```
 
-Recommended next migration target:
+## Remaining Chapter 3 migration order
+
+Recommended remaining order:
 
 ```text
-ch3_school_office
-```
-
-Reason:
-
-```text
-1. no onPresent;
-2. no dynamic choices in the legacy base node;
-3. gives key evidence and items, so it needs a dedicated runtime gate;
-4. outbound targets are limited to ch3_chen_letter and ch3_wrapup;
-5. it should be migrated before ch3_chen_letter.
+1. ch3_chen_letter physical removal
+2. ch3_wu_present_threat / ch3_wu_present_photo
+3. ch3_school_teacher
+4. ch3_school
+5. ch3_wrapup
 ```
 
 Do not migrate `ch3_wrapup` yet. It must remain the final Chapter 3 专项迁移对象.
