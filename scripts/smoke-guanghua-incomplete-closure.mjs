@@ -31,7 +31,7 @@ function hasChoice(list, fragment, goto) {
   return list.some(choice => choice.text.includes(fragment) && (!goto || choice.goto === goto));
 }
 
-// 前期缺 203 恐吓信和大学日记时，光华小学应允许表层结案，而不是强推完整线。
+// 前期缺关键前置时，光华小学应允许表层结案，但提示必须是叙事内语言，不是开发者缺证清单。
 reset({
   flags: {
     asked_about_chen: true,
@@ -49,17 +49,20 @@ reset({
   ],
 });
 let text = textOf('ch3_school_confront_wu');
-assert(text.includes('证据仍不够完整'), `缺证时吴校长质询页应提示证据不足，实际：${text}`);
-assert(text.includes('203 室恐吓信') && text.includes('苏晚亭大学日记残页'), `缺证提示应列出缺失证物，实际：${text}`);
+assert(text.includes('话还没有压到底'), `缺证时吴校长质询页应使用叙事阻滞提示，实际：${text}`);
+assert(text.includes('陈明远死前究竟被谁逼到墙角') && text.includes('苏晚亭到底是主动追查'), `缺证提示应写成叙事空白，实际：${text}`);
+assert(!text.includes('你还缺：'), `缺证提示不应出现开发者清单“你还缺”，实际：${text}`);
+assert(!text.includes('203 室恐吓信') && !text.includes('苏晚亭大学日记残页'), `缺证提示不应直接列道具名，实际：${text}`);
 let list = choices('ch3_school_confront_wu');
-assert(hasChoice(list, '按光华小学现有材料结案', 'ch3_school_incomplete_closure'), `缺证时应提供光华小学表层结案入口，实际 ${JSON.stringify(list)}`);
+assert(hasChoice(list, '接受这个较容易成立的说法', 'ch3_school_incomplete_closure'), `缺证时应提供叙事化表层结案入口，实际 ${JSON.stringify(list)}`);
 
 // 表层结案节点应落到旧证据不足收束。
 text = textOf('ch3_school_incomplete_closure');
 assert(text.includes('不完整的答案'), `表层结案节点应说明答案不完整，实际：${text}`);
 assert(text.includes('太容易被接受的答案'), `表层结案节点应强调这是表层答案，实际：${text}`);
+assert(!text.includes('你还缺：'), `表层结案节点不应出现开发者清单，实际：${text}`);
 list = choices('ch3_school_incomplete_closure');
-assert(hasChoice(list, '按现有材料回去整理结案', 'ch4_conclusion'), `表层结案应回到结案整理，实际 ${JSON.stringify(list)}`);
+assert(hasChoice(list, '接受这个较容易成立的说法', 'ch4_conclusion'), `表层结案应回到结案整理，实际 ${JSON.stringify(list)}`);
 
 if (typeof rt.nodes.ch3_school_incomplete_closure.effect === 'function') rt.nodes.ch3_school_incomplete_closure.effect(E.state);
 assert(E.getFlag('school_incomplete_closure'), '表层结案应设置 school_incomplete_closure');
@@ -91,7 +94,7 @@ reset({
   ],
 });
 list = choices('ch3_school_confront_wu');
-assert(!hasChoice(list, '按光华小学现有材料结案', 'ch3_school_incomplete_closure'), `三证齐全时不应提供表层结案入口，实际 ${JSON.stringify(list)}`);
+assert(!hasChoice(list, '接受这个较容易成立的说法', 'ch3_school_incomplete_closure'), `三证齐全时不应提供表层结案入口，实际 ${JSON.stringify(list)}`);
 
 if (errors.length) {
   console.error('Guanghua incomplete closure smoke failed:');
