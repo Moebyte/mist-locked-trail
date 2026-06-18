@@ -15,17 +15,21 @@ function assert(condition, message) {
 }
 
 const endingsRel = 'src/story-chapters/endings.js';
+const endingsContractRel = 'src/story-chapters/endings-contract.js';
 const storyRel = 'src/story.js';
 const modulesRel = 'src/story-modules.js';
 
 const endingsSource = read(endingsRel);
+const endingsContractSource = read(endingsContractRel);
 const storySource = read(storyRel);
 const modulesSource = read(modulesRel);
 
-try {
-  new vm.Script(endingsSource, { filename: endingsRel });
-} catch (error) {
-  errors.push(`${endingsRel} 语法错误：${error.message}`);
+for (const rel of [endingsRel, endingsContractRel]) {
+  try {
+    new vm.Script(read(rel), { filename: rel });
+  } catch (error) {
+    errors.push(`${rel} 语法错误：${error.message}`);
+  }
 }
 
 const expectedEndings = new Map([
@@ -41,9 +45,15 @@ const expectedEndings = new Map([
 ]);
 
 assert(modulesSource.includes(endingsRel), `${modulesRel} 应加载 ${endingsRel}`);
+assert(modulesSource.includes(endingsContractRel), `${modulesRel} 应加载 ${endingsContractRel}`);
+assert(
+  modulesSource.indexOf(endingsRel) < modulesSource.indexOf(endingsContractRel),
+  `${endingsContractRel} 应在 ${endingsRel} 之后加载`
+);
 
 for (const [id, title] of expectedEndings) {
   assert(endingsSource.includes(`${id}: {`), `${endingsRel} 缺少结局节点 ${id}`);
+  assert(endingsContractSource.includes(id), `${endingsContractRel} 缺少结局节点 ${id} 的运行时契约`);
   const escapedId = id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const escapedTitle = title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const titlePattern = new RegExp(`${escapedId}:\\s*{[\\s\\S]*?title:\\s*['\"]${escapedTitle}['\"]`);
