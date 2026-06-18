@@ -33,7 +33,7 @@
 
         if (fastSupportOnly()) {
           opts.push({
-            text: '🚓 让便衣护住后路，借雾把人先带走',
+            text: '🚓 让便衣守住巷口，借雾把人先带走',
             effect: () => {
               E.setFlag('sun_fast_cover_escape', true);
               E.addClue('便衣掩护撤离', '老孙派来的便衣没有正面扣住傅启元，只护住后路，帮你先把人带走。');
@@ -41,7 +41,7 @@
             goto: 'ch4_dock_escape_finish'
           });
           opts.push({
-            text: '⚠️ 当场质问傅启元，拿出货运单和清场指令',
+            text: '⚠️ 站到车灯前，把货运单和清场纸摊开',
             effect: () => {
               E.setFlag('dock_fast_confront_bad', true);
               E.addHeat(3, '你在人手不足时当场亮出关键证据，傅启元动了灭口的念头。');
@@ -53,7 +53,7 @@
 
         if (fullSupportCanPressFu()) {
           opts.push({
-            text: '🚓 让老孙正面压制傅启元，质问并出示证据',
+            text: '🚓 让老孙带人堵住码头两头',
             effect: () => {
               E.setFlag('dock_sun_pressed_fu', true);
               E.addClue('码头正面压制傅启元', '老孙带队压住码头局面，你得以当场质问傅启元并出示货运单、清场指令。');
@@ -61,7 +61,7 @@
             goto: 'ch4_fu_confront'
           });
           opts.push({
-            text: '🌫️ 趁乱带人撤离，不在码头硬碰傅启元',
+            text: '🌫️ 趁公董局的人还没围上来，先把人带走',
             effect: () => {
               E.setFlag('dock_escaped_during_sun_standoff', true);
               E.addClue('公董局干预码头', '老孙试图压住傅启元时，公董局的人出面阻拦。你趁乱先把人带走，但正式查明真相会更困难。');
@@ -72,9 +72,9 @@
           return opts;
         }
 
-        opts.push({ text: '🌫️ 借雾绕开汽车，先把人带走', goto: 'ch4_dock_escape_finish' });
+        opts.push({ text: '🌫️ 借雾绕开那辆黑车，先把人带走', goto: 'ch4_dock_escape_finish' });
         opts.push({
-          text: '⚠️ 当场质问傅启元',
+          text: '⚠️ 走到傅启元面前，直接问他要人',
           effect: () => E.addHeat(1, '你当场质问傅启元，局势变得危险。'),
           goto: 'end_dock_silenced'
         });
