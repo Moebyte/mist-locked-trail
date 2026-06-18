@@ -14,7 +14,7 @@
         || E.getFlag('dock_solo_waterline_escape')
         || E.getFlag('dock_solo_crate_screen')
         || E.getFlag('dock_solo_decoy_escape')
-        || (typeof E.dockSupportMode === 'function' && E.dockSupportMode() === 'solo');
+        || E.getFlag('dock_solo_hard_confront');
     }
 
     function dockExitBadge() {
