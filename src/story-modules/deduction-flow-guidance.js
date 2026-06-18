@@ -58,11 +58,11 @@
       deduce_fusheng: [
         {
           names: ['王巡官遗留纸条', '半张烟盒纸', '福生仓标识', '福生仓地址', '福生仓位置'],
-          label: '福生仓入口与王巡官警告'
+          label: '仓库入口与王巡官警告'
         },
         {
           names: ['陈明远的信', '陈老师给苏晚亭的信', '给苏晚亭的信', '陈明远的退缩'],
-          label: '陈明远留下的福生仓前因'
+          label: '陈明远留下的前因'
         },
         {
           names: ['恐吓信', '203 室恐吓信', '如果你不说，他们下一个就是你'],
@@ -70,11 +70,11 @@
         },
         {
           names: ['公董局公文纸', '清场指令', '暗室刚被清空', '福生仓公董局公文纸', '福生仓清场'],
-          label: '福生仓现场公董局清场证据'
+          label: '现场清场证据'
         },
         {
           names: ['教具箱走私', '管制药品走私', '傅启元夜运教具箱', '光华货运单', '傅启元货运单破绽', '光华小学采购疑点'],
-          label: '教具箱走私与傅启元线索'
+          label: '教具箱与货运线索'
         }
       ]
     };
@@ -147,7 +147,7 @@
       const labelMap = {
         deduce_chen: '陈明远',
         deduce_lu_zhao: '黑衣男人',
-        deduce_fusheng: '福生仓'
+        deduce_fusheng: '仓库'
       };
       const label = labelMap[id];
       return choices.some(choice => (choice.text || choice.fogText || '').includes(label));
@@ -187,9 +187,9 @@
 
         if (E.getFlag('deduced_lu_zhao') && !E.getFlag('deduced_fusheng') && !E.getFlag('deduced_fusheng_fail') && !hasDeductionChoice(opts, 'deduce_fusheng')) {
           if (E.canDeduce('deduce_fusheng')) {
-            opts.push({ text: '🧩 推理——福生仓与公董局的真相', effect: openDeductionEffect('deduce_fusheng') });
+            opts.push({ text: '🧩 推理——仓库与清场线索', effect: openDeductionEffect('deduce_fusheng') });
           } else {
-            opts.push(lockedDeduction('🧩 推理——福生仓与公董局的真相', 'deduce_fusheng', '第三段推理要等福生仓现场证据'));
+            opts.push(lockedDeduction('🧩 推理——仓库与清场线索', 'deduce_fusheng', '第三段推理还不能开'));
           }
         }
 
