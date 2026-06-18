@@ -2,6 +2,7 @@
 // 目标：王巡官纸条不再由巡捕房凭空给出。
 // 玩家需要先在薛华立路向看门老头出示法租界地图，让“福生仓”这个仓库名浮出水面，
 // 再回巡捕房追问王巡官，老孙才会翻出那半张烟盒纸。
+// 调整：巡捕房第一次看到光华小学批注后，不直接开放光华小学主线；先要求玩家查清薛华立路/福生仓地点，避免路线跳段。
 (function installWangNotePrereq() {
   function applyWangNotePrereq() {
     if (typeof E === 'undefined' || typeof nodes === 'undefined') return;
@@ -20,6 +21,12 @@
 
     function hasWangNote() {
       return E.getFlag('got_wang_note') || E.hasClue('王巡官遗留纸条') || E.hasItem('半张烟盒纸');
+    }
+
+    function canGoGuanghuaFromPolice() {
+      // 只在“王巡官批注”有了可追问的上下文之后，才让玩家直接去光华小学。
+      // 否则玩家会从一行批注直接跳到学校，绕过薛华立路与王巡官纸条这条关键桥。
+      return hasWangNote() || hasLandlordFushengLead() || E.hasClue('光华小学事件');
     }
 
     function nextPoliceChoices() {
@@ -41,7 +48,7 @@
         opts.push({ text: '🏛️ 回薛华立路 22 号——查清地图上的标记', goto: 'ch2_frenchtown' });
       }
       if (!E.hasClue('母亲证词') || !E.getFlag('asked_photo')) opts.push({ text: '🏠 去苏家', goto: 'ch2_home' });
-      opts.push({ text: '📚 去光华小学', goto: 'ch3_school' });
+      if (canGoGuanghuaFromPolice()) opts.push({ text: '📚 去光华小学', goto: 'ch3_school' });
       return opts;
     }
 
@@ -60,7 +67,7 @@
         choices: () => {
           const opts = [];
           if (hasUniversityXuehuaLead()) opts.push({ text: '🏛️ 去薛华立路 22 号——查清地图标记', goto: 'ch2_frenchtown' });
-          opts.push({ text: '📚 先去光华小学查陈老师的事', goto: 'ch3_school' });
+          if (canGoGuanghuaFromPolice()) opts.push({ text: '📚 去光华小学查陈老师的事', goto: 'ch3_school' });
           return opts;
         }
       };
