@@ -238,14 +238,12 @@ assertIncludes(gotos('ch2_leave_home', { clues: ['舍监证词', '法租界地�
 
 assertIncludes(gotos('ch2_frenchtown'), 'ch2_building_stakeout', 'ch2_frenchtown initial choices');
 assertIncludes(gotos('ch2_frenchtown'), 'ch2_ask_landlord', 'ch2_frenchtown initial choices');
-assertIncludes(gotos('ch2_frenchtown'), 'ch2_203_door', 'ch2_frenchtown initial choices');
-assertIncludes(gotos('ch2_building_enter'), 'ch2_203_door', 'ch2_building_enter final choices');
-resetEvidence();
-const buildingPresent = context.nodes.ch2_building_enter.onPresent({ name: '法租界地图' }, E.state);
-assert(buildingPresent && buildingPresent.goto === 'ch2_landlord_map', 'ch2_building_enter onPresent should route 法租界地图 to ch2_landlord_map');
+assertIncludes(gotos('ch2_frenchtown', { flags: ['asked_landlord'] }), 'ch2_203_door', 'ch2_frenchtown after landlord choices');
+assertIncludes(gotos('ch2_building_enter', { flags: ['asked_landlord'] }), 'ch2_203_door', 'ch2_building_enter final choices');
 assertIncludes(gotos('ch2_203_door'), 'ch2_203_search', 'ch2_203_door before search choices');
-assertIncludes(gotos('ch2_203_door', { clues: ['三人合影'] }), 'ch3_school', 'ch2_203_door after search choices');
-assertIncludes(gotos('ch2_203_search'), 'ch3_school', 'ch2_203_search choices');
+assertIncludes(gotos('ch2_203_door', { clues: ['三人合影', '法租界地图'] }), 'ch2_landlord_map', 'ch2_203_door after 203 evidence should allow map check');
+assertIncludes(gotos('ch2_203_search', { clues: ['三人合影', '法租界地图'] }), 'ch2_landlord_map', 'ch2_203_search after 203 evidence should allow map check');
+assertIncludes(gotos('ch2_203_search', { clues: ['三人合影', '法租界地图'], flags: ['shown_map_to_landlord', 'got_wang_note'] }), 'ch3_school', 'ch2_203_search after map and Wang note should reach ch3_school');
 
 for (const id of expectedChapter2Nodes) {
   for (const goto of gotos(id, { clues: ['舍监证词', '法租界地图', '三人合影'], items: ['三人合影'], flags: ['asked_door', 'asked_photo', 'got_wang_note'] })) {
