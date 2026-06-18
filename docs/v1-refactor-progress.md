@@ -130,7 +130,7 @@ The second script is now an idempotent regression check. It should report that n
 
 ### Phase 5 — Chapter 3 high-risk migration
 
-Status: first-batch runtime takeover started.
+Status: first-batch runtime takeover and dry-run removal guard added.
 
 Selected first batch:
 
@@ -151,7 +151,13 @@ Focused runtime gate:
 scripts/check-story-chapter3-runtime.mjs
 ```
 
-Physical removal from `src/story.js` is not allowed yet. The focused gate must pass first, then a dedicated Chapter 3 removal script must be added for the selected batch.
+Dedicated first-batch removal script:
+
+```text
+scripts/remove-migrated-chapter3-first-batch-from-story.mjs
+```
+
+The removal script is currently part of the full check as a dry-run. Physical removal from `src/story.js` is not done yet.
 
 ## Current gate setup
 
@@ -186,7 +192,7 @@ Also available in GitHub Actions:
 .github/workflows/story-refactor-full-check.yml
 ```
 
-This full check includes the Chapter 3 pre-migration audit and the first-batch Chapter 3 runtime gate.
+This full check includes the Chapter 3 pre-migration audit, the first-batch Chapter 3 runtime gate, and the first-batch removal dry-run.
 
 ## Current next step
 
@@ -202,10 +208,16 @@ Audit details are documented in:
 docs/chapter3-migration-audit.md
 ```
 
-If the full check passes, add a dedicated removal script for the selected first batch only:
+If the full check passes, execute the dedicated removal script with `--write` for the selected first batch only:
 
-```text
-scripts/remove-migrated-chapter3-first-batch-from-story.mjs
+```bash
+node scripts/remove-migrated-chapter3-first-batch-from-story.mjs --write
+```
+
+Then immediately run:
+
+```bash
+node scripts/check-story-refactor-full.mjs
 ```
 
 Do not reuse the Chapter 2 removal script for Chapter 3.
