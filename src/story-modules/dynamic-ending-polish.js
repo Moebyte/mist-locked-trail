@@ -41,6 +41,10 @@
       return Number(t.hardEvidenceCount || 0) >= 2;
     }
 
+    function schoolHiddenGatePassed() {
+      return E.getFlag('school_wu_three_proofs') && E.getFlag('school_wu_full_confront');
+    }
+
     function dockVisited() {
       return E.getFlag('dock_entry_committed') || E.getFlag('dock_solo_entry') || E.getFlag('dock_full_support_entry')
         || E.getFlag('dock_fast_support_entry') || E.getFlag('missed_both_at_dock') || E.getFlag('missed_both_due_to_return_tool')
@@ -149,19 +153,22 @@
         const l = lu();
         const score = Number(t.score || 0);
         const hasWitness = hasAnyDockWitness();
+        const schoolGate = schoolHiddenGatePassed();
 
         if (h.key === 'unstable') {
           if (hasWitness) return 'end_rescue';
           return score >= 6 ? 'end_partial_truth' : 'end_archive';
         }
 
-        if (score >= 10 && (h.key === 'stable' || h.key === 'controlled') && l.key === 'formal' && !this.getFlag('dock_solo_entry')) {
+        // 隐藏/真隐藏必须先完成光华小学三证物质询闭环；否则只能进入普通动态收束。
+        if (schoolGate && score >= 10 && (h.key === 'stable' || h.key === 'controlled') && l.key === 'formal' && !this.getFlag('dock_solo_entry')) {
           return 'end_true_hidden';
         }
-        if (score >= 8 && h.key !== 'unstable') {
+        if (schoolGate && score >= 8 && h.key !== 'unstable') {
           if (l.key === 'formal' || l.key === 'private' || l.key === 'informant') return 'end_hidden_truth';
           return 'end_conspiracy_detail';
         }
+        if (score >= 8 && h.key !== 'unstable') return 'end_partial_truth';
         if (score >= 6) return 'end_partial_truth';
         if (hasWitness) return 'end_rescue';
         return oldResolve();
@@ -173,31 +180,22 @@
     const titleMap = {
       end_true_hidden: ['破晓之前', '真隐藏'],
       end_conspiracy_detail: ['雨夜灯火', '隐藏'],
-      end_rescue: ['生还之夜', '救援'],
+      end_rescue: ['黎明灯火', ''],
       end_conspiracy: ['迷雾未尽', ''],
-      end_archive: ['无声归档', ''],
-      end_too_late: ['迟到一步', ''],
-      end_dock_silenced: ['雾中枪声', '坏结局'],
-      end_refuse: ['雨落无声', '早期结局'],
-      end_boss_lu: ['面具之下', '早期误判'],
-      end_boss_zhao: ['提线木偶', '早期误判'],
-      end_boss_wu: ['师者无声', '早期误判']
+      end_archive: ['封存案卷', ''],
+      end_too_late: ['空仓余证', '']
     };
+    for (const [id, [title]] of Object.entries(titleMap)) fourCharTitle(id, title);
 
-    for (const [nodeId, [title, tag]] of Object.entries(titleMap)) {
-      const node = nodes[nodeId];
-      if (!node || node.__dynamicEndingTextPatched) continue;
+    for (const [id, [title, tag]] of Object.entries(titleMap)) {
+      const node = nodes[id];
+      if (!node || node.__dynamicTailPatched) continue;
       const oldText = node.text;
-      node.title = `结局 · ${title}`;
       node.text = function (state) {
         const base = typeof oldText === 'function' ? oldText(state) : oldText;
-        const early = ['end_refuse', 'end_boss_lu', 'end_boss_zhao', 'end_boss_wu'].includes(nodeId);
-        const tail = early
-          ? `<br><br><span class="sys">这是一条未进入福生仓线的早期收束。你过早给出了答案，或选择让案件停在雾外，因此福生仓、医院、陆念薇程序链条都没有真正展开。</span>`
-          : `<br><br>${dynamicTail()}${scoreLine()}`;
-        return String(base).replace(/<div style="color:#666;font-style:italic;margin-top:20px">——.*?——<\/div>/s, '') + tail + endingFooter(title, tag);
+        return `${base}<br><br>${dynamicTail()}${scoreLine()}${endingFooter(title, tag)}`;
       };
-      node.__dynamicEndingTextPatched = true;
+      node.__dynamicTailPatched = true;
     }
 
     E.__dynamicEndingPolishPatched = true;
