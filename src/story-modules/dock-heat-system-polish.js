@@ -60,9 +60,14 @@
       return fastSupportMode() && !E.getFlag('missed_deadline');
     }
 
+    function globalHeat() {
+      return Math.max(0, Number(E.state?.pressure?.heat || 0));
+    }
+
     function routeDockSearchByTime() {
-      // 福生仓线使用独立 heat/delay 系统，不再依赖 deadline 门控
+      // 福生仓线使用独立 heat/delay 系统判断暗室结果；这里仅用全局 heat 调整“还能搜多久”。
       const phase = typeof E.deadlinePhase === 'function' ? E.deadlinePhase() : 'safe';
+      const heat = globalHeat();
       if (phase === 'expired' && !committedDockEntry()) {
         E.setFlag('missed_deadline', true);
         return 'ch4_dock_cleared';
@@ -72,6 +77,8 @@
         E.setFlag('dock_full_support_tradeoff', true);
         return 'ch4_dock_full_search';
       }
+      if (heat >= 8) return 'ch4_dock_rescue_only';
+      if (heat >= 5) return 'ch4_dock_limited_search';
       if (phase === 'critical') {
         if (lowProfileRouteReady()) return 'ch4_dock_limited_search';
         return 'ch4_dock_rescue_only';
