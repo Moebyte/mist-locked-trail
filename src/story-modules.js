@@ -47,6 +47,7 @@
     'src/story-modules/sun-fast-support-polish.js',
     'src/story-modules/dock-hide-consequence-polish.js',
     'src/story-modules/dock-infiltration-depth-polish.js',
+    'src/story-modules/fusheng-scene-evidence-panel.js',
     'src/story-modules/dock-heat-system-polish.js',
     'src/story-modules/dock-fast-support-dual-balance-polish.js',
     'src/story-modules/dock-escape-choice-polish.js',
