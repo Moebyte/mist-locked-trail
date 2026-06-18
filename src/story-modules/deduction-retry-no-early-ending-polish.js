@@ -1,30 +1,12 @@
-// ===== 推理重选与早期结案退役 =====
-// 目标：主线推理题不再用错误答案触发早期失败结局。
-// 玩家选错时留在推理面板，获得“再想想”的叙事提示，直到选出能被证据压住的答案。
-// 同时，光华小学后的早期 ch4_conclusion 不再提供归档/冒然指认等早期结案系统，只引导玩家回到线索整理继续调查。
+// ===== 推理重选与光华不足案情环节 =====
+// 目标：主线推理题选错时不直接失败，而是提示玩家再想想并允许重选。
+// 同时保留“非三证光华小学结束后 → 案情推理/表层收束”的结构，
+// 不再把早期案情环节误删成只能回线索整理。
 
 (function installDeductionRetryNoEarlyEndingPolish() {
   function applyDeductionRetryNoEarlyEndingPolish() {
     if (typeof E === 'undefined' || typeof nodes === 'undefined') return;
     if (E.__deductionRetryNoEarlyEndingPatched) return;
-
-    function hasWitness() {
-      return E.getFlag('found_yufang') || E.getFlag('rescued_yufang') || E.getFlag('found_su_at_dock') || E.getFlag('rescued_su');
-    }
-
-    function hasAlteredPacket() {
-      return E.getFlag('chen_letter_packet_altered') || E.hasItem?.('陈明远残信') || E.hasItem?.('苏晚亭疑似遗书');
-    }
-
-    function isEarlyClosureState() {
-      return !E.getFlag('deduced_fusheng')
-        && !hasWitness()
-        && (E.getFlag('school_incomplete_closure')
-          || E.getFlag('school_truth_partial_only')
-          || hasAlteredPacket()
-          || E.getFlag('deduced_chen')
-          || E.getFlag('deduced_lu_zhao'));
-    }
 
     function retryHintFor(id, optionText) {
       const text = String(optionText || '');
@@ -84,41 +66,9 @@
       E.__retryDeductionSubmitPatched = true;
     }
 
-    if (nodes.ch4_conclusion && !nodes.ch4_conclusion.__noEarlyEndingRetirePatched) {
-      const oldText = nodes.ch4_conclusion.text;
-      const oldChoices = nodes.ch4_conclusion.choices;
-
-      nodes.ch4_conclusion.text = function (state) {
-        if (!isEarlyClosureState()) return typeof oldText === 'function' ? oldText(state) : oldText;
-        return `你回到事务所，把材料一件件摊开。<br><br>它们已经能拼出一些形状：陈明远不是无缘无故死去，苏晚亭不是无缘无故失踪，光华小学也不是一处无关地点。<br><br>可是这还不是可以落笔结案的时候。<br><br>现在写报告，只会把一个还没走完的案子压成过早的答案。与其把雾写进案卷，不如回到线索整理页，继续把断掉的几条线接上。`;
-      };
-
-      nodes.ch4_conclusion.choices = function (state) {
-        if (!isEarlyClosureState()) return typeof oldChoices === 'function' ? oldChoices(state) : oldChoices;
-        const out = [
-          { text: '🔙 不结案，回到线索整理继续推理', goto: 'ch3_wrapup' }
-        ];
-        if (hasAlteredPacket()) {
-          out.push({ text: '🏮 暂存残信和疑似遗书，先不要交给周怀安', goto: 'ch3_wrapup' });
-        }
-        return out;
-      };
-      nodes.ch4_conclusion.__noEarlyEndingRetirePatched = true;
-    }
-
-    if (nodes.ch4_accuse && !nodes.ch4_accuse.__noEarlyEndingRetirePatched) {
-      const oldText = nodes.ch4_accuse.text;
-      const oldChoices = nodes.ch4_accuse.choices;
-      nodes.ch4_accuse.text = function (state) {
-        if (!isEarlyClosureState()) return typeof oldText === 'function' ? oldText(state) : oldText;
-        return `你试着把某个人的名字写到纸上。<br><br>陆小姐、赵先生、吴校长——每个人都能解释一部分，每个人又都解释不了全部。<br><br>这不是指认的时候。真正的推理不该靠一个最像凶手的名字结束，而要靠能互相咬合的证据继续往下走。`;
-      };
-      nodes.ch4_accuse.choices = function (state) {
-        if (!isEarlyClosureState()) return typeof oldChoices === 'function' ? oldChoices(state) : oldChoices;
-        return [{ text: '🔙 收起这份过早的指认，回到线索整理', goto: 'ch3_wrapup' }];
-      };
-      nodes.ch4_accuse.__noEarlyEndingRetirePatched = true;
-    }
+    // 重要：这里不再 patch ch4_conclusion / ch4_accuse。
+    // 非三证光华小学结束后的“案情推理/表层收束”由 premature-conclusion-polish
+    // 与 early-ending-continuity-polish 接管；本模块只负责推理题选错可重选。
 
     E.__deductionRetryNoEarlyEndingPatched = true;
   }
