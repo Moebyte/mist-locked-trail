@@ -29,23 +29,30 @@
       return this.deadlinePhaseLabel();
     };
 
-    E.routeDockByPressure = function () {
-      if (typeof this.dockHeatTier === 'function') {
-        const tier = this.dockHeatTier();
-        if (tier.key === 'high') return 'ch4_dock_limited_search';
-        if (tier.key === 'mid') return 'ch4_dock_limited_search';
-      }
-      return 'ch4_dock_full_search';
-    };
+    // 不再用硬时间门控覆盖新版福生仓入口路由。
+    // dock-heat-system-polish 会先按 solo/便衣/老孙进入潜入节点，再在仓内用 heat/delay 分流。
+    // 这里仅在旧包没有安装新版路由时提供兼容兜底。
+    if (typeof E.routeDockByPressure !== 'function' || typeof E.dockSupportMode !== 'function') {
+      E.routeDockByPressure = function () {
+        if (typeof this.dockHeatTier === 'function') {
+          const tier = this.dockHeatTier();
+          if (tier.key === 'high') return 'ch4_dock_limited_search';
+          if (tier.key === 'mid') return 'ch4_dock_limited_search';
+        }
+        return 'ch4_dock_full_search';
+      };
+    }
 
-    E.routeDockDeepByPressure = function () {
-      if (typeof this.dockHeatTier === 'function') {
-        const tier = this.dockHeatTier();
-        if (tier.key === 'high') return 'ch4_dock_deep_empty_heat';
-        if (tier.key === 'mid') return 'ch4_dock_deep_trace';
-      }
-      return 'ch4_dock_deep_dual';
-    };
+    if (typeof E.routeDockDeepByPressure !== 'function' || typeof E.dockSupportMode !== 'function') {
+      E.routeDockDeepByPressure = function () {
+        if (typeof this.dockHeatTier === 'function') {
+          const tier = this.dockHeatTier();
+          if (tier.key === 'high') return 'ch4_dock_deep_empty_heat';
+          if (tier.key === 'mid') return 'ch4_dock_deep_trace';
+        }
+        return 'ch4_dock_deep_dual';
+      };
+    }
 
     if (typeof E.v07ResolveEnding === 'function' && !E.__deadlineEndingResolvePatched) {
       const oldResolve = E.v07ResolveEnding.bind(E);
