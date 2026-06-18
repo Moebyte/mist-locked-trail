@@ -11,6 +11,8 @@
     'src/story-chapters/chapter-2-home-xuehua-contract.js',
     'src/story-chapters/chapter-2-home-fixed.js',
     'src/story-chapters/chapter-2-home-fixed-contract.js',
+    'src/story-chapters/chapter-2-frenchtown-entry.js',
+    'src/story-chapters/chapter-2-frenchtown-entry-contract.js',
     'src/story-chapters/chapter-2-frenchtown-tail.js',
     'src/story-chapters/chapter-2-frenchtown-tail-contract.js',
     'src/story-chapters/chapter-2-xuehua-203.js',
