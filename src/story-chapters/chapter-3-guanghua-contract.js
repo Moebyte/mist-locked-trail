@@ -3,12 +3,16 @@
     if (typeof window === 'undefined') return;
     window.MLT_STORY_CHAPTER_3_GUANGHUA_CONTRACT = {
       module: 'chapter-3-guanghua',
-      phase: 'second-batch-runtime-takeover',
-      nodes: ['ch3_school_chen_su', 'ch3_school_weird'],
+      phase: 'third-batch-runtime-takeover',
+      nodes: ['ch3_school_chen_su', 'ch3_school_yufang', 'ch3_school_weird'],
       ownedEffects: {
         ch3_school_chen_su: {
           clues: ['苏晚亭与陈明远'],
           flags: ['chen_su_link'],
+        },
+        ch3_school_yufang: {
+          clues: ['沈玉芳与陈明远'],
+          flags: [],
         },
         ch3_school_weird: {
           clues: ['陈老师与女子争吵'],
@@ -17,6 +21,7 @@
       },
       outboundTargets: {
         ch3_school_chen_su: ['ch3_school_weird', 'ch3_school_office', 'ch3_school'],
+        ch3_school_yufang: ['ch3_school_teacher', 'ch3_school_weird', 'ch3_school_office', 'ch3_school', 'ch3_school_confront_wu'],
         ch3_school_weird: ['ch3_school_office', 'ch3_school', 'ch3_school_confront_wu'],
       },
       physicalRemovalAllowed: false,
