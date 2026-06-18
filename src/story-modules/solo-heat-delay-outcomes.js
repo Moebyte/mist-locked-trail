@@ -22,6 +22,24 @@
         || (typeof E.dockSupportMode === 'function' && E.dockSupportMode() === 'solo');
     }
 
+    function fastSupportMode() {
+      return E.getFlag('sun_fast_support')
+        || E.getFlag('sun_fast_support_active')
+        || E.getFlag('sun_fast_cover_escape')
+        || E.getFlag('dock_fast_support_entry');
+    }
+
+    function fullSupportMode() {
+      return E.getFlag('sun_full_support')
+        || E.getFlag('sun_wait_support')
+        || E.getFlag('dock_full_support_entry')
+        || (E.getFlag('sun_support_in_action') && !E.getFlag('sun_fast_support'));
+    }
+
+    function atFastInfiltrationNode() {
+      return E.state?.currentScene === 'ch4_dock_fast_infiltration';
+    }
+
     function hasClearanceEvidence() {
       return hasThing('清场指令')
         || hasThing('公董局公文纸')
@@ -99,6 +117,9 @@
         const phase = typeof this.deadlinePhase === 'function' ? this.deadlinePhase() : 'safe';
         if (soloMode() && phase !== 'expired' && !this.getFlag('dock_solo_search_committed')) {
           return 'ch4_dock_solo_search_choice';
+        }
+        if (fastSupportMode() && !fullSupportMode() && atFastInfiltrationNode()) {
+          return 'ch4_dock_full_search';
         }
         return oldRouteDockSearchByTime();
       };
