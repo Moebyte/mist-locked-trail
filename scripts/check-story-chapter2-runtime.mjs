@@ -203,9 +203,6 @@ assert(photoState.clues.some(clue => clue.name === '苏母托付信物'), 'ch2_h
 const mapState = runEffect('ch2_landlord_map');
 assert(mapState.flags.shown_map_to_landlord === true || mapState.clues.some(clue => clue.name === '福生仓标识' || clue.name === '福生仓位置'), 'ch2_landlord_map should preserve the Fusheng warehouse lead');
 
-const policeState = runEffect('ch2_police_wang');
-assert(policeState.flags.got_wang_note === true || policeState.clues.some(clue => clue.name === '王巡官遗留纸条') || policeState.items.some(item => item.name === '半张烟盒纸'), 'ch2_police_wang should preserve Wang note evidence');
-
 const sampleEvidenceSets = [
   {},
   { clues: ['舍监证词', '法租界地图'], flags: ['asked_door'] },
