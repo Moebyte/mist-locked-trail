@@ -79,8 +79,9 @@ const context = vm.createContext({
   console,
   E,
   document: documentStub,
-  window: {},
-  localStorage: { getItem() { return null; }, setItem() {} },
+  URLSearchParams,
+  window: { location: { search: '', hash: '' } },
+  localStorage: { getItem() { return null; }, setItem() {}, removeItem() {} },
   setTimeout(fn) { if (typeof fn === 'function') fn(); },
   clearTimeout() {},
 });
