@@ -1,6 +1,16 @@
 name: Chapter 3 School Hub Physical Removal
 
 on:
+  push:
+    branches:
+      - v1_refactor
+    paths:
+      - '.github/workflows/chapter3-school-hub-physical-removal.yml'
+      - 'scripts/remove-migrated-chapter3-school-hub-from-story.mjs'
+      - 'scripts/check-story-refactor-full.mjs'
+      - 'src/story-chapters/chapter-3-guanghua.js'
+      - 'src/story-chapters/chapter-3-guanghua-contract.js'
+      - 'src/story.js'
   workflow_dispatch:
 
 permissions:
