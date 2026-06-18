@@ -1,0 +1,45 @@
+#status-bar{
+  display:none;
+  padding:12px 0;
+  margin-top:8px;
+  border-top:1px solid var(--line);
+  font-size:13px;
+  color:var(--muted);
+  gap:12px;
+  flex-wrap:wrap;
+}
+
+.stat{
+  display:flex;
+  align-items:center;
+  gap:4px;
+}
+
+.stat .l{color:var(--muted)}
+.stat .v{color:var(--text2);font-weight:bold}
+
+.toast{
+  position:fixed;
+  left:50%;
+  bottom:22px;
+  transform:translateX(-50%);
+  z-index:40;
+  background:
+    linear-gradient(180deg, var(--surface2), var(--surface)),
+    repeating-linear-gradient(0deg, transparent 0 2px, rgba(80,60,30,.015) 2px 4px);
+  border:1px solid var(--line2);
+  color:var(--text);
+  border-radius:2px;
+  padding:10px 18px;
+  font-size:13px;
+  box-shadow:var(--soft-shadow);
+  opacity:0;
+  pointer-events:none;
+  transition:.2s;
+  letter-spacing:1px;
+}
+
+.toast.show{
+  opacity:1;
+  bottom:30px;
+}
