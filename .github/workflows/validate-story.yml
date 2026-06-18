@@ -85,6 +85,9 @@ jobs:
       - name: Smoke test Sun support evidence panel
         run: node scripts/smoke-sun-support-evidence-panel.mjs
 
+      - name: Smoke test darkroom evidence panel
+        run: node scripts/smoke-darkroom-evidence-panel.mjs
+
       - name: Smoke test Sun fast support
         run: node scripts/smoke-sun-fast-support.mjs
 
