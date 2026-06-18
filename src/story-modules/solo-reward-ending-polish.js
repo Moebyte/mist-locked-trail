@@ -67,12 +67,14 @@
       return true;
     }
 
-    function grantSoloDarkroomMarks() {
+    function grantSoloDarkroomMarks(nodeId) {
       if (!canGrantSoloDarkroomMarks()) return;
       E.setFlag('solo_darkroom_marks', true);
       E.addClue('暗室刻痕', '福生仓暗室门背后有两排刻痕：深的一排像沈玉芳刻下的日期，浅的一排像苏晚亭后来补上的记号，最后一格旁边有一个几乎看不清的“陆”字。');
       E.addItem('暗室刻痕拓片', '你用纸轻轻拓下暗室门背后的刻痕。它不是硬物证，却能说明苏晚亭和沈玉芳曾在同一间暗室里互相撑过一段时间。');
-      if (E.getFlag('found_su_at_dock') || E.getFlag('rescued_su')) E.setFlag('solo_rescuer_trust', true);
+      if (nodeId === 'ch4_dock_deep_dual' || E.getFlag('solo_outcome_no_evidence_dual_rescue') || E.getFlag('found_su_at_dock') || E.getFlag('rescued_su')) {
+        E.setFlag('solo_rescuer_trust', true);
+      }
     }
 
     function patchDarkroomNode(nodeId) {
@@ -82,7 +84,7 @@
       const oldText = node.text;
       node.effect = function (state) {
         if (typeof oldEffect === 'function') oldEffect(state);
-        grantSoloDarkroomMarks();
+        grantSoloDarkroomMarks(nodeId);
       };
       node.text = function (state) {
         const base = typeof oldText === 'function' ? oldText(state) : oldText;
