@@ -1,5 +1,5 @@
 // ===== 推理题注册最终兜底 =====
-// 目标：读档或模块顺序导致 E.deductions 为空时，点击推理入口仍能补登记，而不是提示“推理题尚未登记”。
+// 目标：读档、开发者导入或模块顺序导致 E.deductions 为空时，自动补登记，而不是提示“推理题尚未登记”。
 
 (function installDeductionRegistryFinalFix() {
   function applyDeductionRegistryFinalFix() {
@@ -65,6 +65,18 @@
       return findDeduction(id);
     }
 
+    function syncSolvedFlags() {
+      const map = {
+        deduce_chen: 'deduced_chen',
+        deduce_lu_zhao: 'deduced_lu_zhao',
+        deduce_fusheng: 'deduced_fusheng'
+      };
+      for (const [id, flag] of Object.entries(map)) {
+        const d = findDeduction(id);
+        if (d && E.getFlag?.(flag)) d.solved = true;
+      }
+    }
+
     function ensureDeduction(id) {
       if (!Array.isArray(E.deductions)) E.deductions = [];
       let d = findDeduction(id);
@@ -76,6 +88,17 @@
       return d || registerFallback(id);
     }
 
+    function repairDeductionRegistry() {
+      if (!Array.isArray(E.deductions)) E.deductions = [];
+      ensureDeduction('deduce_chen');
+      ensureDeduction('deduce_lu_zhao');
+      ensureDeduction('deduce_fusheng');
+      syncSolvedFlags();
+      return E.deductions;
+    }
+
+    E.repairDeductionRegistry = repairDeductionRegistry;
+
     const oldEnsure = typeof E.ensureDeductionRegistered === 'function' ? E.ensureDeductionRegistered.bind(E) : null;
     E.ensureDeductionRegistered = function (id) {
       const d = oldEnsure ? oldEnsure(id) : null;
@@ -84,6 +107,7 @@
 
     const oldOpenDeductionSafe = typeof E.openDeductionSafe === 'function' ? E.openDeductionSafe.bind(E) : null;
     E.openDeductionSafe = function (id) {
+      repairDeductionRegistry();
       const d = ensureDeduction(id);
       if (!d) {
         this.toast('推理题尚未登记，请刷新页面后重试。');
@@ -105,10 +129,32 @@
     const oldOpenDeduction = typeof E.openDeduction === 'function' ? E.openDeduction.bind(E) : null;
     if (oldOpenDeduction) {
       E.openDeduction = function (id) {
+        repairDeductionRegistry();
         ensureDeduction(id);
         return oldOpenDeduction(id);
       };
     }
+
+    const oldLoadGame = typeof E.loadGame === 'function' ? E.loadGame.bind(E) : null;
+    if (oldLoadGame) {
+      E.loadGame = function (...args) {
+        const result = oldLoadGame(...args);
+        repairDeductionRegistry();
+        return result;
+      };
+    }
+
+    const oldStart = typeof E.start === 'function' ? E.start.bind(E) : null;
+    if (oldStart) {
+      E.start = function (...args) {
+        const result = oldStart(...args);
+        repairDeductionRegistry();
+        return result;
+      };
+    }
+
+    // 开发者导入 state 时经常不会走 loadGame；因此模块加载后也主动修一次。
+    repairDeductionRegistry();
 
     E.__deductionRegistryFinalFixPatched = true;
   }
