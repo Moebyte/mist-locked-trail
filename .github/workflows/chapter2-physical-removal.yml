@@ -2,6 +2,11 @@ name: Chapter 2 Physical Removal
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - v1_refactor
+    paths:
+      - .github/workflows/chapter2-physical-removal.yml
 
 permissions:
   contents: write
