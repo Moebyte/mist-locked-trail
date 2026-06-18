@@ -125,6 +125,8 @@ export function loadStoryRuntime(options = {}) {
   const locationStub = options.location || { href: 'http://localhost/', search: '', hash: '', pathname: '/' };
   const documentStub = createDocumentStub(domReadyHandlers, locationStub);
   const windowStub = { location: locationStub };
+  const URLCtor = globalThis.URL;
+  const URLSearchParamsCtor = globalThis.URLSearchParams;
 
   const context = vm.createContext({
     console,
@@ -132,8 +134,8 @@ export function loadStoryRuntime(options = {}) {
     document: documentStub,
     window: windowStub,
     location: locationStub,
-    URL,
-    URLSearchParams,
+    URL: URLCtor,
+    URLSearchParams: URLSearchParamsCtor,
     localStorage: { getItem() { return null; }, setItem() {} },
     setTimeout(fn) { if (typeof fn === 'function') fn(); },
     clearTimeout() {},
@@ -141,6 +143,9 @@ export function loadStoryRuntime(options = {}) {
   context.globalThis = context;
   context.window = context;
   context.location = locationStub;
+  context.URL = URLCtor;
+  context.URLSearchParams = URLSearchParamsCtor;
+  vm.runInContext('globalThis.URL = URL; globalThis.URLSearchParams = URLSearchParams; window.URL = URL; window.URLSearchParams = URLSearchParams;', context);
 
   function read(rel) {
     return fs.readFileSync(path.join(repoRoot, rel), 'utf8');
