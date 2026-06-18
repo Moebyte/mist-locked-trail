@@ -29,7 +29,7 @@
 
     function isReview(choice) {
       const text = textOf(choice);
-      return text.includes('回顾现有证据') || text.includes('再想想') || choice.goto === 'ch4_conclusion';
+      return text.includes('回顾现有证据') || text.includes('再想想') || text.includes('封卷') || choice.goto === 'ch4_conclusion';
     }
 
     function isDeduceChen(choice) {
@@ -93,10 +93,10 @@
     }
 
     function fallbackReview() {
-      return { text: '🔙 回顾现有证据（暂不推进主线）', goto: 'ch4_conclusion' };
+      return { text: '📁 就此落笔，先把案子封卷', goto: 'ch4_conclusion' };
     }
 
-    function reviewChoice(base, text = '🔙 回顾现有证据（暂不推进主线）') {
+    function reviewChoice(base, text = '📁 就此落笔，先把案子封卷') {
       return { ...(base || fallbackReview()), text, goto: 'ch4_conclusion' };
     }
 
@@ -193,18 +193,18 @@
       if (E.getFlag('deduced_lu_zhao') && !hasSunSupport() && !hasDockEvidence()) {
         const dock = firstMatching(choices, isDock, { text: '⛵ 下一步：去苏州河废弃码头——查福生仓', goto: 'ch4_suzhou_creek' });
         const sun = firstMatching(choices, isSunSupport, { text: '🚓 下一步：去巡捕房找老孙商量福生仓', goto: 'ch4_sun_support' });
-        return [dockSoloChoice(dock), sunChoice(sun), reviewChoice(review, '🔙 回顾现有证据（暂不行动）')];
+        return [dockSoloChoice(dock), sunChoice(sun), reviewChoice(review, '📁 就此落笔，先把案子封卷')];
       }
 
       if (hasSunSupport() && !hasDockEvidence()) {
         const dock = firstMatching(choices, isDock, { text: '⛵ 下一步：去苏州河废弃码头——查福生仓', goto: 'ch4_suzhou_creek' });
-        return [{ ...dock, text: '⛵ 下一步：去苏州河废弃码头——查福生仓' }, reviewChoice(review, '🔙 回顾现有证据（暂不行动）')];
+        return [{ ...dock, text: '⛵ 下一步：去苏州河废弃码头——查福生仓' }, reviewChoice(review, '📁 就此落笔，先把案子封卷')];
       }
 
       if (hasDockEvidence() && !E.getFlag('deduced_fusheng')) {
         const deduce = firstMatching(choices, isDeduceFusheng, null);
-        if (deduce) return [deduceChoice('deduce_fusheng', '🧩 下一步：推理福生仓与公董局的真相', deduce), reviewChoice(review, '🔙 回顾现有证据，准备收束')];
-        return [reviewChoice(review, '🔙 回顾现有证据，准备收束')];
+        if (deduce) return [deduceChoice('deduce_fusheng', '🧩 下一步：推理福生仓与公董局的真相', deduce), reviewChoice(review, '📁 就此落笔，先把案子封卷')];
+        return [reviewChoice(review, '📁 就此落笔，先把案子封卷')];
       }
 
       return choices;
