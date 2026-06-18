@@ -27,6 +27,8 @@
     'src/story-chapters/chapter-2-xuehua-203-contract.js',
     'src/story-chapters/chapter-3-guanghua.js',
     'src/story-chapters/chapter-3-guanghua-contract.js',
+    'src/story-chapters/chapter-3-wrapup.js',
+    'src/story-chapters/chapter-3-wrapup-contract.js',
     'src/story-chapters/endings.js',
     'src/story-chapters/endings-contract.js',
     'src/story-modules/runtime-contract.js',
@@ -78,38 +80,16 @@
     'src/story-modules/dock-escape-choice-polish.js',
     'src/story-modules/dock-exit-hospital-tension-polish.js',
     'src/story-modules/hidden-ending-gate-cleanup.js',
-    'src/story-modules/hospital-flow-polish.js',
-    'src/story-modules/hospital-pressure-witness-polish.js',
-    'src/story-modules/hospital-truth-score-polish.js',
-    'src/story-modules/lu-procedure-truth-polish.js',
-    'src/story-modules/lu-evidence-panel.js',
-    'src/story-modules/fusheng-key-gates-polish.js',
-    'src/story-modules/hospital-triage-polish.js',
-    'src/story-modules/solo-dock-hospital-polish.js',
-    'src/story-modules/solo-entry-choice-label-polish.js',
-    'src/story-modules/dock-hospital-continuity-polish.js',
-    'src/story-modules/hospital-ending-impact-polish.js',
-    'src/story-modules/dynamic-ending-polish.js',
-    'src/story-modules/deadline-deprecation-polish.js',
-    'src/story-modules/fusheng-entry-unblock-polish.js',
-    'src/story-modules/solo-reward-ending-polish.js',
-    'src/story-modules/final-closure-flow-polish.js',
-    'src/story-modules/legacy-quality-scope-polish.js',
-    'src/story-modules/legacy-quality-text-polish.js',
-    'src/story-modules/yufang-testimony-polish.js',
-    'src/story-modules/darkroom-evidence-panel.js',
-    'src/story-modules/conclusion-summary-polish.js',
-    'src/story-modules/status-polish.js',
-    'src/story-modules/ending-layout-polish.js',
-    'src/story-modules/solo-heat-delay-outcomes.js',
+    'src/story-modules/dock-escape-ending-polish.js',
     'src/story-modules/runtime-bugfixes.js',
-    'src/story-modules/url-search-params-polyfill.js',
-    'src/story-modules/dev-mode-panel.js'
+    'src/story-modules/final-closure-flow-polish.js',
+    'src/story-modules/dev-mode-panel.js',
+    'src/story-modules/solo-heat-delay-outcomes.js',
+    'src/story-modules/legacy-quality-text-polish.js',
   ];
 
-  window.MLT_STORY_MODULES = modules.slice();
-
-  for (const src of modules) {
-    document.write(`<script src="${src}"><\/script>`);
+  if (typeof window !== 'undefined') {
+    window.MLT_STORY_MODULES = modules.slice();
+    window.MLT_STORY_MODULES_READY = true;
   }
 })();
