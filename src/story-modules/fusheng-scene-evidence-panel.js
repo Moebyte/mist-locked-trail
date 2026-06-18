@@ -86,26 +86,20 @@
       node[`__${key}Patched`] = true;
     }
 
-    // 账房/蓝封纸节点：进入时即有清场纸，但给玩家一个“确认归档”的显式动作。
+    // 账房/蓝封纸节点：进入账房时原剧情已经读取并收好蓝封纸，不再额外塞“现场确认”按钮。
     for (const id of ['ch4_dock_inner_office', 'ch4_dock_inner_office_limited', 'ch4_dock_inside']) {
       if (nodes[id] && !nodes[id].__sceneClearanceEffectPatched) {
         const oldEffect = nodes[id].effect;
         nodes[id].effect = function (state) {
           if (typeof oldEffect === 'function') oldEffect(state);
-          // 不强制认为玩家已“确认”，只保证清场纸可以作为材料存在。
           if (id === 'ch4_dock_inside') confirmClearance('福生仓入口处');
         };
         nodes[id].__sceneClearanceEffectPatched = true;
       }
       addPanelText(id);
-      appendChoice(id, () => E.getFlag('scene_confirmed_clearance_order') ? null : {
-        text: '📄 现场确认清场指令——蓝封公文纸与“三日内清走”',
-        effect: () => confirmClearance('你在福生仓现场'),
-        goto: id
-      }, 'sceneClearanceChoice');
     }
 
-    // 教具箱节点：保留原 effect，同时显式确认货运单。
+    // 教具箱节点：进入该节点时直接确认货运单，避免在货架页出现两个近似“检查教具箱”选项。
     if (nodes.ch4_dock_crates && !nodes.ch4_dock_crates.__sceneWaybillEffectPatched) {
       const oldEffect = nodes.ch4_dock_crates.effect;
       nodes.ch4_dock_crates.effect = function (state) {
@@ -115,29 +109,19 @@
       nodes.ch4_dock_crates.__sceneWaybillEffectPatched = true;
     }
     addPanelText('ch4_dock_crates');
-    appendChoice('ch4_dock_crates', () => E.getFlag('scene_confirmed_waybill_crates') ? null : {
-      text: '📦 现场确认光华货运单——学校名义接到福生仓',
-      effect: () => confirmWaybill('你在教具箱夹层'),
-      goto: 'ch4_dock_crates'
-    }, 'sceneWaybillChoice');
 
-    // 货架核心区域：给玩家明确先确认哪一类现场证据。
+    // 货架核心区域：只补现场确认面板，不额外添加与“检查教具箱”重复的选项。
     for (const id of ['ch4_dock_shelf_approach', 'ch4_dock_shelf_approach_limited']) {
       addPanelText(id);
-      appendChoice(id, () => E.getFlag('scene_confirmed_waybill_crates') ? null : {
-        text: '📦 先确认教具箱和货运单，再去找声音来源',
-        effect: () => confirmWaybill('你在货架旁'),
-        goto: 'ch4_dock_crates'
-      }, 'sceneShelfWaybillChoice');
       appendChoice(id, () => E.getFlag('scene_confirmed_clearance_order') ? null : {
-        text: '📄 回头确认账房里的蓝封清场纸',
+        text: '📄 回头看一眼账房里的蓝封纸',
         effect: () => confirmClearance('你回头在账房'),
         goto: id.includes('limited') ? 'ch4_dock_inner_office_limited' : 'ch4_dock_inner_office'
       }, 'sceneShelfClearanceChoice');
     }
 
-    // 暗门/暗室节点：确认关押痕迹。
-    for (const id of ['ch4_dock_deep', 'ch4_dock_locked_door', 'ch4_dock_who', 'ch4_dock_who_dual']) {
+    // 暗室痕迹只有进入暗室后才能确认；暗门还没撬开时不显示床、水桶、刻痕相关选项。
+    for (const id of ['ch4_dock_deep', 'ch4_dock_who', 'ch4_dock_who_dual']) {
       addPanelText(id);
       appendChoice(id, () => E.getFlag('scene_confirmed_darkroom_marks') ? null : {
         text: '🕯️ 趁离开前记下暗室里的痕迹',
@@ -145,12 +129,13 @@
         goto: id
       }, 'sceneDarkroomChoice');
     }
+    addPanelText('ch4_dock_locked_door');
 
     // 码头对峙 / 傅启元相关节点：确认人物链条。
     for (const id of ['ch4_fu_confront', 'ch4_dock_escape', 'ch4_dock_escape_finish']) {
       addPanelText(id);
       appendChoice(id, () => E.getFlag('scene_confirmed_fu_lu_conversation') ? null : {
-        text: '🎙️ 记录傅启元与陆念薇/码头人员的对话链条',
+        text: '🎙️ 记下傅启元和陆念薇露出的那几句话',
         effect: () => confirmConversation('你在码头'),
         goto: id
       }, 'sceneConversationChoice');
