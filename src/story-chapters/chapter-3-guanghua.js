@@ -79,11 +79,35 @@
           { text: '🔙 回到校长办公室', goto: 'ch3_school' },
         ],
       },
+
+      ch3_school_office: {
+        title: '陈老师的办公室',
+        text: () => `吴校长带你来到一楼拐角的一间办公室。门上贴着"陈明远老师"的名牌，已经有些褪色。
+
+办公室已经被收拾过了——书架上空了一大半，桌面干净得像没人用过一样。
+
+但你还是发现了一些东西。
+
+在书桌最底层的抽屉里，有一个夹层——你摸到了。撬开夹层，里面有一个牛皮纸信封。
+
+信封里装着三样东西：
+
+<b>一、</b>一张当票——"永昌当铺 · 民国三十七年九月 · 押：翡翠镯一只 · 洋三百元"。
+
+<b>二、</b>一封没有寄出的信。开头是："晚亭吾爱……"
+
+<b>三、</b>一张黑白照片——陈老师、苏晚亭，还有一个穿旗袍的女人。三个人站在一座教堂前。那个女人你在茶楼见过——沈玉兰。`,
+        effect: (s) => { E.addClue('陈老师遗物', '当票、给苏晚亭的信、三人合影'); E.addClue('陈老师给苏晚亭的信', '"晚亭吾爱"开头——两人关系不一般'); E.addItem('永昌当票', '民国三十七年九月，押翡翠镯一只，洋三百元。'); E.addItem('未寄出的信', '陈明远写给苏晚亭的信，开头是"晚亭吾爱"。'); E.setFlag('got_chen_evidence', true); },
+        choices: [
+          { text: '📩 看那封信的内容', goto: 'ch3_chen_letter' },
+          { text: '🔙 整理线索，准备结案', goto: 'ch3_wrapup' },
+        ],
+      },
     });
 
     if (typeof window !== 'undefined') {
       window.MLT_STORY_CHAPTER_3_GUANGHUA_READY = true;
-      window.MLT_STORY_CHAPTER_3_GUANGHUA_NODES = ['ch3_school_chen_su', 'ch3_school_yufang', 'ch3_school_weird'];
+      window.MLT_STORY_CHAPTER_3_GUANGHUA_NODES = ['ch3_school_chen_su', 'ch3_school_yufang', 'ch3_school_weird', 'ch3_school_office'];
     }
   }
 
