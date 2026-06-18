@@ -196,6 +196,25 @@
       ]
     };
 
+    nodes.ch4_dock_deep_empty_heat = {
+      title: '福生仓 · 声音停了',
+      weather: 5,
+      effect: () => {
+        E.setFlag('solo_outcome_full_evidence_no_rescue', true);
+        E.setFlag('missed_both_at_dock', true);
+        E.setFlag('missed_yufang_at_dock', true);
+        E.setFlag('su_moved_from_dock', true);
+        E.setFlag('yufang_moved_from_dock', true);
+        E.addClue('暗室刚被清空', '你在福生仓里拖得太久或动静太大，打开暗门时里面只剩刚被带走的痕迹。');
+        E.addClue('沈玉芳曾在暗室', '暗室墙边有沈玉芳留下的半截粉笔和一道反复刻出的“沈”字。');
+        E.addClue('苏晚亭曾在暗室', '暗室床缝里有苏晚亭的学生证和半张写给母亲的字条，她也曾被关在这里。');
+        E.addItem('苏晚亭学生证', '暗室床缝里找到的学生证，边角被水泡软。');
+        E.addItem('沈玉芳半截粉笔', '暗室墙边捡到的半截粉笔，旁边刻着一个反复划出的“沈”字。');
+      },
+      text: () => `你推开暗门时，门后的敲击声已经停了。<br><br>暗室里只剩一盏快要熄灭的煤油灯，一张还带着余温的行军床，和地上被匆忙拖过的痕迹。<br><br>你在床缝里摸到一张学生证，又在墙角看见半截粉笔。证据还在，可活人的声音已经被货车带进雾里。<br><br>你没有救出沈玉芳。<br><br>也没有救出苏晚亭。`,
+      choices: [{ text: '🌫️ 带着完整证据撤出福生仓', goto: 'ch4_dock_escape_evidence_only' }]
+    };
+
     nodes.ch4_dock_escape_evidence_only = {
       title: '福生仓 · 带证据撤离',
       weather: 5,
