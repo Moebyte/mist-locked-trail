@@ -86,6 +86,16 @@
       return `${k.labels.entry} / ${k.labels.darkroom} / ${k.labels.suTrust}`;
     };
 
+    if (typeof E.routeDockDeepByPressure === 'function' && !E.__fushengKeyRouteDeepPatched) {
+      const oldRouteDockDeepByPressure = E.routeDockDeepByPressure.bind(E);
+      E.routeDockDeepByPressure = function () {
+        const k = this.fushengKeyState();
+        if (k.entry && !k.darkroom) return 'ch4_dock_no_darkroom';
+        return oldRouteDockDeepByPressure();
+      };
+      E.__fushengKeyRouteDeepPatched = true;
+    }
+
     function keyBadge() {
       if (typeof E.fushengKeySummary !== 'function') return '';
       return `<br><br><span class="sys">福生仓钥匙：${E.fushengKeySummary()}</span>`;
@@ -165,7 +175,7 @@
         if (!k.suTrustToken) {
           return base.map(choice => {
             const text = choice.text || '';
-            if (choice.goto === 'ch4_dock_escape' || text.includes('立刻带她们')) {
+            if (choice.goto === 'ch4_dock_escape' || text.includes('立刻带她们') || text.includes('带苏晚亭和沈玉芳')) {
               return {
                 ...choice,
                 text: '⚠️ 没有信物，仍然强行带她们离开暗室'
@@ -207,7 +217,7 @@
       };
       nodes.ch4_dock_escape_finish.text = function (state) {
         if (E.getFlag('found_su_at_dock') && !suTrustProof()) {
-          return `黄包车的铃铛在深夜街道上响起。<br><br>沈玉芳蜷在车座一角，手指死死攥着你的衣袖。苏晚亭曾经就在你背后不远处，可码头乱起来的那一刻，她没有跟上来。<br><br>她太虚弱，也太警惕。你说自己是周怀安请来的侦探，可她只是看着你，像隔着一层很厚的雾。<br><br>如果你把苏母托付的银发夹拿给她看，也许她会相信你。<br><br>可你没有。<br><br>傅启元的人趁乱把她重新拖上车。你只来得及抢回沈玉芳，和苏晚亭曾经还活着的证明。`;
+          return `黄包车的铃铛在深夜街道上响起。<br><br>沈玉芳蜷在车座一角，手指死死攥着你的衣袖。苏晚亭曾经就在你背后不远处，可码头乱起来的那一刻，她没有跟上来。<br><br>她太虚弱，也太警惕。你说自己是周怀安请来的侦探，可她只是看着你，像隔着一层很厚的雾。<br><br>如果你把苏母托付的银发夹拿给她看，也许她会相信你。<br><br>可你没有。<br><br>傅启元的人趁乱把她重新拖上车。你只来得及抢回沈玉芳，和苏晚亭曾经还活着的证明。<br><br><span class="sys">双救路线关闭：没有苏母信物，苏晚亭无法在码头撤离中信任你。</span>`;
         }
         const base = typeof oldText === 'function' ? oldText(state) : oldText;
         return `${base}`;
