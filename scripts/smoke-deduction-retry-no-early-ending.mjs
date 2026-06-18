@@ -78,9 +78,16 @@ reset({
   items: [
     { name: '陈明远残信', desc: '' },
     { name: '苏晚亭疑似遗书', desc: '' },
+    { name: '永昌当票', desc: '' },
   ],
   clues: [
     { name: '推理结论：陈明远被灭口', desc: '' },
+    { name: '203 室恐吓信', desc: '' },
+    { name: '三人合影', desc: '' },
+    { name: '杭州旧案剪报', desc: '' },
+    { name: '光华小学箱子异常', desc: '' },
+    { name: '黑衣男人线索', desc: '' },
+    { name: '沈玉兰的妹妹', desc: '' },
   ],
 });
 let list = choices('ch4_conclusion');
@@ -89,8 +96,8 @@ assert(hasChoice(list, '暂时归档', 'end_archive'), `非三证光华后应保
 assert(hasChoice(list, '压成一份指认', 'ch4_accuse'), `非三证光华后应保留案情指认入口，实际 ${JSON.stringify(list)}`);
 
 list = choices('ch4_accuse');
-assert(hasChoice(list, '旧名、当票和203室', 'end_boss_lu'), `案情指认应保留陆小姐表层方向，实际 ${JSON.stringify(list)}`);
-assert(hasChoice(list, '一直在盯陆小姐和沈玉芳', 'end_boss_zhao'), `案情指认应保留赵先生表层方向，实际 ${JSON.stringify(list)}`);
+assert(hasChoice(list, '203、旧名和当票', 'end_boss_lu'), `案情指认应保留陆小姐表层方向，实际 ${JSON.stringify(list)}`);
+assert(hasChoice(list, '黑衣男人与沈玉芳', 'end_boss_zhao'), `案情指认应保留赵先生表层方向，实际 ${JSON.stringify(list)}`);
 assert(hasChoice(list, '学校口径最能把事情压下去', 'end_boss_wu'), `案情指认应保留吴校长表层方向，实际 ${JSON.stringify(list)}`);
 
 if (errors.length) {
