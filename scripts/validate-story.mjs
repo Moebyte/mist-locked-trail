@@ -202,33 +202,26 @@ function resetLegalDockState(overrides = {}) {
 
 try {
   resetLegalDockState({ inGameTime: { day: 1, hour: 14, minute: 30 } });
-  visit('ch4_suzhou_creek');
-  // 新版: 码头入口前按支援模式路由（默认SOLO），进入码头后时间压力才影响搜索
+  // 新版：码头入口前按支援模式路由；硬时间结局已退役，过时钟不会直接清空入口。
   expectEqual(E.routeDockByPressure(), 'ch4_dock_solo_infiltration', 'safe routeDockByPressure (pre-entry)');
   expectEqual(E.routeDockDeepByPressure(), 'ch4_dock_deep_dual', 'safe routeDockDeepByPressure');
 
-  // 有支援但未进入码头时：按支援模式路由
   resetLegalDockState({ inGameTime: { day: 1, hour: 14, minute: 30 }, flags: { sun_fast_support: true } });
-  visit('ch4_suzhou_creek');
   expectEqual(E.routeDockByPressure(), 'ch4_dock_fast_infiltration', 'fast support route (pre-entry)');
   
   resetLegalDockState({ inGameTime: { day: 1, hour: 14, minute: 30 }, flags: { sun_full_support: true } });
-  visit('ch4_suzhou_creek');
   expectEqual(E.routeDockByPressure(), 'ch4_dock_full_support_infiltration', 'full support route (pre-entry)');
 
   resetLegalDockState({ inGameTime: { day: 2, hour: 14, minute: 0 } });
-  visit('ch4_suzhou_creek');
   expectEqual(E.routeDockByPressure(), 'ch4_dock_solo_infiltration', 'tight routeDockByPressure (pre-entry)');
   expectEqual(E.routeDockDeepByPressure(), 'ch4_dock_deep_dual', 'tight routeDockDeepByPressure');
 
   resetLegalDockState({ inGameTime: { day: 2, hour: 20, minute: 30 } });
-  visit('ch4_suzhou_creek');
   expectEqual(E.routeDockByPressure(), 'ch4_dock_solo_infiltration', 'critical routeDockByPressure (pre-entry)');
   expectEqual(E.routeDockDeepByPressure(), 'ch4_dock_deep_dual', 'critical routeDockDeepByPressure');
 
   resetLegalDockState({ inGameTime: { day: 2, hour: 23, minute: 30 } });
-  visit('ch4_suzhou_creek');
-  expectEqual(E.routeDockByPressure(), 'ch4_dock_cleared', 'expired routeDockByPressure');
+  expectEqual(E.routeDockByPressure(), 'ch4_dock_solo_infiltration', 'expired routeDockByPressure after deadline retirement');
 } catch (err) { errors.push(`pressure smoke failed: ${err.message}`); }
 
 const staticGotoMatches = [...sourceText.matchAll(/goto:\s*['"`]([^'"`]+)['"`]/g)].map(m => m[1]);
