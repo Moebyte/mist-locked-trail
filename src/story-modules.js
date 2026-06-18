@@ -83,6 +83,7 @@
     'src/story-modules/fusheng-entry-unblock-polish.js',
     'src/story-modules/wrapup-no-repeat-fusheng-entry-fix.js',
     'src/story-modules/causal-echo.js',
+    'src/story-modules/casebook-graph-polish.js',
     'src/story-modules/dev-mode-panel.js'
   ];
 
