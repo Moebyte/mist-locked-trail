@@ -129,7 +129,7 @@
         return out;
       }
 
-      if (thirdDeductionReady() && E.canDeduce?.('deduce_fusheng') && !out.some(choice => (choice.text || '').includes('福生仓与公董局'))) {
+      if (thirdDeductionReady() && !out.some(choice => (choice.text || '').includes('福生仓与公董局'))) {
         out.unshift({ text: '🧩 第三段推理——福生仓与公董局', effect: () => E.openDeductionSafe ? E.openDeductionSafe('deduce_fusheng') : E.openDeduction('deduce_fusheng') });
       }
 
