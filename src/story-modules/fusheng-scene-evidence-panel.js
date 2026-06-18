@@ -4,7 +4,7 @@
 // 1) 清场指令 / 蓝封公文纸：程序压力与傅启元清场。
 // 2) 光华教具箱 / 货运单：学校名义和福生仓货路。
 // 3) 暗室痕迹：关押事实，不只是口供。
-// 4) 傅启元/陆念薇对话或码头正面压制：人物链条。
+// 4) 码头对峙里露出的几句话：人物链条。
 // 本模块只补确认面板和统一 flag，不改变潜入热度/逃离机制。
 
 (function installFushengSceneEvidencePanel() {
@@ -43,9 +43,9 @@
       }
     }
 
-    function confirmConversation(prefix = '福生仓现场') {
+    function confirmConversation(prefix = '码头上') {
       E.setFlag('scene_confirmed_fu_lu_conversation', true);
-      E.addClue('现场确认：傅启元与陆念薇对话', `${prefix}听见傅启元与陆念薇谈到清场、转运和知情人，人物链条不再只靠推测。`);
+      E.addClue('现场确认：码头对话', `${prefix}露出的几句话把清场、转运和知情人串到了一起。`);
     }
 
     function confirmedSummary() {
@@ -53,7 +53,7 @@
       if (E.getFlag('scene_confirmed_clearance_order') || hasThing('清场指令') || hasThing('公董局公文纸')) parts.push('清场指令/蓝封公文纸');
       if (E.getFlag('scene_confirmed_waybill_crates') || hasThing('光华货运单') || hasThing('教具箱走私')) parts.push('光华教具箱/货运单');
       if (E.getFlag('scene_confirmed_darkroom_marks') || hasThing('仓库暗室') || hasThing('现场确认：暗室关押痕迹')) parts.push('暗室关押痕迹');
-      if (E.getFlag('scene_confirmed_fu_lu_conversation') || E.getFlag('dock_sun_pressed_fu') || hasThing('现场确认：傅启元与陆念薇对话')) parts.push('傅启元/陆念薇人物链条');
+      if (E.getFlag('scene_confirmed_fu_lu_conversation') || E.getFlag('dock_sun_pressed_fu') || hasThing('现场确认：码头对话')) parts.push('码头上露出的对话');
       return parts.length ? parts.join('；') : '尚未确认任何现场核心证据';
     }
 
@@ -131,15 +131,15 @@
     }
     addPanelText('ch4_dock_locked_door');
 
-    // 码头对峙 / 傅启元相关节点：确认人物链条。
-    for (const id of ['ch4_fu_confront', 'ch4_dock_escape', 'ch4_dock_escape_finish']) {
-      addPanelText(id);
-      appendChoice(id, () => E.getFlag('scene_confirmed_fu_lu_conversation') ? null : {
-        text: '🎙️ 记下傅启元和陆念薇露出的那几句话',
-        effect: () => confirmConversation('你在码头'),
-        goto: id
-      }, 'sceneConversationChoice');
-    }
+    // 只有真正进入码头对峙节点后，才允许玩家记下对话；不要在普通撤离页提前点名傅启元/陆念薇。
+    addPanelText('ch4_fu_confront');
+    appendChoice('ch4_fu_confront', () => E.getFlag('scene_confirmed_fu_lu_conversation') ? null : {
+      text: '🎙️ 记下码头上露出的那几句话',
+      effect: () => confirmConversation('你在码头'),
+      goto: 'ch4_fu_confront'
+    }, 'sceneConversationChoice');
+    addPanelText('ch4_dock_escape');
+    addPanelText('ch4_dock_escape_finish');
 
     if (typeof E.v07InvestigationQuality === 'function' && !E.__fushengSceneQualityPatched) {
       const oldQuality = E.v07InvestigationQuality.bind(E);
@@ -152,7 +152,7 @@
         if (this.getFlag('scene_confirmed_fu_lu_conversation')) confirmed += 1;
         if (confirmed >= 3) {
           quality.score += 1;
-          quality.reasons.push('福生仓现场证据确认完整，物证、关押痕迹与人物链条互相咬合');
+          quality.reasons.push('福生仓现场证据确认完整，物证、关押痕迹与码头对话互相咬合');
         }
         return quality;
       };
