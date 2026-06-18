@@ -34,6 +34,7 @@
     'src/story-modules/location-hub-flow-polish.js',
     'src/story-modules/location-hub-detail-text-polish.js',
     'src/story-modules/present-flow-cleanup.js',
+    'src/story-modules/zhou-jade-present-node-fix.js',
     'src/story-modules/deduction-flow-guidance.js',
     'src/story-modules/wrapup-priority-guidance.js',
     'src/story-modules/premature-conclusion-polish.js',
