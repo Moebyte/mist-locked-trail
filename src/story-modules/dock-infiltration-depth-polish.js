@@ -86,9 +86,9 @@
       text: () => `你贴着货架往里走。麻袋、油布和空木箱把通道切成几段，稍不留神就会碰出声响。<br><br>穿过第二排货架后，你终于看见那排标着“光华小学·教学器材”的木箱。箱盖有被撬过的痕迹，旁边散着草绳和钉子。<br><br>敲击声就在木箱后面的墙里。<br><br>现在你才真正到了仓库核心。`,
       choices: () => {
         const out = [
-          { text: '📦 蹲下翻开旁边那只教具箱', goto: 'ch4_dock_crates' },
-          { text: '🔦 敲击声还在，先往木箱后面摸过去', effect: () => addHeat(1, '你绕过木箱直接去找声音来源，脚步节奏变得急了。', 'skipped_crates_for_sound'), goto: 'ch4_dock_locked_door' },
-          { text: '⚠️ 跨过草绳，抢到木箱后面', effect: () => addHeat(1, '你跨过草绳时踢到一枚钉子，声音在货架间弹了一下。', 'dock_reached_crate_area_fast'), goto: 'ch4_dock_locked_door' }
+          { text: '📦 先检查旁边的教具箱', goto: 'ch4_dock_crates' },
+          { text: '🔦 先循着敲击声去仓库深处', effect: () => addHeat(1, '你绕过木箱直接去找声音来源，脚步节奏变得急了。', 'skipped_crates_for_sound'), goto: 'ch4_dock_locked_door' },
+          { text: '⚠️ 直接跨过散落草绳，抢到木箱后面', effect: () => addHeat(1, '你跨过草绳时踢到一枚钉子，声音在货架间弹了一下。', 'dock_reached_crate_area_fast'), goto: 'ch4_dock_locked_door' }
         ];
         if (!E.getFlag('dock_clearance_seen_inside')) {
           out.push({ text: '🗂️ 回头看一眼临时账房里的公文夹', goto: 'ch4_dock_inner_office' });
@@ -105,9 +105,9 @@
       text: () => `货架已经空了一半，地上拖着新鲜车辙和草绳。<br><br>你弯腰穿过油布，听见外面有人喊“快点”。<br><br>右侧还有几只没搬走的木箱，上面仍写着“光华小学·教学器材”。更深处的敲击声断断续续，像是随时会被外面的装车声盖住。`,
       choices: () => {
         const out = [
-          { text: '📦 冒险翻开旁边那只教具箱', goto: 'ch4_dock_crates' },
-          { text: '🔦 敲击声还在，先往木箱后面摸过去', effect: () => addHeat(1, '你绕过木箱直接去找声音来源，脚步节奏变得急了。', 'skipped_crates_for_sound'), goto: 'ch4_dock_locked_door' },
-          { text: '⚠️ 跨过草绳，抢到木箱后面', effect: () => addHeat(1, '你跨过草绳时踢到一枚钉子，声音在货架间弹了一下。', 'dock_reached_crate_area_fast'), goto: 'ch4_dock_locked_door' }
+          { text: '📦 先检查旁边的教具箱', goto: 'ch4_dock_crates' },
+          { text: '🔦 先循着敲击声去仓库深处', effect: () => addHeat(1, '你绕过木箱直接去找声音来源，脚步节奏变得急了。', 'skipped_crates_for_sound'), goto: 'ch4_dock_locked_door' },
+          { text: '⚠️ 直接跨过散落草绳，抢到木箱后面', effect: () => addHeat(1, '你跨过草绳时踢到一枚钉子，声音在货架间弹了一下。', 'dock_reached_crate_area_fast'), goto: 'ch4_dock_locked_door' }
         ];
         if (!E.getFlag('dock_clearance_seen_inside')) {
           out.push({ text: '🗂️ 回头看一眼账房里的蓝封纸', goto: 'ch4_dock_inner_office_limited' });
