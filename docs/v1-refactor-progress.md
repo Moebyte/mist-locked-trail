@@ -130,7 +130,7 @@ The second script is now an idempotent regression check. It should report that n
 
 ### Phase 5 — Chapter 3 high-risk migration
 
-Status: first-batch runtime takeover and dry-run removal guard added.
+Status: first-batch runtime takeover and dry-run removal guard added; physical removal workflow created.
 
 Selected first batch:
 
@@ -157,7 +157,13 @@ Dedicated first-batch removal script:
 scripts/remove-migrated-chapter3-first-batch-from-story.mjs
 ```
 
-The removal script is currently part of the full check as a dry-run. Physical removal from `src/story.js` is not done yet.
+Physical removal workflow:
+
+```text
+.github/workflows/chapter3-first-batch-physical-removal.yml
+```
+
+This workflow runs the full check before and after removal, executes only the first-batch removal script with `--write`, and commits `src/story.js` only if a generated change exists.
 
 ## Current gate setup
 
@@ -196,28 +202,18 @@ This full check includes the Chapter 3 pre-migration audit, the first-batch Chap
 
 ## Current next step
 
-Next step: run and review the full check.
+Next step: wait for the Chapter 3 First Batch Physical Removal workflow to finish.
 
-```bash
-node scripts/check-story-refactor-full.mjs
-```
-
-Audit details are documented in:
+Expected generated commit:
 
 ```text
-docs/chapter3-migration-audit.md
+Remove migrated chapter 3 first batch node from story
 ```
 
-If the full check passes, execute the dedicated removal script with `--write` for the selected first batch only:
+After it succeeds, remove the temporary `push` trigger from:
 
-```bash
-node scripts/remove-migrated-chapter3-first-batch-from-story.mjs --write
-```
-
-Then immediately run:
-
-```bash
-node scripts/check-story-refactor-full.mjs
+```text
+.github/workflows/chapter3-first-batch-physical-removal.yml
 ```
 
 Do not reuse the Chapter 2 removal script for Chapter 3.
