@@ -2,11 +2,6 @@ name: Chapter 3 First Batch Physical Removal
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - v1_refactor
-    paths:
-      - .github/workflows/chapter3-first-batch-physical-removal.yml
 
 permissions:
   contents: write
