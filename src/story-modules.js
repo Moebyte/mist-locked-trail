@@ -9,7 +9,6 @@
     'src/story-modules/evidence.js',
     'src/story-modules/evidence-polish.js',
     'src/story-modules/narrative-depth.js',
-    'src/story-modules/causal-echo.js',
     'src/story-modules/engine-ui-runtime-restore.js',
     'src/story-modules/ui-responsive.js',
     'src/story-modules/region-gates.js',
@@ -83,6 +82,7 @@
     'src/story-modules/runtime-bugfixes.js',
     'src/story-modules/fusheng-entry-unblock-polish.js',
     'src/story-modules/wrapup-no-repeat-fusheng-entry-fix.js',
+    'src/story-modules/causal-echo.js',
     'src/story-modules/dev-mode-panel.js'
   ];
 
