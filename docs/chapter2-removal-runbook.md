@@ -19,7 +19,7 @@ node scripts/remove-migrated-chapter2-from-story.mjs
 
 `check-story-refactor.mjs` is intentionally narrow. It checks the story module manifest and the final Chapter 2 runtime state. It does not run broad save, smoke, or fuzz checks.
 
-The second command is a dry-run. It must report that all migrated Chapter 2 nodes can be removed and must list non-overlapping ranges.
+The second command is a dry-run. Before physical removal, it must report that all migrated Chapter 2 nodes can be removed and must list non-overlapping ranges.
 
 ## Optional full check
 
@@ -46,7 +46,7 @@ node scripts/check-story-refactor.mjs
 node scripts/remove-migrated-chapter2-from-story.mjs
 ```
 
-The second command should fail after physical removal because migrated Chapter 2 nodes are no longer expected to exist in `src/story.js`. At that point, update or retire the removal script so it no longer assumes the legacy fallback is present.
+After physical removal, the second command should pass by reporting that no migrated Chapter 2 node definitions remain in `src/story.js`. If only some migrated nodes are missing and others remain, the script treats that as a partial-removal error.
 
 ## Do not
 
