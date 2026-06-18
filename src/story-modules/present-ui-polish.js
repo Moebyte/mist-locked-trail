@@ -41,8 +41,16 @@
       if (typeof E !== 'undefined' && E.state === state) E.state.flags = state.flags;
     }
 
+    function displayThing(thing) {
+      if (!thing) return thing;
+      if (thing.name === '苏晚亭的伪造遗书') {
+        return { ...thing, name: '苏晚亭疑似遗书', desc: thing.desc || '字迹像苏晚亭，却安静得像有人替所有人把结论写好。' };
+      }
+      return thing;
+    }
+
     function cloneThing(type, thing) {
-      return { type, name: thing.name, desc: thing.desc };
+      return displayThing({ type, name: thing.name, desc: thing.desc });
     }
 
     function clueAllowedByNode(node, clue, state) {
@@ -165,7 +173,7 @@
       nodes.ch4_revisit_zhou.presentFilter = function (thing, state) {
         if (isBadRouteLocked()) {
           return thing.type === 'item'
-            && ['陈明远的信', '苏晚亭的遗书', '苏晚亭的伪造遗书'].includes(thing.name);
+            && ['陈明远的信', '苏晚亭的遗书', '苏晚亭疑似遗书'].includes(displayThing(thing).name);
         }
         return typeof oldFilter === 'function' ? oldFilter(thing, state) : true;
       };
