@@ -49,6 +49,7 @@ for (const rel of discoveredModules) {
 }
 
 const requiredModules = [
+  'src/story-chapters/index.js',
   'src/story-modules/runtime-contract.js',
   'src/story-modules/consistency.js',
   'src/story-modules/evidence.js',
