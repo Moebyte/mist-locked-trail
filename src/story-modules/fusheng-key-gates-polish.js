@@ -22,13 +22,23 @@
         || hasThing('福生仓位置');
     }
 
+    function onSiteDarkroomLead() {
+      return E.getFlag('dock_reached_crate_area')
+        || E.getFlag('dock_reached_crate_area_fast')
+        || E.getFlag('found_door_tool')
+        || E.getFlag('dock_hid_in_crate')
+        || E.getFlag('dock_guard_chase_no_hide')
+        || hasThing('仓库暗室');
+    }
+
     function darkroomKey() {
       return E.getFlag('sister_case')
         || E.getFlag('talked_to_woman')
         || hasThing('沈玉芳')
         || hasThing('沈玉兰的妹妹')
         || hasThing('沈玉芳与陈明远')
-        || hasThing('沈玉芳人质线');
+        || hasThing('沈玉芳人质线')
+        || onSiteDarkroomLead();
     }
 
     function suTrustToken() {
@@ -94,11 +104,6 @@
         return oldRouteDockDeepByPressure();
       };
       E.__fushengKeyRouteDeepPatched = true;
-    }
-
-    function keyBadge() {
-      if (typeof E.fushengKeySummary !== 'function') return '';
-      return `<br><br><span class="sys">福生仓钥匙：${E.fushengKeySummary()}</span>`;
     }
 
     function choicesOf(source, state) {
