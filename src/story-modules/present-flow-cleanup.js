@@ -59,7 +59,7 @@
       const opts = [];
       if (hasItem('翡翠镯') && !E.getFlag('presented_jade_to_zhou') && !E.getFlag('presented_jade_to_zhou_premature')) {
         opts.push({
-          text: '🟢 拿出翡翠镯，问他是否听过“陆念”',
+          text: '🟢 追问“陆念”——苏晚亭生前是否提过这个名字',
           effect: () => {
             if (isBadRouteLocked()) E.setFlag('presented_jade_to_zhou_premature', true);
             else E.setFlag('presented_jade_to_zhou', true);
@@ -143,7 +143,7 @@
         return base.map(choice => {
           const text = choice.text || '';
           if (choice.goto === 'ch4_conclusion' || text.includes('带着翡翠镯回去整理') || text.includes('所有的线索都齐了')) {
-            return { ...choice, text: '🔙 带着翡翠镯回去整理下一步', goto: 'ch3_wrapup' };
+            return { ...choice, text: '🔙 带着“陆念”这个名字回去整理下一步', goto: 'ch3_wrapup' };
           }
           return choice;
         });
@@ -156,7 +156,7 @@
       nodes.ch4_revisit_zhou.presentFilter = () => false;
       nodes.ch4_revisit_zhou.text = function () {
         const hints = [];
-        if (hasItem('翡翠镯') && !E.getFlag('presented_jade_to_zhou') && !E.getFlag('presented_jade_to_zhou_premature')) hints.push('翡翠镯能问出“陆念”这个名字。');
+        if (hasItem('翡翠镯') && !E.getFlag('presented_jade_to_zhou') && !E.getFlag('presented_jade_to_zhou_premature')) hints.push('“陆念”这个名字，需要向最熟悉苏晚亭近况的人核对。');
         if (hasChenLetter() && !E.getFlag('presented_chen_letter_to_zhou')) hints.push('陈明远那封未寄出的信，能让周怀安知道晚亭真正卷进了什么。');
         if (hasSuLastLetter() && !E.getFlag('presented_su_last_letter_to_zhou')) hints.push('那封疑似遗书，需要让最熟悉晚亭的人判断真假。');
         if (hasItem('半张烟盒纸') && !E.getFlag('presented_wang_note_to_zhou')) hints.push('王巡官留下的半张烟盒纸，能说明这不是普通失踪案。');
