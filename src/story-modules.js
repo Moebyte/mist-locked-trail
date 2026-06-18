@@ -1,7 +1,3 @@
-// ===== 故事模块入口 =====
-// 约定：稳定故事模块按依赖顺序登记在这里，index.html 只加载本文件。
-// 这里是正式模块清单，不再使用版本补丁语义。
-
 (function loadStoryModules() {
   const modules = [
     'src/story-chapters/index.js',
@@ -15,6 +11,8 @@
     'src/story-chapters/chapter-2-frenchtown-entry-contract.js',
     'src/story-chapters/chapter-2-frenchtown-tail.js',
     'src/story-chapters/chapter-2-frenchtown-tail-contract.js',
+    'src/story-chapters/chapter-2-building-enter.js',
+    'src/story-chapters/chapter-2-building-enter-contract.js',
     'src/story-chapters/chapter-2-xuehua-203.js',
     'src/story-chapters/chapter-2-xuehua-203-contract.js',
     'src/story-chapters/endings.js',
