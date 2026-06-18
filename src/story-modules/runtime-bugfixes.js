@@ -227,6 +227,7 @@
       || E.getFlag('found_door_tool')
       || E.getFlag('dock_hid_in_crate')
       || E.getFlag('dock_guard_chase_no_hide')
+      || E.getFlag('dock_broke_lock_no_tool')
       || hasThing('沈玉芳')
       || hasThing('沈玉兰的妹妹')
       || hasThing('沈玉芳与陈明远')
@@ -234,10 +235,24 @@
       || hasThing('仓库暗室');
   }
 
+  function hasForcedLockHighRiskStack() {
+    return E.getFlag('dock_shelf_shortcut')
+      || E.getFlag('skipped_crates_for_sound')
+      || E.getFlag('skipped_dock_hide')
+      || E.getFlag('dock_guard_chase_no_hide')
+      || E.getFlag('dock_inner_office_rushed')
+      || E.getFlag('dock_reached_crate_area_fast');
+  }
+
   function patchFushengDeepGateTail() {
     if (typeof E.routeDockDeepByPressure !== 'function' || E.__runtimeFushengDeepGateTailPatched) return;
     const oldRouteDockDeepByPressure = E.routeDockDeepByPressure.bind(E);
     E.routeDockDeepByPressure = function () {
+      if (this.getFlag('dock_broke_lock_no_tool')) {
+        const tier = typeof this.dockHeatTier === 'function' ? this.dockHeatTier() : { key: 'mid' };
+        if (tier.key === 'high' && hasForcedLockHighRiskStack()) return 'ch4_dock_deep_empty_heat';
+        return 'ch4_dock_deep_trace';
+      }
       if (hasFushengEntryKey() && !hasDarkroomLead()) return 'ch4_dock_no_darkroom';
       return oldRouteDockDeepByPressure();
     };
