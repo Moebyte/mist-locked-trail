@@ -40,14 +40,6 @@
         || (E.getFlag('presented_threat_to_wu') && E.getFlag('presented_photo_to_wu') && E.getFlag('presented_university_to_wu'));
     }
 
-    function missingWuProofLabels() {
-      const missing = [];
-      if (!hasThreatProof()) missing.push('203 室恐吓信');
-      if (!hasPhotoProof()) missing.push('陈老师办公室三人合影');
-      if (!hasUniversityProof()) missing.push('苏晚亭大学日记残页');
-      return missing;
-    }
-
     function shouldOfferIncompleteClosure() {
       if (E.getFlag('school_wu_three_proofs') || E.getFlag('deduced_fusheng')) return false;
       if (!presentedAnyWuProof()) return false;
@@ -55,9 +47,14 @@
     }
 
     function incompleteReasonText() {
-      const missing = missingWuProofLabels();
-      if (!missing.length) return '三件证物虽然都在你手里，但还没有把它们全部压到吴校长面前。';
-      return `你还缺：${missing.join('、')}。`;
+      if (fullWuProofsReady() && !fullWuProofsPresented()) {
+        return '几件东西都在你手边，可还没有在同一张桌面上合成一条能压住吴校长的话。';
+      }
+      const phrases = [];
+      if (!hasThreatProof()) phrases.push('陈明远死前究竟被谁逼到墙角，还没有人愿意承认');
+      if (!hasPhotoProof()) phrases.push('陆小姐为什么能自由出入学校，仍能被说成偶然来访');
+      if (!hasUniversityProof()) phrases.push('苏晚亭到底是主动追查，还是只被一段私情拖进来，仍没有旁证替她说话');
+      return phrases.length ? phrases.join('；') + '。' : '这几条线还没有在吴校长面前真正合拢。';
     }
 
     nodes.ch3_school_incomplete_closure = {
@@ -70,7 +67,7 @@
       },
       text: () => `吴校长终于不再说“巡捕房已经结案”。<br><br>可他也没有真正把话说到底。<br><br>你手里的证据能说明陈明远不是单纯坠楼，能说明苏晚亭和陆小姐都曾靠近光华小学，也能说明学校里有人在害怕。可是这些线索还没能合成一条完整的链。<br><br><span class="sys">${incompleteReasonText()}</span><br><br>吴校长顺着这个缺口，把事情往最安全的方向推：陈明远与苏晚亭有私情，陆小姐只是校外来客，学校只是怕名声受损。<br><br>这不是没有答案。<br><br>只是一个太容易被接受的答案。`,
       choices: [
-        { text: '📁 按现有材料回去整理结案', goto: 'ch4_conclusion' },
+        { text: '📁 接受这个较容易成立的说法，回去整理结案', goto: 'ch4_conclusion' },
         { text: '🔙 不甘心，回到校长办公室继续找缺口', goto: 'ch3_school_confront_wu' }
       ]
     };
@@ -82,14 +79,14 @@
       nodes.ch3_school_confront_wu.text = function (state) {
         const base = typeof oldText === 'function' ? oldText(state) : oldText;
         if (!shouldOfferIncompleteClosure()) return base;
-        return `${base}<br><br><div class="notice"><b>证据仍不够完整</b><br>${incompleteReasonText()}<br>你可以继续补查，把吴校长压到说出傅启元和福生仓；也可以按现有材料结案，但那只会得到一个表层答案。</div>`;
+        return `${base}<br><br><div class="notice"><b>话还没有压到底</b><br>${incompleteReasonText()}<br>现在的材料足够让吴校长改口，却还不足以逼他把傅启元、福生仓和公董局放到同一张桌面上。你可以继续追问，也可以接受这个更容易被写进案卷的说法。</div>`;
       };
 
       nodes.ch3_school_confront_wu.choices = function (state) {
         const base = typeof oldChoices === 'function' ? oldChoices(state) : oldChoices;
         const out = Array.isArray(base) ? base.slice() : [];
         if (shouldOfferIncompleteClosure() && !out.some(choice => choice.goto === 'ch3_school_incomplete_closure')) {
-          out.push({ text: '📁 证据不足，按光华小学现有材料结案', goto: 'ch3_school_incomplete_closure' });
+          out.push({ text: '📁 接受这个较容易成立的说法', goto: 'ch3_school_incomplete_closure' });
         }
         return out;
       };
