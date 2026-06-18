@@ -1,10 +1,9 @@
-// ===== 第三段推理后的终局收束 =====
-// 目标：完成“福生仓与公董局”第三段推理后，玩家不应再在 wrapup / conclusion 中迷路。
-// 规则：
-// 1) deduced_fusheng 后显示“进入终局收束”。
-// 2) 如果有人证且医院/陆念薇还没处理完，先导向医院/陆念薇。
-// 3) 如果已经处理完，直接按 v07ResolveEnding() 写结案材料。
-// 4) 零证人证据线也能直接收束到空仓余证/无声归档等动态结局。
+// ===== 第三段推理作为最终结局门 =====
+// 目标：第三段推理“福生仓与公董局”必须是结局前最后一道门。
+// 流程：
+// 1) 有证人：先完成医院线与陆念薇线，再开放第三段推理。
+// 2) 无证人：直接开放第三段推理。
+// 3) 第三段推理完成后，直接写最终结案材料并进入结局。
 
 (function installFinalClosureFlowPolish() {
   function applyFinalClosureFlowPolish() {
@@ -26,7 +25,7 @@
         || E.getFlag('v07_lu_formal_blocked');
     }
 
-    function hospitalStarted() {
+    function hospitalDone() {
       return E.getFlag('v07_choice_protect_witnesses')
         || E.getFlag('hospital_protect_witnesses')
         || E.getFlag('hospital_doctor_record')
@@ -37,31 +36,23 @@
         || E.getFlag('v07_choice_draw_lu');
     }
 
-    function shouldShowFinalClosure() {
-      return E.getFlag('deduced_fusheng');
-    }
-
-    function nextFinalStep() {
-      if (!shouldShowFinalClosure()) return 'ch3_wrapup';
-      if (hasWitness() && !hospitalStarted()) return 'ch4_hospital_conflict';
-      if (hasWitness() && !hasLuOutcome()) return 'ch4_lu_confrontation';
-      if (typeof E.v07ResolveEnding === 'function') return E.v07ResolveEnding();
-      return 'ch4_conclusion';
+    function thirdDeductionReady() {
+      if (!E.getFlag('deduced_lu_zhao')) return false;
+      if (!hasWitness()) return true;
+      return hospitalDone() && hasLuOutcome();
     }
 
     function finalStatusText() {
       const parts = [];
-      parts.push(E.getFlag('deduced_fusheng') ? '福生仓与公董局链条已经推明' : '第三段推理尚未完成');
-      if (hasWitness()) parts.push('活证人已进入后续保护流程');
-      else parts.push('无人证线将按证据收束');
-      if (hasWitness() && !hospitalStarted()) parts.push('医院线尚未处理');
-      else if (hasWitness() && !hasLuOutcome()) parts.push('陆念薇口供尚未定型');
-      else parts.push('可以写最终结案材料');
+      parts.push('第三段推理已经完成');
+      if (hasWitness()) parts.push('医院线与陆念薇线已经定型');
+      else parts.push('无人证路线按证据链收束');
+      parts.push('可以写最终结案材料');
       return parts.join('；');
     }
 
     nodes.ch4_final_closure = {
-      title: '终局 · 收束',
+      title: '终局 · 落笔',
       weather: 0,
       text: () => {
         const truth = typeof E.truthCompletenessTier === 'function' ? E.truthCompletenessTier() : null;
@@ -72,67 +63,93 @@
           hospital && hasWitness() ? `医院状态：${hospital.label}` : '',
           lu && hasWitness() ? `陆念薇：${lu.label}` : ''
         ].filter(Boolean).join('<br>');
-        return `你把第三段推理写完，钢笔在“公董局”三个字上停了很久。<br><br>现在案件已经不再是“谁杀了陈明远”，也不只是“苏晚亭去了哪里”。福生仓把学校、码头、傅启元和公董局手续链连在了一起。<br><br><span class="sys">${finalStatusText()}。</span>${detail ? `<br><br><div class="notice">${detail}</div>` : ''}<br><br>剩下的不是再找一个新地点，而是把这一夜造成的后果正式收束。`;
+        return `你把第三段推理写完，钢笔在“公董局”三个字上停了很久。<br><br>现在案件已经不再是“谁杀了陈明远”，也不只是“苏晚亭去了哪里”。福生仓把学校、码头、傅启元和公董局手续链连在了一起。<br><br><span class="sys">${finalStatusText()}。</span>${detail ? `<br><br><div class="notice">${detail}</div>` : ''}<br><br>剩下的不是再找一个新地点，而是把这一夜造成的后果写进最终结案材料。`;
       },
-      choices: () => {
-        if (hasWitness() && !hospitalStarted()) {
-          return [{ text: '🏥 先去医院，处理证人保护与后续口供', goto: 'ch4_hospital_conflict' }];
-        }
-        if (hasWitness() && !hasLuOutcome()) {
-          return [{ text: '🕯️ 先处理陆念薇，让程序链条落地', goto: 'ch4_lu_confrontation' }];
-        }
-        return [
-          { text: '🧾 写下最终结案材料', goto: () => E.v07ResolveEnding() },
-          { text: '🔙 暂不收束，回到线索整理', goto: 'ch3_wrapup' }
-        ];
-      }
+      choices: () => [
+        { text: '🧾 写下最终结案材料', goto: () => E.v07ResolveEnding() },
+        { text: '🔙 暂不落笔，回到线索整理', goto: 'ch3_wrapup' }
+      ]
     };
 
-    function patchChoicesToClosure(nodeId, matcher, replacementText) {
+    function patchChoices(nodeId, transform) {
       const node = nodes[nodeId];
       if (!node || node.__finalClosureChoicesPatched) return;
       const oldChoices = node.choices;
       node.choices = function (state) {
         const base = typeof oldChoices === 'function' ? oldChoices(state) : oldChoices;
         if (!Array.isArray(base)) return base;
-        if (!shouldShowFinalClosure()) return base;
-        let replaced = false;
-        const out = base.map(choice => {
-          const text = choice.text || choice.fogText || '';
-          const goto = typeof choice.goto === 'function' ? choice.goto(state) : choice.goto;
-          if (matcher(choice, text, goto)) {
-            replaced = true;
-            return { text: replacementText, goto: 'ch4_final_closure' };
-          }
-          return choice;
-        });
-        if (!replaced && !out.some(choice => choice.goto === 'ch4_final_closure')) {
-          out.unshift({ text: replacementText, goto: 'ch4_final_closure' });
-        }
-        return out;
+        return transform(base, state);
       };
       node.__finalClosureChoicesPatched = true;
     }
 
+    // 第三段推理成功后，直接进入最终落笔；不再回补医院/陆念薇。
     if (nodes.deduc_fusheng_ok && !nodes.deduc_fusheng_ok.__finalClosurePatched) {
       nodes.deduc_fusheng_ok.choices = [
-        { text: '🧾 第三段推理完成，进入终局收束', goto: 'ch4_final_closure' },
+        { text: '🧾 第三段推理完成，写下最终结案材料', goto: 'ch4_final_closure' },
         { text: '🔙 暂时回到线索整理', goto: 'ch3_wrapup' }
       ];
       nodes.deduc_fusheng_ok.__finalClosurePatched = true;
     }
 
-    patchChoicesToClosure(
-      'ch3_wrapup',
-      (choice, text, goto) => goto === 'ch4_conclusion' || text.includes('回顾所有证据') || text.includes('准备收束'),
-      '🧾 第三段推理已完成，进入终局收束'
-    );
+    // 有证人时，第三段推理入口前置检查医院/陆念薇；无证人时直接允许第三段推理。
+    patchChoices('ch3_wrapup', (base, state) => {
+      let out = base.slice();
 
-    patchChoicesToClosure(
-      'ch4_conclusion',
-      (choice, text) => text.includes('按证据链自然收束') || text.includes('结案') || text.includes('收束'),
-      '🧾 写下最终结案材料'
-    );
+      if (E.getFlag('deduced_fusheng')) {
+        const hasClosure = out.some(choice => choice.goto === 'ch4_final_closure');
+        out = out.filter(choice => {
+          const text = choice.text || choice.fogText || '';
+          const goto = typeof choice.goto === 'function' ? choice.goto(state) : choice.goto;
+          return goto !== 'ch4_conclusion' && !text.includes('回顾所有证据') && !text.includes('准备收束');
+        });
+        if (!hasClosure) out.unshift({ text: '🧾 第三段推理已完成，写下最终结案材料', goto: 'ch4_final_closure' });
+        return out;
+      }
+
+      if (hasWitness() && !hospitalDone()) {
+        out = out.filter(choice => {
+          const text = choice.text || choice.fogText || '';
+          return !text.includes('福生仓与公董局') && !text.includes('deduce_fusheng');
+        });
+        if (!out.some(choice => choice.goto === 'ch4_hospital_conflict')) {
+          out.unshift({ text: '🏥 先完成医院线，再做第三段推理', goto: 'ch4_hospital_conflict' });
+        }
+        return out;
+      }
+
+      if (hasWitness() && hospitalDone() && !hasLuOutcome()) {
+        out = out.filter(choice => {
+          const text = choice.text || choice.fogText || '';
+          return !text.includes('福生仓与公董局') && !text.includes('deduce_fusheng');
+        });
+        if (!out.some(choice => choice.goto === 'ch4_lu_confrontation')) {
+          out.unshift({ text: '🕯️ 先处理陆念薇，再做第三段推理', goto: 'ch4_lu_confrontation' });
+        }
+        return out;
+      }
+
+      if (thirdDeductionReady() && E.canDeduce?.('deduce_fusheng') && !out.some(choice => (choice.text || '').includes('福生仓与公董局'))) {
+        out.unshift({ text: '🧩 第三段推理——福生仓与公董局', effect: () => E.openDeductionSafe ? E.openDeductionSafe('deduce_fusheng') : E.openDeduction('deduce_fusheng') });
+      }
+
+      return out;
+    });
+
+    patchChoices('ch4_conclusion', (base, state) => {
+      if (!E.getFlag('deduced_fusheng')) return base;
+      let replaced = false;
+      const out = base.map(choice => {
+        const text = choice.text || choice.fogText || '';
+        if (text.includes('按证据链自然收束') || text.includes('结案') || text.includes('收束')) {
+          replaced = true;
+          return { text: '🧾 写下最终结案材料', goto: () => E.v07ResolveEnding() };
+        }
+        return choice;
+      });
+      if (!replaced) out.unshift({ text: '🧾 写下最终结案材料', goto: () => E.v07ResolveEnding() });
+      return out;
+    });
 
     E.__finalClosureFlowPolishPatched = true;
   }
