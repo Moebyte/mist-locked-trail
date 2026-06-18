@@ -3,7 +3,8 @@
 // 处理重点：
 // 1) 陈明远的信不再直接点名傅启元、走私、管制药品、陆念薇层级。
 // 2) 203 与大学线的导向不再说“中心/真相”，只说“下一处可疑地点”。
-// 3) 保留推理所需的软线索名，避免流程被卡死。
+// 3) 第一、第二段推理成功文本只给阶段性结论，不提前讲后期完整链条。
+// 4) 保留推理所需的软线索名，避免流程被卡死。
 
 (function installEarlyMistPerspectivePolish() {
   function applyEarlyMistPerspectivePolish() {
@@ -43,6 +44,24 @@
       };
       nodes.ch3_chen_letter.choices = [{ text: '🔙 这些碎片还得回去重新拼', goto: 'ch3_wrapup' }];
       nodes.ch3_chen_letter.__earlyMistPerspectivePatched = true;
+    }
+
+    if (nodes.deduc_success && !nodes.deduc_success.__earlyMistPerspectivePatched) {
+      nodes.deduc_success.effect = () => {
+        E.setFlag('deduced_chen', true);
+        E.addClue('推理结论：陈明远被灭口', '陈明远发现光华小学后楼的箱子异常，并因留下证据与遭到威胁而被灭口。');
+      };
+      nodes.deduc_success.text = () => `你把所有线索摊在桌上。<br><br>恐吓信、薛华立路203室的碎片、苏晚亭的日记残页、陈明远不敢寄出的信……<br><br>它们指向的不是一个单纯的情杀，也不是一个教师的自杀。<br><br><b>陈明远撞见了光华小学后楼的箱子。</b>他曾经沉默，后来留下证据，于是被人灭口。<br><br>至于陆小姐，你现在能确定的还不是完整档案，而是几个互相咬合的碎片：${E.truthFragmentText()}。<br><br>这些碎片说明，她的“陆小姐”身份很可能是假的；“陆念薇”这个名字，也许才是通往旧案的钥匙。<br><br>你已经摸到了雾里的第一根线。它还没有告诉你终点在哪里，只告诉你：光华小学里有人在怕，陈明远不是第一个被逼退的人。`;
+      nodes.deduc_success.__earlyMistPerspectivePatched = true;
+    }
+
+    if (nodes.deduc_lu_zhao_ok && !nodes.deduc_lu_zhao_ok.__earlyMistPerspectivePatched) {
+      nodes.deduc_lu_zhao_ok.effect = () => {
+        E.setFlag('deduced_lu_zhao', true);
+        E.addClue('推理结论：黑衣男是暗线', '黑衣男人并非普通侦探，他在盯陆小姐与光华小学之间未说清的联系。');
+      };
+      nodes.deduc_lu_zhao_ok.text = () => `你把沈玉兰的证词、薛华立路的监视记录和陆念薇的旧案碎片放在一起。<br><br>黑衣男人——那个在鸿运茶楼被伙计叫做“赵先生”的人——不是沈玉兰请来的普通侦探。他当然拿了她的钱，但他的目光一直不在沈玉芳身上。<br><br>他更像是在盯陆小姐：她见过谁，收过什么，又会不会在害怕时说出不该说的话。<br><br>陆念薇不是这团雾的中心。她身上背着旧案，也被人用旧名牵着走。她替人办过事，替人传过话，却也像随时会被丢出去挡刀的人。<br><br>你还不知道那只手从哪里伸来，只知道它已经碰到了学校、203室和失踪的人。`;
+      nodes.deduc_lu_zhao_ok.__earlyMistPerspectivePatched = true;
     }
 
     E.__earlyMistPerspectivePolishPatched = true;
