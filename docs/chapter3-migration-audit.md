@@ -80,7 +80,7 @@ ch3_wu_present_university
 ch3_school_after_confront
 ```
 
-The safest first target is therefore a single unpatched node:
+The safest first target was therefore a single unpatched node:
 
 ```text
 ch3_school_chen_su
@@ -118,11 +118,7 @@ nodes patched by story-modules
 nodes that write core truth flags
 ```
 
-## Required before runtime takeover
-
-Before adding `src/story-chapters/chapter-3-guanghua.js`, document the selected first batch in this file under `Selected first batch`.
-
-## Selected first batch
+## Completed first batch
 
 ```text
 ch3_school_chen_su
@@ -145,11 +141,24 @@ Target file:
 src/story-chapters/chapter-3-guanghua.js
 ```
 
-Required companion files before deletion:
+Companion files:
 
 ```text
 src/story-chapters/chapter-3-guanghua-contract.js
 scripts/check-story-chapter3-runtime.mjs
+scripts/remove-migrated-chapter3-first-batch-from-story.mjs
 ```
 
-Physical deletion from `src/story.js` is not allowed until the focused Chapter 3 runtime gate passes.
+Status:
+
+```text
+runtime takeover complete
+focused runtime gate complete
+physical removal complete
+```
+
+## Next batch selection
+
+The next batch must be selected from the remaining `ch3_*` nodes after re-running the audit.
+
+Because most remaining Chapter 3 nodes are patch-owned by `guanghua-school-flow-polish.js`, the next batch should not be physically removed until its final runtime behavior has been made explicit in `src/story-chapters/chapter-3-guanghua.js` and covered by `scripts/check-story-chapter3-runtime.mjs`.
