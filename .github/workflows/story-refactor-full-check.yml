@@ -1,0 +1,29 @@
+name: Story Refactor Full Check
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - v1_refactor
+    paths:
+      - .github/workflows/story-refactor-full-check.yml
+      - scripts/check-story-refactor-full.mjs
+      - scripts/audit-story-chapter3.mjs
+      - docs/v1-refactor-progress.md
+
+jobs:
+  full-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: v1_refactor
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Run full refactor check
+        run: node scripts/check-story-refactor-full.mjs
