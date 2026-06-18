@@ -6,9 +6,11 @@ This runbook documents the safe path from runtime takeover to physical removal o
 
 Chapter 2 nodes are registered from `src/story-chapters/*` and loaded before later runtime polish modules through `src/story-modules.js`.
 
-The legacy Chapter 2 definitions in `src/story.js` are still present as a migration fallback. They should not be removed by hand.
+The legacy Chapter 2 definitions have been physically removed from `src/story.js` on `v1_refactor`. The removal reduced `src/story.js` by 619 lines. The migrated Chapter 2 files are now the source of truth for the migrated `ch2_*` nodes.
 
-## Required checks before removal
+`remove-migrated-chapter2-from-story.mjs` is now used as an idempotent regression check: it should report that no migrated Chapter 2 node definitions remain in `src/story.js`.
+
+## Required post-removal checks
 
 Run the migration gate:
 
@@ -19,7 +21,7 @@ node scripts/remove-migrated-chapter2-from-story.mjs
 
 `check-story-refactor.mjs` is intentionally narrow. It checks the story module manifest and the final Chapter 2 runtime state. It does not run broad save, smoke, or fuzz checks.
 
-The second command is a dry-run. Before physical removal, it must report that all migrated Chapter 2 nodes can be removed and must list non-overlapping ranges.
+After physical removal, the second command should pass by reporting that no migrated Chapter 2 node definitions remain in `src/story.js`. If only some migrated nodes are missing and others remain, the script treats that as a partial-removal error.
 
 The same checks also run in GitHub Actions:
 
@@ -37,9 +39,9 @@ node scripts/check-story-refactor-full.mjs
 
 Save compatibility, route smoke tests, and fuzz tests may still be useful, but they are not part of the Chapter 2 physical-removal gate.
 
-## Perform physical removal
+## Physical removal workflow
 
-Preferred path: use the manual GitHub Actions workflow.
+The manual GitHub Actions workflow remains available for repeatable execution, but after completion it should usually be a no-op because the Chapter 2 legacy definitions are already gone.
 
 ```text
 Actions → Chapter 2 Physical Removal → Run workflow → v1_refactor
@@ -48,23 +50,11 @@ Actions → Chapter 2 Physical Removal → Run workflow → v1_refactor
 The workflow will:
 
 1. run the migration gate before removal;
-2. run the Chapter 2 removal dry-run;
+2. run the Chapter 2 removal dry-run / idempotent check;
 3. execute `node scripts/remove-migrated-chapter2-from-story.mjs --write`;
 4. run the migration gate again;
 5. verify that the removal script is idempotent after removal;
-6. commit the resulting `src/story.js` change back to `v1_refactor`.
-
-Local equivalent:
-
-```bash
-node scripts/check-story-refactor.mjs
-node scripts/remove-migrated-chapter2-from-story.mjs
-node scripts/remove-migrated-chapter2-from-story.mjs --write
-node scripts/check-story-refactor.mjs
-node scripts/remove-migrated-chapter2-from-story.mjs
-```
-
-After physical removal, the final command should pass by reporting that no migrated Chapter 2 node definitions remain in `src/story.js`. If only some migrated nodes are missing and others remain, the script treats that as a partial-removal error.
+6. commit `src/story.js` only if there is a generated change.
 
 ## Do not
 
