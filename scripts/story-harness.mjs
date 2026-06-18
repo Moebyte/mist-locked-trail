@@ -127,8 +127,9 @@ export function loadStoryRuntime(options = {}) {
     console,
     E,
     document: documentStub,
-    window: {},
-    localStorage: { getItem() { return null; }, setItem() {} },
+    URLSearchParams,
+    window: { location: { search: '', hash: '' } },
+    localStorage: { getItem() { return null; }, setItem() {}, removeItem() {} },
     setTimeout(fn) { if (typeof fn === 'function') fn(); },
     clearTimeout() {},
   });
