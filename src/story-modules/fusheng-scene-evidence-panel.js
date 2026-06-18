@@ -140,7 +140,7 @@
     for (const id of ['ch4_dock_deep', 'ch4_dock_locked_door', 'ch4_dock_who', 'ch4_dock_who_dual']) {
       addPanelText(id);
       appendChoice(id, () => E.getFlag('scene_confirmed_darkroom_marks') ? null : {
-        text: '🕯️ 现场确认暗室关押痕迹——床、水桶、煤油灯和墙面刻痕',
+        text: '🕯️ 趁离开前记下暗室里的痕迹',
         effect: () => confirmDarkroom('你在暗室里'),
         goto: id
       }, 'sceneDarkroomChoice');
