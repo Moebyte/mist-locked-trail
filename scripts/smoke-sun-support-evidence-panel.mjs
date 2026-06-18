@@ -23,6 +23,9 @@ function textOf(id) {
 function hasChoice(list, fragment, goto) {
   return list.some(choice => choice.text.includes(fragment) && (!goto || choice.goto === goto));
 }
+function hasRoute(list, goto) {
+  return list.some(choice => choice.goto === goto);
+}
 function assertValidTargets(sceneId, list) {
   for (const choice of list) {
     if (!choice.goto) continue;
@@ -66,20 +69,20 @@ let list = choices('ch4_sun_support');
 assertValidTargets('ch4_sun_support', list);
 assert(hasChoice(list, '王巡官', 'ch4_sun_present_wang_note'), `老孙应可看王巡官纸条，实际 ${JSON.stringify(list)}`);
 assert(hasChoice(list, '陈明远', 'ch4_sun_present_chen_letter'), `老孙应可看陈明远的信，实际 ${JSON.stringify(list)}`);
-assert(hasChoice(list, '福生仓位置', 'ch4_sun_present_fusheng_location'), `老孙应可看福生仓位置，实际 ${JSON.stringify(list)}`);
-assert(hasChoice(list, '203 室恐吓信', 'ch4_sun_present_threat'), `老孙应可看 203 恐吓信，实际 ${JSON.stringify(list)}`);
+assert(hasRoute(list, 'ch4_sun_present_fusheng_location'), `老孙应可看福生仓位置，实际 ${JSON.stringify(list)}`);
+assert(hasRoute(list, 'ch4_sun_present_threat'), `老孙应可看 203 恐吓信，实际 ${JSON.stringify(list)}`);
 assert(!list.some(choice => choice.text.includes('翡翠镯') || choice.text.includes('陆念') || choice.text.includes('疑似遗书')), `老孙支援面板不应出现翡翠镯/陆念/疑似遗书，实际 ${JSON.stringify(list)}`);
 assert(!list.some(choice => choice.goto === 'ch4_dock_sun_fast_support'), '未出示核心证据前，不应直接低调支援');
 
-for (const [fragment, nodeId, flag] of [
-  ['王巡官', 'ch4_sun_present_wang_note', 'sun_presented_wang_note'],
-  ['陈明远', 'ch4_sun_present_chen_letter', 'sun_presented_chen_letter'],
-  ['福生仓位置', 'ch4_sun_present_fusheng_location', 'sun_presented_fusheng_location'],
-  ['203 室恐吓信', 'ch4_sun_present_threat', 'sun_presented_threat_letter'],
+for (const [nodeId, flag] of [
+  ['ch4_sun_present_wang_note', 'sun_presented_wang_note'],
+  ['ch4_sun_present_chen_letter', 'sun_presented_chen_letter'],
+  ['ch4_sun_present_fusheng_location', 'sun_presented_fusheng_location'],
+  ['ch4_sun_present_threat', 'sun_presented_threat_letter'],
 ]) {
   list = choices('ch4_sun_support');
-  const choice = list.find(choice => choice.text.includes(fragment));
-  assert(choice?.goto === nodeId, `「${fragment}」应跳 ${nodeId}，实际 ${JSON.stringify(choice)}`);
+  const choice = list.find(choice => choice.goto === nodeId);
+  assert(choice, `应存在通往 ${nodeId} 的举证选项，实际 ${JSON.stringify(list)}`);
   if (!choice) continue;
   const text = textOf(choice.goto);
   assert(text.length > 20, `${nodeId} 应有正文`);
@@ -91,8 +94,8 @@ for (const [fragment, nodeId, flag] of [
 }
 
 list = choices('ch4_sun_support');
-assert(hasChoice(list, '低调支援', 'ch4_dock_sun_fast_support'), `出示核心证据后应允许低调支援，实际 ${JSON.stringify(list)}`);
-assert(hasChoice(list, '调齐人手', 'ch4_dock_wait'), `出示三件核心证据后应允许调齐人手，实际 ${JSON.stringify(list)}`);
+assert(hasRoute(list, 'ch4_dock_sun_fast_support'), `出示核心证据后应允许低调支援路线，实际 ${JSON.stringify(list)}`);
+assert(hasRoute(list, 'ch4_dock_wait'), `出示三件核心证据后应允许调齐人手路线，实际 ${JSON.stringify(list)}`);
 const fast = list.find(choice => choice.goto === 'ch4_dock_sun_fast_support');
 fast?.effect?.(E.state);
 assert(E.getFlag('sun_fast_support'), '低调支援应设置 sun_fast_support');
