@@ -8,9 +8,50 @@
     if (typeof E === 'undefined' || typeof nodes === 'undefined') return;
     if (E.__deadlineDeprecationPolishPatched) return;
 
+    function rawMinutesUntilDeadline() {
+      const deadline = E.state?.pressure?.deadline;
+      const now = E.state?.inGameTime;
+      if (!deadline || !now) return Number.POSITIVE_INFINITY;
+      if (typeof E.timeToMinutes === 'function') return E.timeToMinutes(deadline) - E.timeToMinutes(now);
+      const toMinutes = (t) => (t.day || 1) * 1440 + (t.hour || 0) * 60 + (t.minute || 0);
+      return toMinutes(deadline) - toMinutes(now);
+    }
+
+    function rawDeadlinePhase() {
+      const left = rawMinutesUntilDeadline();
+      if (left < 0) return 'expired';
+      if (left < 180) return 'critical';
+      if (left < 600) return 'tight';
+      return 'safe';
+    }
+
+    function fastSupportMode() {
+      return E.getFlag('sun_fast_support')
+        || E.getFlag('sun_fast_support_active')
+        || E.getFlag('sun_fast_cover_escape')
+        || E.getFlag('dock_fast_support_entry');
+    }
+
+    function fullSupportMode() {
+      return E.getFlag('sun_full_support')
+        || E.getFlag('sun_wait_support')
+        || E.getFlag('dock_full_support_entry')
+        || (E.getFlag('sun_support_in_action') && !E.getFlag('sun_fast_support'));
+    }
+
+    function trueFastRescuePrepared() {
+      return typeof E.trueEndingFastRescuePrepared === 'function' && E.trueEndingFastRescuePrepared();
+    }
+
+    function fullSupportTradeoffActive() {
+      return typeof E.fullSupportTradeoffActive === 'function' && E.fullSupportTradeoffActive();
+    }
+
     E.effectiveMinutesUntilDeadline = function () {
       return Number.POSITIVE_INFINITY;
     };
+
+    E.rawDeadlinePhaseForDock = rawDeadlinePhase;
 
     E.deadlinePhase = function () {
       return 'safe';
@@ -28,6 +69,23 @@
       if (typeof this.narrativeClockLabel === 'function') return this.narrativeClockLabel();
       return this.deadlinePhaseLabel();
     };
+
+    if (typeof E.routeDockSearchByTime === 'function' && !E.__deadlineFastSearchWindowPatched) {
+      const oldRouteDockSearchByTime = E.routeDockSearchByTime.bind(E);
+      E.routeDockSearchByTime = function () {
+        if (trueFastRescuePrepared()) return 'ch4_dock_full_search';
+        if (fullSupportTradeoffActive()) {
+          this.setFlag('dock_full_support_tradeoff', true);
+          return 'ch4_dock_full_search';
+        }
+        const heat = Math.max(0, Number(this.state?.pressure?.heat || 0));
+        if (fastSupportMode() && !fullSupportMode() && rawDeadlinePhase() === 'critical' && heat < 5 && !this.getFlag('missed_deadline')) {
+          return 'ch4_dock_limited_search';
+        }
+        return oldRouteDockSearchByTime();
+      };
+      E.__deadlineFastSearchWindowPatched = true;
+    }
 
     // 不再用硬时间门控覆盖新版福生仓入口路由。
     // dock-heat-system-polish 会先按 solo/便衣/老孙进入潜入节点，再在仓内用 heat/delay 分流。
