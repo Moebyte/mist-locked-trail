@@ -34,6 +34,12 @@
       return Math.max(min, Math.min(max, n));
     }
 
+    function hospitalTruthPenaltyTier() {
+      if (E.getFlag('hospital_force_su_identify')) return 'unstable';
+      if (E.getFlag('hospital_early_lu') && E.getFlag('hospital_interrogate_yufang')) return 'tense';
+      return 'none';
+    }
+
     E.hospitalEvidenceProfile = function () {
       const witness = typeof this.hospitalWitnessProfile === 'function'
         ? this.hospitalWitnessProfile()
@@ -88,13 +94,14 @@
         modifiers.push({ key: 'lu_statement', delta: 1, label: '陆念薇补了一段关键说法' });
       }
 
-      if (hospital.key === 'tense') {
+      const penaltyTier = hospitalTruthPenaltyTier();
+      if (penaltyTier === 'tense') {
         score -= 1;
         modifiers.push({ key: 'hospital_tense', delta: -1, label: '医院气氛紧，证词容易被搅乱' });
       }
-      if (hospital.key === 'unstable') {
-        score -= 2;
-        modifiers.push({ key: 'hospital_unstable', delta: -2, label: '医院压不住，证人状态受影响' });
+      if (penaltyTier === 'unstable') {
+        score -= 3;
+        modifiers.push({ key: 'hospital_unstable', delta: -3, label: '医院压不住，证人状态受影响' });
       }
 
       let cap = 10;
@@ -110,11 +117,11 @@
         cap = Math.min(cap, 6);
         capReasons.push('没有码头硬物证，很多话落不到纸面上');
       }
-      if (hospital.key === 'tense') {
+      if (penaltyTier === 'tense') {
         cap = Math.min(cap, 9);
         capReasons.push('医院气氛紧，后面会更难写稳');
       }
-      if (hospital.key === 'unstable') {
+      if (penaltyTier === 'unstable') {
         cap = Math.min(cap, 7);
         capReasons.push('医院压不住，证词很难保持干净');
       }
