@@ -1,6 +1,7 @@
 // ===== 苏家信任门槛 =====
 // 目标：苏家不只是补叙。救苏晚亭时，需要“向苏母出示照片”换得的贴身信物，
 // 并在暗室里把信物出示给苏晚亭。没有这一步，仍可找到苏晚亭，但无法成功带走她。
+// 追加：苏家线可确认苏母知道周怀安是晚亭未婚夫，从而削弱“为情而去”的疑似遗书解释，避免《吾爱晚亭》误收束。
 (function installSuHomeTrustGate() {
   function applySuHomeTrustGate() {
     if (typeof E === 'undefined' || typeof nodes === 'undefined') return;
@@ -15,6 +16,12 @@
       return false;
     }
 
+    function markZhouFianceKnown() {
+      E.setFlag('su_mother_knows_zhou_fiance', true);
+      E.addClue('苏母知道周怀安婚约', '苏母知道周怀安是苏晚亭的未婚夫，也知道女儿失踪后是周怀安在到处托人寻找。');
+      E.addClue('为情而去说法存疑', '苏母承认周怀安与苏晚亭的婚约仍在；若只凭残信和疑似遗书断定苏晚亭“为情而去”，这个说法站不稳。');
+    }
+
     function hasSuHomeTrustToken() {
       return E.getFlag('shown_photo_to_mother') || E.hasClue('苏母认出照片') || E.hasItem('苏晚亭的银发夹');
     }
@@ -25,15 +32,30 @@
 
     E.hasSuHomeTrustToken = hasSuHomeTrustToken;
     E.hasSuHomeTrustProof = hasSuHomeTrustProof;
+    E.knowsZhouFianceFromSuHome = function () {
+      return E.getFlag('su_mother_knows_zhou_fiance') || E.hasClue('苏母知道周怀安婚约') || E.hasClue('为情而去说法存疑');
+    };
+
+    if (nodes.ch2_home_talk && !nodes.ch2_home_talk.__zhouFiancePatched) {
+      const oldEffect = nodes.ch2_home_talk.effect;
+      const oldText = nodes.ch2_home_talk.text;
+      nodes.ch2_home_talk.effect = function (state) {
+        if (typeof oldEffect === 'function') oldEffect(state);
+        markZhouFianceKnown();
+      };
+      nodes.ch2_home_talk.text = () => `你问苏母，晚亭失踪前有没有什么异常。<br><br><span class="sys">“这孩子……”</span>苏母叹了口气，<span class="sys">“她从小就懂事，从来不让我操心。功课好，人也乖巧。可是最近这半年，她好像一直有心事。我问她，她总说没事。”</span><br><br><span class="sys">“有一回——大概两个月前——她半夜突然跑回来，浑身湿透了，像是淋了雨。我问她怎么了，她说是图书馆关门了，走到半路下雨了。但我看到她眼睛红红的，像是哭过。她不说，我也不忍心追问。”</span><br><br>你提到周怀安。<br><br>苏母抬起头，像是终于听见一个还能抓住的名字。<br><br><span class="sys">“周先生是个好人。晚亭父亲走得早，我这条腿又不争气，这门亲事原本是我点头的。晚亭也没有反对。”</span><br><br>她停了停，声音低下去。<br><br><span class="sys">“她失踪以后，周先生来过几次。每次都说一定会找她回来。他不像会害她的人。”</span><br><br>这句话让你记住了。若以后有人把苏晚亭的失踪写成一段简单的私情出走，至少苏家这里，还有一个说不通的地方。`;
+      nodes.ch2_home_talk.__zhouFiancePatched = true;
+    }
 
     if (nodes.ch2_home_showphoto && !nodes.ch2_home_showphoto.__suKeepsakePatched) {
       const oldEffect = nodes.ch2_home_showphoto.effect;
       nodes.ch2_home_showphoto.effect = function (state) {
         if (typeof oldEffect === 'function') oldEffect(state);
+        markZhouFianceKnown();
         E.addItem('苏晚亭的银发夹', '苏母交给你的旧银发夹，内侧刻着一个很小的“亭”字。');
         E.addClue('苏母托付信物', '苏母把苏晚亭小时候常戴的银发夹交给你，说她认得这个东西。');
       };
-      nodes.ch2_home_showphoto.text = () => `你从怀里掏出那张照片，递给苏母。<br><br>她接过去的时候手是稳的——但看到照片的一瞬间，眼泪毫无预兆地落了下来。她没有抬手去擦。<br><br><span class="sys">“这是……她失踪前两个月拍的。光启公园。她说那天天气好，非要拉我去，我没去成。”</span><br><br>她用手指轻轻摩挲照片边缘，像在抚摸女儿的脸。<br><br><span class="sys">“她拍完回来说：妈，这张照片我要留给明远。如果有一天我不见了，他至少有张照片可以找我。”</span><br><br>她说到这里，忽然停住了。她扶着轮椅转进里屋，过了很久，拿出一只用旧手帕包着的小银发夹。发夹内侧刻着一个很小的<span class="sys">“亭”</span>字。<br><br><span class="sys">“这是她小时候常戴的。后来长大了，说太孩子气，就收起来了。你要是真能见到她，把这个给她看。她会知道，你来过家里。”</span><br><br>苏晚亭在拍照那天就已经想到了自己会失踪。这不是临时起意的出走——她在做准备。<br><br>苏母把发夹放到你手里，声音很轻：<span class="sys">“找到她。不管在哪里，找到她。”</span><br><br>你点点头，把照片和发夹一起贴胸收好。`;
+      nodes.ch2_home_showphoto.text = () => `你从怀里掏出那张照片，递给苏母。<br><br>她接过去的时候手是稳的——但看到照片的一瞬间，眼泪毫无预兆地落了下来。她没有抬手去擦。<br><br><span class="sys">“这是……她失踪前两个月拍的。光启公园。她说那天天气好，非要拉我去，我没去成。”</span><br><br>她用手指轻轻摩挲照片边缘，像在抚摸女儿的脸。<br><br><span class="sys">“她拍完回来说：妈，这张照片我要留给周先生。如果有一天我不见了，至少他知道该拿什么找我。”</span><br><br>你问她，周先生是不是周怀安。<br><br>苏母点点头。<br><br><span class="sys">“他是晚亭的未婚夫。晚亭嘴上不常说，可她心里是认这门亲事的。她若真要走，不会一句话都不留给他，也不会把我一个人丢在这里。”</span><br><br>她说到这里，忽然停住了。她扶着轮椅转进里屋，过了很久，拿出一只用旧手帕包着的小银发夹。发夹内侧刻着一个很小的<span class="sys">“亭”</span>字。<br><br><span class="sys">“这是她小时候常戴的。后来长大了，说太孩子气，就收起来了。你要是真能见到她，把这个给她看。她会知道，你来过家里。”</span><br><br>苏晚亭在拍照那天就已经想到了自己会失踪。这不是临时起意的出走——她在做准备。<br><br>苏母把发夹放到你手里，声音很轻：<span class="sys">“找到她。不管在哪里，找到她。”</span><br><br>你点点头，把照片和发夹一起贴胸收好。`;
       nodes.ch2_home_showphoto.__suKeepsakePatched = true;
     }
 
