@@ -28,6 +28,38 @@
         ],
       },
 
+      ch3_school_yufang: {
+        title: '问沈玉芳的事',
+        text: () => `你从怀里掏出沈玉兰给的那张照片——她妹妹沈玉芳，梳着齐耳短发，穿一件素色旗袍，站在光华小学门口，笑得很安静。
+
+吴校长接过照片，脸色沉了下来。
+
+<span class="sys">"沈老师……她是我们学校的数学老师，教五年级。来了三年了，课讲得好，学生都喜欢她。"</span>
+
+<span class="sys">"她失踪前有什么异常吗？"</span>
+
+吴校长摘下眼镜擦了擦。<span class="sys">"说实话——她出事前那段时间确实不对劲。总是心不在焉，上课有时候会走神。我找她谈过一次话，她说家里有事。她说她姐姐身体不好……现在看来，可能是另一个意思。"</span>
+
+<span class="sys">"她跟陈老师关系怎么样？"</span>
+
+吴校长想了想。<span class="sys">"走得挺近的。陈老师藏书多，沈老师也爱看书，经常去他办公室借书。有时候放学了还看到他们在办公室里聊到很晚。但也就是普通同事——我当时是这么以为的。"</span>
+
+他说"我当时是这么以为的"的时候，语气里有一丝迟来的不安。
+
+<span class="sys">"她失踪前最后一天——有什么特别的事吗？"</span>
+
+<span class="sys">"最后一天……她上了一节早课，然后说人不舒服，提前走了。那之后再也没有回来。她办公桌上的东西都没带走——书本、茶杯、一张学生的成绩单——到现在还原封不动放着。"</span>
+
+你心里记下了这一点——沈玉芳离开得很匆忙，连随身物品都没拿。不像是计划好的离开。`,
+        effect: (s) => { E.addClue('沈玉芳与陈明远', '走得近，经常借书聊天；失踪前心不在焉，匆忙离开未带物品'); },
+        choices: [
+          { text: '💬 问陈老师的事', goto: 'ch3_school_teacher' },
+          { text: '💬 学校还有什么异常？', goto: 'ch3_school_weird' },
+          { text: '📖 看陈老师的办公室', goto: 'ch3_school_office' },
+          { text: '🔙 回到校长办公室', goto: 'ch3_school' },
+        ],
+      },
+
       ch3_school_weird: {
         title: '学校的异常',
         text: () => `你问吴校长，最近学校有没有什么不寻常的事。
@@ -51,7 +83,7 @@
 
     if (typeof window !== 'undefined') {
       window.MLT_STORY_CHAPTER_3_GUANGHUA_READY = true;
-      window.MLT_STORY_CHAPTER_3_GUANGHUA_NODES = ['ch3_school_chen_su', 'ch3_school_weird'];
+      window.MLT_STORY_CHAPTER_3_GUANGHUA_NODES = ['ch3_school_chen_su', 'ch3_school_yufang', 'ch3_school_weird'];
     }
   }
 
