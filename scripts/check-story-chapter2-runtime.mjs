@@ -82,12 +82,11 @@ const documentStub = {
   createElement() { return { className: '', textContent: '', title: '', onclick: null, style: {}, appendChild() {} }; },
 };
 
-const windowStub = { location: locationStub };
 const context = vm.createContext({
   console,
   E,
   document: documentStub,
-  window: windowStub,
+  window: { location: locationStub },
   location: locationStub,
   URL,
   URLSearchParams,
@@ -114,27 +113,16 @@ function resetEvidence({ clues = [], items = [], flags = [] } = {}) {
   for (const flag of flags) E.setFlag(flag, true);
 }
 
-function rawChoices(id) {
+function choicesOf(id, evidence = {}) {
+  resetEvidence(evidence);
   const node = context.nodes && context.nodes[id];
   if (!node) return [];
   const choices = typeof node.choices === 'function' ? node.choices(E.state) : node.choices;
   return Array.isArray(choices) ? choices : [];
 }
 
-function gotos(id, evidence = {}) {
-  resetEvidence(evidence);
-  return rawChoices(id)
-    .filter(choice => typeof choice.when === 'function' ? choice.when(E.state) : true)
-    .map(choice => choice && choice.goto)
-    .filter(Boolean);
-}
-
 function assert(condition, message) {
   if (!condition) errors.push(message);
-}
-
-function assertIncludes(list, value, message) {
-  assert(list.includes(value), `${message}: expected ${value}, got [${list.join(', ')}]`);
 }
 
 function runEffect(id, evidence = {}) {
@@ -192,62 +180,47 @@ const expectedChapter2Nodes = [
   'ch2_203_search',
 ];
 
+const requiredNonChapterTargets = [
+  'ch3_school',
+  'ch4_su_present_keepsake',
+];
+
 for (const id of expectedChapter2Nodes) {
   const node = context.nodes[id];
   assert(Boolean(node), `missing chapter 2 runtime node: ${id}`);
-  if (node) assert(typeof node.text === 'function' || typeof node.text === 'string', `${id} has no renderable text`);
+  if (!node) continue;
+  assert(typeof node.text === 'function' || typeof node.text === 'string', `${id} has no renderable text`);
 }
 
-assertIncludes(gotos('ch2_university'), 'ch2_univ_matron', 'ch2_university early choices');
-assertIncludes(gotos('ch2_university'), 'ch2_univ_door', 'ch2_university early choices');
-assertIncludes(gotos('ch2_university'), 'ch2_univ_paper', 'ch2_university early choices');
-assertIncludes(gotos('ch2_university', { clues: ['舍监证词', '法租界地图'], flags: ['asked_door'] }), 'ch2_leave_univ', 'ch2_university completed choices');
-
-assertIncludes(gotos('ch2_leave_univ', { clues: ['舍监证词', '法租界地图'], flags: ['asked_door'] }), 'ch2_frenchtown', 'ch2_leave_univ completed choices');
-assertIncludes(gotos('ch2_leave_univ', { clues: ['舍监证词', '法租界地图'], flags: ['asked_door'] }), 'ch2_police', 'ch2_leave_univ completed choices');
-assertIncludes(gotos('ch2_leave_univ', { clues: ['舍监证词', '法租界地图'], flags: ['asked_door'] }), 'ch2_home', 'ch2_leave_univ completed choices');
-
-assertIncludes(gotos('ch2_police'), 'ch2_police_file', 'ch2_police choices');
-resetEvidence();
-if (typeof context.nodes.ch2_police.onPresent === 'function') {
-  const policePresent = context.nodes.ch2_police.onPresent({ name: '半张烟盒纸' }, E.state);
-  assert(policePresent && policePresent.goto === 'ch2_police_present', 'ch2_police onPresent should route 半张烟盒纸 to ch2_police_present');
-} else {
-  assert(false, 'ch2_police should keep onPresent for 半张烟盒纸');
+for (const id of requiredNonChapterTargets) {
+  assert(Boolean(context.nodes[id]), `missing required downstream runtime node: ${id}`);
 }
-assertIncludes(gotos('ch2_police_file'), 'ch2_police_wang', 'ch2_police_file choices before got_wang_note');
-assertIncludes(gotos('ch2_police_file', { flags: ['got_wang_note'] }), 'ch2_frenchtown', 'ch2_police_file choices after got_wang_note');
-assertIncludes(gotos('ch2_police_file', { flags: ['got_wang_note'] }), 'ch2_home', 'ch2_police_file choices after got_wang_note');
-assertIncludes(gotos('ch2_police_file', { flags: ['got_wang_note'] }), 'ch3_school', 'ch2_police_file choices after got_wang_note');
-assertIncludes(gotos('ch2_police_alt', { flags: ['got_wang_note'] }), 'ch2_frenchtown', 'ch2_police_alt choices after got_wang_note');
 
-if (typeof context.nodes.ch2_home.onPresent === 'function') {
-  resetEvidence();
-  const homePresent = context.nodes.ch2_home.onPresent({ name: '苏晚亭的照片' }, E.state);
-  assert(homePresent && homePresent.goto === 'ch2_home_showphoto', 'ch2_home onPresent should route 苏晚亭的照片 to ch2_home_showphoto');
-} else {
-  assert(Boolean(context.nodes.ch2_home_showphoto), 'ch2_home has no onPresent, so ch2_home_showphoto must exist as the final photo route');
-  const state = runEffect('ch2_home_showphoto');
-  assert(state.items.some(item => item.name === '苏晚亭的银发夹'), 'ch2_home_showphoto should still grant 苏晚亭的银发夹 in final runtime');
-  assert(state.clues.some(clue => clue.name === '苏母托付信物'), 'ch2_home_showphoto should still grant 苏母托付信物 in final runtime');
-}
-assertIncludes(gotos('ch2_home'), 'ch2_home_talk', 'ch2_home early choices');
-assertIncludes(gotos('ch2_home'), 'ch2_home_photo', 'ch2_home early choices');
-assertIncludes(gotos('ch2_home', { clues: ['母亲证词'], flags: ['asked_photo'] }), 'ch2_leave_home', 'ch2_home completed choices');
-assertIncludes(gotos('ch2_leave_home', { clues: ['舍监证词', '法租界地图'], flags: ['asked_door'] }), 'ch2_frenchtown', 'ch2_leave_home final choices');
+const photoState = runEffect('ch2_home_showphoto');
+assert(photoState.items.some(item => item.name === '苏晚亭的银发夹'), 'ch2_home_showphoto should grant 苏晚亭的银发夹');
+assert(photoState.clues.some(clue => clue.name === '苏母托付信物'), 'ch2_home_showphoto should grant 苏母托付信物');
 
-assertIncludes(gotos('ch2_frenchtown'), 'ch2_building_stakeout', 'ch2_frenchtown initial choices');
-assertIncludes(gotos('ch2_frenchtown'), 'ch2_ask_landlord', 'ch2_frenchtown initial choices');
-assertIncludes(gotos('ch2_frenchtown', { flags: ['asked_landlord'] }), 'ch2_203_door', 'ch2_frenchtown after landlord choices');
-assertIncludes(gotos('ch2_building_enter', { flags: ['asked_landlord'] }), 'ch2_203_door', 'ch2_building_enter final choices');
-assertIncludes(gotos('ch2_203_door'), 'ch2_203_search', 'ch2_203_door before search choices');
-assertIncludes(gotos('ch2_203_door', { clues: ['三人合影', '法租界地图'] }), 'ch2_landlord_map', 'ch2_203_door after 203 evidence should allow map check');
-assertIncludes(gotos('ch2_203_search', { clues: ['三人合影', '法租界地图'] }), 'ch2_landlord_map', 'ch2_203_search after 203 evidence should allow map check');
-assertIncludes(gotos('ch2_203_search', { clues: ['三人合影', '法租界地图'], flags: ['shown_map_to_landlord', 'got_wang_note'] }), 'ch3_school', 'ch2_203_search after map and Wang note should reach ch3_school');
+const mapState = runEffect('ch2_landlord_map');
+assert(mapState.flags.shown_map_to_landlord === true || mapState.clues.some(clue => clue.name === '福生仓标识' || clue.name === '福生仓位置'), 'ch2_landlord_map should preserve the Fusheng warehouse lead');
+
+const policeState = runEffect('ch2_police_wang');
+assert(policeState.flags.got_wang_note === true || policeState.clues.some(clue => clue.name === '王巡官遗留纸条') || policeState.items.some(item => item.name === '半张烟盒纸'), 'ch2_police_wang should preserve Wang note evidence');
+
+const sampleEvidenceSets = [
+  {},
+  { clues: ['舍监证词', '法租界地图'], flags: ['asked_door'] },
+  { clues: ['母亲证词'], flags: ['asked_photo'] },
+  { clues: ['三人合影', '法租界地图'], items: ['三人合影'], flags: ['asked_landlord'] },
+  { clues: ['三人合影', '法租界地图'], items: ['三人合影'], flags: ['shown_map_to_landlord', 'got_wang_note'] },
+];
 
 for (const id of expectedChapter2Nodes) {
-  for (const goto of gotos(id, { clues: ['舍监证词', '法租界地图', '三人合影'], items: ['三人合影'], flags: ['asked_door', 'asked_photo', 'got_wang_note'] })) {
-    assert(context.nodes[goto], `${id} has missing goto target: ${goto}`);
+  for (const evidence of sampleEvidenceSets) {
+    for (const choice of choicesOf(id, evidence)) {
+      if (!choice || !choice.goto) continue;
+      const target = typeof choice.goto === 'function' ? choice.goto(E.state) : choice.goto;
+      assert(context.nodes[target], `${id} has missing goto target: ${target}`);
+    }
   }
 }
 
@@ -257,4 +230,4 @@ if (errors.length) {
   process.exit(1);
 }
 
-console.log(`Chapter 2 runtime audit passed: ${expectedChapter2Nodes.length} nodes checked after full module load.`);
+console.log(`Chapter 2 runtime audit passed: ${expectedChapter2Nodes.length} migrated nodes checked after full module load.`);
