@@ -217,7 +217,7 @@
       if (hasDockEvidence() && !E.getFlag('deduced_fusheng')) {
         const deduce = firstMatching(choices, isDeduceFusheng, null);
         if (deduce) return [deduceChoice('deduce_fusheng', '🧩 下一步：推理福生仓与公董局的真相', deduce), reviewChoice(review, '📁 就此落笔，先把案子封卷')];
-        return [reviewChoice(review, '📁 就此落笔，先把案子封卷')];
+        return [reviewChoice(review, '📁 回顾现有证据，整理福生仓行动结果')];
       }
 
       return choices;
