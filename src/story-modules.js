@@ -6,6 +6,7 @@
   const modules = [
     'src/story-chapters/index.js',
     'src/story-chapters/endings.js',
+    'src/story-chapters/endings-contract.js',
     'src/story-modules/runtime-contract.js',
     'src/story-modules/consistency.js',
     'src/story-modules/evidence.js',
