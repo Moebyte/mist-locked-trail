@@ -19,9 +19,9 @@ function assert(condition, message) {
 }
 
 const indexHtml = read('index.html');
-assert(indexHtml.includes(STORY_MODULE_ENTRY), 'index.html 应加载 src/story-modules.js 作为故事模块入口');
-assert(!indexHtml.includes('src/patches.js'), 'index.html 不应继续加载 src/patches.js');
-assert(!exists('src/patches.js'), 'src/patches.js 已退役，不应再次出现');
+assert(indexHtml.includes(STORY_MODULE_ENTRY), 'index.html should load the story module entry');
+assert(!indexHtml.includes('src/patches.js'), 'legacy patches entry should not be loaded');
+assert(!exists('src/patches.js'), 'legacy patches file should not exist');
 
 const modulesJs = read(STORY_MODULE_ENTRY);
 const manifestModules = [];
@@ -33,14 +33,14 @@ for (const quote of ["'", '"']) {
 const uniqueManifestModules = [...new Set(manifestModules)];
 const discoveredModules = listStoryModuleScripts(repoRoot);
 
-assert(uniqueManifestModules.length > 0, 'src/story-modules.js 中没有登记任何故事模块');
+assert(uniqueManifestModules.length > 0, 'story module manifest should not be empty');
 assert(
   JSON.stringify(uniqueManifestModules) === JSON.stringify(discoveredModules),
-  `故事模块清单不一致：\n  story-modules.js=${uniqueManifestModules.join(', ')}\n  loader=${discoveredModules.join(', ')}`
+  `story module manifest mismatch:\n  story-modules.js=${uniqueManifestModules.join(', ')}\n  loader=${discoveredModules.join(', ')}`
 );
 
 for (const rel of discoveredModules) {
-  assert(exists(rel), `故事模块不存在：${rel}`);
+  assert(exists(rel), `story module file is missing: ${rel}`);
 }
 
 const requiredModules = [
@@ -51,6 +51,8 @@ const requiredModules = [
   'src/story-chapters/chapter-2-home-xuehua-contract.js',
   'src/story-chapters/chapter-2-home-fixed.js',
   'src/story-chapters/chapter-2-home-fixed-contract.js',
+  'src/story-chapters/chapter-2-frenchtown-entry.js',
+  'src/story-chapters/chapter-2-frenchtown-entry-contract.js',
   'src/story-chapters/chapter-2-frenchtown-tail.js',
   'src/story-chapters/chapter-2-frenchtown-tail-contract.js',
   'src/story-chapters/chapter-2-xuehua-203.js',
@@ -67,7 +69,7 @@ const requiredModules = [
   'src/story-modules/region-gates.js',
 ];
 for (const rel of requiredModules) {
-  assert(discoveredModules.includes(rel), `story-modules.js 缺少必需模块：${rel}`);
+  assert(discoveredModules.includes(rel), `required story module is missing: ${rel}`);
 }
 
 if (errors.length) {
