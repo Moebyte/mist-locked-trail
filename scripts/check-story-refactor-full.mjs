@@ -18,6 +18,7 @@ const checks = [
   'scripts/remove-migrated-chapter3-second-batch-from-story.mjs',
   'scripts/remove-migrated-chapter3-yufang-batch-from-story.mjs',
   'scripts/remove-migrated-chapter3-office-from-story.mjs',
+  'scripts/remove-migrated-chapter3-chen-letter-from-story.mjs',
 ];
 
 const failures = [];
