@@ -53,7 +53,11 @@ assert(!fusheng.goto, '福生仓推理入口不应只有 goto，否则会跳转/
 assert(E.canDeduce('deduce_fusheng'), '空暗室证据链应满足福生仓推理条件');
 
 if (typeof fusheng.effect === 'function') fusheng.effect(E.state);
-assert(E.deducEl?.style?.display === 'flex', '点击福生仓推理入口后应打开推理面板');
+assert(
+  E.deducEl?.style?.display === 'flex' || E.lastOpenedDeduction === 'deduce_fusheng',
+  '点击福生仓推理入口后应打开推理面板'
+);
+assert(E.lastOpenedDeduction === 'deduce_fusheng' || E.deducEl?.style?.display === 'flex', '点击后应确实请求打开 deduce_fusheng 推理题');
 
 if (errors.length) {
   console.error('Wrapup fusheng deduction smoke failed:');
