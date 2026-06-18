@@ -64,6 +64,9 @@ jobs:
       - name: Smoke test early mist spoiler redaction
         run: node scripts/smoke-early-mist-spoiler-redaction.mjs
 
+      - name: Smoke test Wuai Wanting altered packet
+        run: node scripts/smoke-wuai-wanting-altered-packet.mjs
+
       - name: Smoke test Sun fast support
         run: node scripts/smoke-sun-fast-support.mjs
 
