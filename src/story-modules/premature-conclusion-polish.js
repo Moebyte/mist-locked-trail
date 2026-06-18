@@ -19,8 +19,6 @@
         || E.hasItem('法租界地图')
         || E.hasClue('铅笔清单')
         || E.hasItem('铅笔清单')
-        // 到达薛华立路 203 后取得的线索也能证明玩家已经接上这条前置线，
-        // 避免后续整理页把已完成第二段推理的正常路线误判为“没查大学”。
         || E.hasClue('陆小姐的笔记')
         || E.hasClue('三人合影')
         || E.hasItem('三人合影');
@@ -83,7 +81,7 @@
 
     function zhouLetterReturnChoices() {
       if (zhouHasBothLetters()) return [{ text: '🕯️ 把两封信并在一起，听周怀安说完', goto: 'end_zhou_chen_letter' }];
-      return [{ text: '📨 继续出示另一封信', goto: 'ch4_revisit_zhou' }];
+      return [{ text: '📨 再递出另一封信', goto: 'ch4_revisit_zhou' }];
     }
 
     if (nodes.ch3_chen_letter && !nodes.ch3_chen_letter.__suLastLetterPatched) {
@@ -125,7 +123,7 @@
               out.push({ text: '🏮 回访周怀安——带去残信和那封疑似遗书', goto: 'ch4_revisit_zhou' });
               hasZhouChoice = true;
             }
-            out.push({ ...choice, text: '🔙 回顾现有证据（证据链仍不完整）' });
+            out.push({ ...choice, text: '🔙 把手头材料重新摊开' });
             continue;
           }
 
@@ -151,8 +149,8 @@
         if (!isPrematureConclusion()) return choices;
         if (E.getFlag('missed_deadline')) return choices;
         return [
-          { text: '📁 证据不足，暂时归档此案', goto: 'end_archive' },
-          { text: '⚠️ 证据不足，仍要冒然指认嫌疑人', goto: 'ch4_accuse' }
+          { text: '📁 暂时把案卷压进抽屉', goto: 'end_archive' },
+          { text: '⚠️ 线索还断着，却仍决定指认一个人', goto: 'ch4_accuse' }
         ];
       };
       nodes.ch4_conclusion.__prematureConclusionChoicesPatched = true;
@@ -172,7 +170,7 @@
         return choicesOf(oldChoices, state).map(choice => {
           if (isBadRouteLocked() && choice.goto === 'ch4_revisit_zhou') {
             if (knowsZhouFianceFromSuHome()) {
-              return { ...choice, text: '🔙 带着翡翠镯回去整理证据——疑似遗书的说法站不稳', goto: 'ch4_conclusion' };
+              return { ...choice, text: '🔙 把翡翠镯收回去，别让那封疑似遗书误导他', goto: 'ch4_conclusion' };
             }
             return { ...choice, text: '🏮 回访周怀安——带去翡翠镯、残信和疑似遗书' };
           }
