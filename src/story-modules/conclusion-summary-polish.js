@@ -1,6 +1,6 @@
 // ===== 终局总结显示收束 =====
-// 目标：不要把内部叠加分直接显示成 18 分；玩家看到的是明确维度的 10 分制与压力指数。
-// 同时把“查明福生仓”改成“福生仓真相推理”，并在可推理时优先给出推理入口。
+// 目标：终局前只显示玩家已经掌握的案卷状态，不显示内部评分、路线名或开发者式“真相完整度”。
+// 同时把“查明福生仓”改成“整理福生仓案卷”，并在可推理时优先给出推理入口。
 
 (function installConclusionSummaryPolish() {
   function applyConclusionSummaryPolish() {
@@ -45,20 +45,20 @@
 
       if (E.getFlag('v07_choice_late_blockade')) {
         pressure += 1;
-        notes.push('码头封锁迟一步');
+        notes.push('码头封锁迟了一步');
       }
       if (E.getFlag('dock_escaped_during_sun_standoff') || E.getFlag('v07_choice_blockade_after_interference')) {
         pressure += 2;
-        notes.push('公董局已经插手');
+        notes.push('对方已经惊动');
       }
-      if (E.getFlag('v07_choice_blockade_after_interference')) notes.push('补封码头受阻');
-      if (E.getFlag('dock_sun_pressed_fu') || E.getFlag('v07_choice_hold_blockade')) notes.push('封锁线仍在');
+      if (E.getFlag('v07_choice_blockade_after_interference')) notes.push('补封码头遇阻');
+      if (E.getFlag('dock_sun_pressed_fu') || E.getFlag('v07_choice_hold_blockade')) notes.push('码头封锁线还在');
       if (E.getFlag('v07_witnesses_protected')) notes.push('证人暂时安全');
       if (E.getFlag('v07_accepted_fu_card')) {
         pressure += 2;
-        notes.push('傅启元交易留下污点');
+        notes.push('你接下了傅启元的名片');
       }
-      if (E.getFlag('v07_rejected_fu_deal') || E.getFlag('v07_fu_bluffed_with_press')) notes.push('傅启元被反制');
+      if (E.getFlag('v07_rejected_fu_deal') || E.getFlag('v07_fu_bluffed_with_press')) notes.push('傅启元暂时退了一步');
 
       let label = '可控';
       if (pressure >= 7) label = '临界';
@@ -70,16 +70,16 @@
 
     function finalCaseQuality() {
       const factors = [
-        ['沈玉芳获救', E.getFlag('rescued_yufang')],
-        ['苏晚亭获救', E.getFlag('rescued_su')],
-        ['光华三证物闭环', E.getFlag('school_wu_three_proofs')],
-        ['福生仓真相推理', E.getFlag('deduced_fusheng')],
-        ['货运单曝光', waybillReady()],
-        ['清场指令曝光', clearanceReady()],
-        ['保护了证人', E.getFlag('v07_witnesses_protected')],
-        ['陆念薇对质/口供', luLineReady()],
-        ['码头封锁有效', E.getFlag('dock_sun_pressed_fu') || E.getFlag('v07_choice_hold_blockade')],
-        ['拒绝傅启元交易', E.getFlag('v07_rejected_fu_deal') || E.getFlag('v07_fu_bluffed_with_press')],
+        ['沈玉芳已经带出福生仓', E.getFlag('rescued_yufang')],
+        ['苏晚亭已经带出福生仓', E.getFlag('rescued_su')],
+        ['光华小学旧案已经对上三样物证', E.getFlag('school_wu_three_proofs')],
+        ['福生仓这条线已经整理清楚', E.getFlag('deduced_fusheng')],
+        ['光华货运单已经到手', waybillReady()],
+        ['清场指令已经到手', clearanceReady()],
+        ['证人已经安置妥当', E.getFlag('v07_witnesses_protected')],
+        ['陆念薇已经说出她知道的事', luLineReady()],
+        ['码头封锁线还在', E.getFlag('dock_sun_pressed_fu') || E.getFlag('v07_choice_hold_blockade')],
+        ['你没有接傅启元递来的台阶', E.getFlag('v07_rejected_fu_deal') || E.getFlag('v07_fu_bluffed_with_press')],
       ];
 
       let points = factors.reduce((sum, [, ok]) => sum + (ok ? 1 : 0), 0);
@@ -87,27 +87,27 @@
 
       if (E.getFlag('v07_choice_late_blockade')) {
         points -= 1;
-        penalties.push('封码头迟一步');
+        penalties.push('封码头迟了一步');
       }
       if (E.getFlag('dock_escaped_during_sun_standoff') || E.getFlag('v07_choice_blockade_after_interference')) {
         points -= 1;
-        penalties.push('公董局已插手');
+        penalties.push('对方已经惊动');
       }
       if ((E.state?.pressure?.heat || 0) >= 5) {
         points -= 1;
-        penalties.push('行动热度过高');
+        penalties.push('你之前闹出的动静太大');
       }
       if (E.getFlag('v07_accepted_fu_card')) {
         points -= 2;
-        penalties.push('接下傅启元交易名片');
+        penalties.push('傅启元留下了可以拿捏你的东西');
       }
 
       points = Math.max(0, Math.min(10, points));
-      let label = '证据不足';
-      if (points >= 9) label = '证据成链';
-      else if (points >= 7) label = '主线清楚';
-      else if (points >= 5) label = '线索可用';
-      else if (points >= 3) label = '仍有缺口';
+      let label = '案卷仍薄';
+      if (points >= 9) label = '案卷很稳';
+      else if (points >= 7) label = '主线已清';
+      else if (points >= 5) label = '能往下写';
+      else if (points >= 3) label = '缺口不少';
 
       return { points, label, factors, penalties };
     }
@@ -123,41 +123,49 @@
     }
 
     function check(name, ok) {
-      return `${ok ? '✅' : '⚫'} ${name}`;
+      return `${ok ? '✓' : '·'} ${name}`;
     }
 
     function qualityLine(q) {
       const positives = q.factors.filter(([, ok]) => ok).map(([name]) => name);
       const gaps = q.factors.filter(([, ok]) => !ok).map(([name]) => name);
-      const gapText = gaps.length ? `<br><span class="sys">缺口：${gaps.slice(0, 3).join('、')}${gaps.length > 3 ? '等' : ''}。</span>` : '';
-      const penaltyText = q.penalties.length ? `<br><span class="sys">扣分：${q.penalties.join('、')}。</span>` : '';
-      return `<b>📋 案件质量 · ${q.label} · ${q.points}/10</b><br><span class="sys">已闭合：${positives.join('、') || '暂无'}。</span>${gapText}${penaltyText}`;
+      const positivesText = positives.length ? positives.slice(0, 5).join('；') : '桌上还没有足够能落笔的东西';
+      const gapText = gaps.length ? `<br><span class="sys">还没完全落稳的地方：${gaps.slice(0, 3).join('；')}${gaps.length > 3 ? '等' : ''}。</span>` : '';
+      const penaltyText = q.penalties.length ? `<br><span class="sys">麻烦在于：${q.penalties.join('；')}。</span>` : '';
+      return `<b>📋 案卷状态 · ${q.label}</b><br><span class="sys">已经能写进案卷的：${positivesText}。</span>${gapText}${penaltyText}`;
     }
 
     function pressureLine(p) {
-      const notes = p.notes.length ? ` · ${Array.from(new Set(p.notes)).join(' / ')}` : '';
-      return `<b>⚠️ 压力指数 · ${p.label} · ${p.value}/8</b><br><span class="sys">${p.label === '临界' ? '对方已经开始压证据和证人，公开查明真相会明显受阻。' : p.label === '高压' ? '局势已经被惊动，后续每一步都会影响证据保全。' : p.label === '紧张' ? '对方已有风声，但局面仍可控制。' : '行动仍在可控范围内。'}${notes}</span>`;
+      const notes = p.notes.length ? ` ${Array.from(new Set(p.notes)).join('；')}。` : '';
+      const line = p.label === '临界'
+        ? '对方已经开始压证据和证人，公开追下去会很难。'
+        : p.label === '高压'
+          ? '局势已经被惊动，后续每一步都会影响证据和证人。'
+          : p.label === '紧张'
+            ? '对方已有风声，但局面还没有完全失控。'
+            : '行动还在可控范围内。';
+      return `<b>⚠️ 外面的风声 · ${p.label}</b><br><span class="sys">${line}${notes}</span>`;
     }
 
     function summaryHtml() {
       const q = finalCaseQuality();
       const p = finalPressureProfile();
       const checks = [
-        check('沈玉芳获救', E.getFlag('rescued_yufang')),
-        check('苏晚亭获救', E.getFlag('rescued_su')),
-        check('福生仓真相推理', E.getFlag('deduced_fusheng')),
-        check('货运单曝光', waybillReady()),
-        check('清场指令曝光', clearanceReady()),
-        check('保护了证人', E.getFlag('v07_witnesses_protected')),
-        check('陆念薇对质/口供', luLineReady()),
-        check('封锁线有效', E.getFlag('dock_sun_pressed_fu') || E.getFlag('v07_choice_hold_blockade')),
-      ].join('  ');
+        check('沈玉芳', E.getFlag('rescued_yufang')),
+        check('苏晚亭', E.getFlag('rescued_su')),
+        check('福生仓案卷', E.getFlag('deduced_fusheng')),
+        check('货运单', waybillReady()),
+        check('清场纸', clearanceReady()),
+        check('证人安置', E.getFlag('v07_witnesses_protected')),
+        check('陆念薇', luLineReady()),
+        check('码头封锁', E.getFlag('dock_sun_pressed_fu') || E.getFlag('v07_choice_hold_blockade')),
+      ].join('　');
 
       const hint = !E.getFlag('deduced_fusheng') && dockEvidenceReady()
-        ? '<br><span class="sys">福生仓现场证据已经到手。现在还差最后一步：推理福生仓与公董局的真相。</span>'
+        ? '<br><span class="sys">福生仓现场的东西已经摆在桌上。还差一次把它们串起来的判断。</span>'
         : '';
 
-      return `<br><br><div style="border:1px solid var(--line);padding:10px;border-radius:4px;margin:8px 0">${qualityLine(q)}<br><br>${pressureLine(p)}<br>${checks}${hint}</div><br>选择“按手头证据结案”将根据当前案件质量与压力状态得出最合适结局。`;
+      return `<br><br><div style="border:1px solid var(--line);padding:10px;border-radius:4px;margin:8px 0">${qualityLine(q)}<br><br>${pressureLine(p)}<br>${checks}${hint}</div><br>现在落笔，结局会顺着你手里这份案卷走。`;
     }
 
     function hasFushengDeductionChoice(choices) {
@@ -176,7 +184,7 @@
       nodes.ch4_conclusion.choices = function (state) {
         const opts = choicesOf(oldChoices, state).slice();
         if (!E.getFlag('deduced_fusheng') && dockEvidenceReady() && !hasFushengDeductionChoice(opts)) {
-          opts.unshift({ text: '🧩 先推理——福生仓与公董局的真相', effect: () => E.openDeduction('deduce_fusheng') });
+          opts.unshift({ text: '🧩 把福生仓、货运单和清场纸串起来', effect: () => E.openDeduction('deduce_fusheng') });
         }
         return opts;
       };
