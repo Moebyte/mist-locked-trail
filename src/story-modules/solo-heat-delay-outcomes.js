@@ -80,9 +80,9 @@
         let score = oldDelayScore();
         if (soloMode()) {
           if (waitedPatrol) score = Math.max(0, score - 1);
-          // 取证动作只改变 delay floor，等待巡灯等动作应在 floor 之后继续生效。
-          if (this.getFlag('dock_solo_full_evidence_sweep') || soloHardEvidenceCount() >= 2) score = Math.max(score, 5);
-          else if (this.getFlag('dock_solo_partial_evidence_sweep') || soloHardEvidenceCount() === 1) score = Math.max(score, 3);
+          // 取证动作只改变 delay floor；库存里已有的证据只用于结局完整度，不反推为本次潜入拖延。
+          if (this.getFlag('dock_solo_full_evidence_sweep')) score = Math.max(score, 5);
+          else if (this.getFlag('dock_solo_partial_evidence_sweep')) score = Math.max(score, 3);
           else if (this.getFlag('dock_solo_no_evidence_rush')) score = Math.min(score, 1);
           if (waitedPatrol) score += 1;
         }
