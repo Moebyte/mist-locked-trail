@@ -42,6 +42,13 @@
       return hospitalDone() && hasLuOutcome();
     }
 
+    function ensureReviewEntry(out) {
+      if (!out.some(choice => String(choice.text || choice.fogText || '').includes('回顾现有证据'))) {
+        out.push({ text: '📁 回顾现有证据，整理福生仓行动结果', goto: 'ch4_conclusion' });
+      }
+      return out;
+    }
+
     function finalStatusText() {
       const parts = [];
       parts.push('第三段推理已经完成');
@@ -115,7 +122,7 @@
         if (!out.some(choice => choice.goto === 'ch4_hospital_conflict')) {
           out.unshift({ text: '🏥 先完成医院线，再做第三段推理', goto: 'ch4_hospital_conflict' });
         }
-        return out;
+        return ensureReviewEntry(out);
       }
 
       if (hasWitness() && hospitalDone() && !hasLuOutcome()) {
@@ -126,7 +133,7 @@
         if (!out.some(choice => choice.goto === 'ch4_lu_confrontation')) {
           out.unshift({ text: '🕯️ 先处理陆念薇，再做第三段推理', goto: 'ch4_lu_confrontation' });
         }
-        return out;
+        return ensureReviewEntry(out);
       }
 
       if (thirdDeductionReady() && !out.some(choice => (choice.text || '').includes('福生仓与公董局'))) {
