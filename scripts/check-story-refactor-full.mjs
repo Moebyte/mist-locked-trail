@@ -10,6 +10,7 @@ const checks = [
   'scripts/audit-story-endings.mjs',
   'scripts/check-story-chapter2-runtime.mjs',
   'scripts/audit-story-chapter3.mjs',
+  'scripts/check-story-chapter3-runtime.mjs',
 ];
 
 const failures = [];
