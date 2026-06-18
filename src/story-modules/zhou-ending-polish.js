@@ -46,14 +46,19 @@
       nodes.ch4_zhou_present_su_last_letter.choices = zhouLetterReturnChoices;
     }
 
-    if (nodes.end_zhou_chen_letter) {
-      nodes.end_zhou_chen_letter.effect = () => {
-        E.addClue('周怀安接受两封信的结论', '周怀安同时读到陈明远残信中的“晚亭吾爱”和苏晚亭疑似遗书，接受了“为情而去”的不完整结论。');
-        E.setFlag('zhou_chen_letter_easter_egg', true);
-        E.setFlag('zhou_accepts_false_closure', true);
+    if (!nodes.end_zhou_chen_letter) {
+      nodes.end_zhou_chen_letter = {
+        title: '结局 · 吾爱晚亭',
+        type: 'end'
       };
-      nodes.end_zhou_chen_letter.text = () => `你把残信和疑似遗书并排放在周怀安面前。<br><br>一封残信开头是：<span class="sys">“晚亭吾爱。”</span><br><br>另一张纸写着：<span class="sys">“此身既已入雾，愿随他而去。”</span><br><br>周怀安看了很久。先看残信，再看那封疑似遗书，最后又回到第一封。<br><br>他没有哭，也没有发怒。只是把背挺得很直，像一个人忽然明白自己已经迟到了很久。<br><br><span class="sys">“原来如此。”</span><br><br>他说。<br><br><span class="sys">“她不是被我弄丢的。她只是……早就走到我看不见的地方去了。”</span><br><br>你想提醒他，这只信封仍有太多空白：残信缺了下半截，薛华立路 22 号 203 室没有完全查清，那条被刻意擦掉的去向也没有重新接上。可是话到嘴边，你又停住了。<br><br>因为周怀安已经接受了这个结局。<br><br>接受苏晚亭爱过陈明远，接受她可能在绝望里选择离开，接受自己从未真正走进她的秘密。这个答案不完整，却足够让一个等待太久的人放下。<br><br>他把陈明远的残信折好，放在疑似遗书下面。这个动作很轻，像是把两个亡魂安置到同一只抽屉里。<br><br><span class="sys">“沈先生，案子可以归档了。”</span><br><br>他停了一下，又说：<br><br><span class="sys">“至少，我知道她最后不是一个人。”</span><br><br>你离开商务印书馆时，雨又落了下来。街边的铅字铺还亮着灯，印刷机在楼下轧轧作响，仿佛这座城每天都在替别人排好结局。<br><br>你没有找到苏晚亭。你也没有证明那封疑似遗书是真是假。<br><br>但周怀安已经相信了它。<br><br>雾没有散，只是有人选择不再往里走。<br><br><div style="color:#666;font-style:italic;margin-top:20px">—— 结局 · 吾爱晚亭 ——</div>`;
     }
+
+    nodes.end_zhou_chen_letter.effect = () => {
+      E.addClue('周怀安接受两封信的结论', '周怀安同时读到陈明远残信中的“晚亭吾爱”和苏晚亭疑似遗书，接受了“为情而去”的不完整结论。');
+      E.setFlag('zhou_chen_letter_easter_egg', true);
+      E.setFlag('zhou_accepts_false_closure', true);
+    };
+    nodes.end_zhou_chen_letter.text = () => `你把残信和疑似遗书并排放在周怀安面前。<br><br>一封残信开头是：<span class="sys">“晚亭吾爱。”</span><br><br>另一张纸写着：<span class="sys">“此身既已入雾，愿随他而去。”</span><br><br>周怀安看了很久。先看残信，再看那封疑似遗书，最后又回到第一封。<br><br>他没有哭，也没有发怒。只是把背挺得很直，像一个人忽然明白自己已经迟到了很久。<br><br><span class="sys">“原来如此。”</span><br><br>他说。<br><br><span class="sys">“她不是被我弄丢的。她只是……早就走到我看不见的地方去了。”</span><br><br>你想提醒他，这只信封仍有太多空白：残信缺了下半截，薛华立路 22 号 203 室没有完全查清，那条被刻意擦掉的去向也没有重新接上。可是话到嘴边，你又停住了。<br><br>因为周怀安已经接受了这个结局。<br><br>接受苏晚亭爱过陈明远，接受她可能在绝望里选择离开，接受自己从未真正走进她的秘密。这个答案不完整，却足够让一个等待太久的人放下。<br><br>他把陈明远的残信折好，放在疑似遗书下面。这个动作很轻，像是把两个亡魂安置到同一只抽屉里。<br><br><span class="sys">“沈先生，案子可以归档了。”</span><br><br>他停了一下，又说：<br><br><span class="sys">“至少，我知道她最后不是一个人。”</span><br><br>你离开商务印书馆时，雨又落了下来。街边的铅字铺还亮着灯，印刷机在楼下轧轧作响，仿佛这座城每天都在替别人排好结局。<br><br>你没有找到苏晚亭。你也没有证明那封疑似遗书是真是假。<br><br>但周怀安已经相信了它。<br><br>雾没有散，只是有人选择不再往里走。<br><br><div style="color:#666;font-style:italic;margin-top:20px">—— 结局 · 吾爱晚亭 ——</div>`;
 
     E.__zhouEndingPolishPatched = true;
   }
