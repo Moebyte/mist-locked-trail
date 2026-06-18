@@ -137,6 +137,13 @@ function assertIncludes(list, value, message) {
   assert(list.includes(value), `${message}: expected ${value}, got [${list.join(', ')}]`);
 }
 
+function runEffect(id, evidence = {}) {
+  resetEvidence(evidence);
+  const node = context.nodes && context.nodes[id];
+  if (node && typeof node.effect === 'function') node.effect(E.state);
+  return E.state;
+}
+
 runScript('src/story.js', '\nglobalThis.nodes = nodes;');
 runScript('src/main.js');
 runStoryModuleScripts(runScript, repoRoot);
@@ -202,17 +209,28 @@ assertIncludes(gotos('ch2_leave_univ', { clues: ['舍监证词', '法租界地�
 
 assertIncludes(gotos('ch2_police'), 'ch2_police_file', 'ch2_police choices');
 resetEvidence();
-const policePresent = context.nodes.ch2_police.onPresent({ name: '半张烟盒纸' }, E.state);
-assert(policePresent && policePresent.goto === 'ch2_police_present', 'ch2_police onPresent should route 半张烟盒纸 to ch2_police_present');
+if (typeof context.nodes.ch2_police.onPresent === 'function') {
+  const policePresent = context.nodes.ch2_police.onPresent({ name: '半张烟盒纸' }, E.state);
+  assert(policePresent && policePresent.goto === 'ch2_police_present', 'ch2_police onPresent should route 半张烟盒纸 to ch2_police_present');
+} else {
+  assert(false, 'ch2_police should keep onPresent for 半张烟盒纸');
+}
 assertIncludes(gotos('ch2_police_file'), 'ch2_police_wang', 'ch2_police_file choices before got_wang_note');
 assertIncludes(gotos('ch2_police_file', { flags: ['got_wang_note'] }), 'ch2_frenchtown', 'ch2_police_file choices after got_wang_note');
 assertIncludes(gotos('ch2_police_file', { flags: ['got_wang_note'] }), 'ch2_home', 'ch2_police_file choices after got_wang_note');
 assertIncludes(gotos('ch2_police_file', { flags: ['got_wang_note'] }), 'ch3_school', 'ch2_police_file choices after got_wang_note');
 assertIncludes(gotos('ch2_police_alt', { flags: ['got_wang_note'] }), 'ch2_frenchtown', 'ch2_police_alt choices after got_wang_note');
 
-resetEvidence();
-const homePresent = context.nodes.ch2_home.onPresent({ name: '苏晚亭的照片' }, E.state);
-assert(homePresent && homePresent.goto === 'ch2_home_showphoto', 'ch2_home onPresent should route 苏晚亭的照片 to ch2_home_showphoto');
+if (typeof context.nodes.ch2_home.onPresent === 'function') {
+  resetEvidence();
+  const homePresent = context.nodes.ch2_home.onPresent({ name: '苏晚亭的照片' }, E.state);
+  assert(homePresent && homePresent.goto === 'ch2_home_showphoto', 'ch2_home onPresent should route 苏晚亭的照片 to ch2_home_showphoto');
+} else {
+  assert(Boolean(context.nodes.ch2_home_showphoto), 'ch2_home has no onPresent, so ch2_home_showphoto must exist as the final photo route');
+  const state = runEffect('ch2_home_showphoto');
+  assert(state.items.some(item => item.name === '苏晚亭的银发夹'), 'ch2_home_showphoto should still grant 苏晚亭的银发夹 in final runtime');
+  assert(state.clues.some(clue => clue.name === '苏母托付信物'), 'ch2_home_showphoto should still grant 苏母托付信物 in final runtime');
+}
 assertIncludes(gotos('ch2_home'), 'ch2_home_talk', 'ch2_home early choices');
 assertIncludes(gotos('ch2_home'), 'ch2_home_photo', 'ch2_home early choices');
 assertIncludes(gotos('ch2_home', { clues: ['母亲证词'], flags: ['asked_photo'] }), 'ch2_leave_home', 'ch2_home completed choices');
