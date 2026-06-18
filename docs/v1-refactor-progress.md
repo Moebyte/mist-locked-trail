@@ -130,9 +130,9 @@ The second script is now an idempotent regression check. It should report that n
 
 ### Phase 5 — Chapter 3 high-risk migration
 
-Status: first-batch runtime takeover and dry-run removal guard added; physical removal workflow created.
+Status: first-batch physical removal complete.
 
-Selected first batch:
+Completed first batch:
 
 ```text
 ch3_school_chen_su
@@ -163,7 +163,7 @@ Physical removal workflow:
 .github/workflows/chapter3-first-batch-physical-removal.yml
 ```
 
-This workflow runs the full check before and after removal, executes only the first-batch removal script with `--write`, and commits `src/story.js` only if a generated change exists.
+`ch3_school_chen_su` has been physically removed from `src/story.js`. The removal script is now an idempotent guard for that first batch.
 
 ## Current gate setup
 
@@ -198,22 +198,18 @@ Also available in GitHub Actions:
 .github/workflows/story-refactor-full-check.yml
 ```
 
-This full check includes the Chapter 3 pre-migration audit, the first-batch Chapter 3 runtime gate, and the first-batch removal dry-run.
+This full check includes the Chapter 3 pre-migration audit, the first-batch Chapter 3 runtime gate, and the first-batch removal guard.
 
 ## Current next step
 
-Next step: wait for the Chapter 3 First Batch Physical Removal workflow to finish.
+Next step: select the second Chapter 3 migration batch from the audit output.
 
-Expected generated commit:
+Candidate selection must still avoid high-risk hub / patch-owned nodes unless a focused gate is added first.
 
-```text
-Remove migrated chapter 3 first batch node from story
-```
-
-After it succeeds, remove the temporary `push` trigger from:
+Likely next candidates must be reviewed against:
 
 ```text
-.github/workflows/chapter3-first-batch-physical-removal.yml
+src/story-modules/guanghua-school-flow-polish.js
 ```
 
 Do not reuse the Chapter 2 removal script for Chapter 3.
