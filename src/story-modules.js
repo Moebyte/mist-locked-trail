@@ -68,6 +68,7 @@
     'src/story-modules/dynamic-ending-polish.js',
     'src/story-modules/deadline-deprecation-polish.js',
     'src/story-modules/fusheng-entry-unblock-polish.js',
+    'src/story-modules/fusheng-decision-no-review.js',
     'src/story-modules/solo-reward-ending-polish.js',
     'src/story-modules/final-closure-flow-polish.js',
     'src/story-modules/legacy-quality-scope-polish.js',
