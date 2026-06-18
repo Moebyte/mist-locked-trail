@@ -85,7 +85,7 @@
         out.push({ text: '🔍 陆小姐——203、旧名和当票都能指向她', goto: 'end_boss_lu' });
       }
       if (hasZhaoAccuseBasis()) {
-        out.push({ text: '🔍 赵先生——他一直在盯陆小姐和沈玉芳', goto: 'end_boss_zhao' });
+        out.push({ text: '🔍 赵先生——黑衣男人与沈玉芳这条线能指向他', goto: 'end_boss_zhao' });
       }
       if (hasWuAccuseBasis()) {
         out.push({ text: '🔍 吴校长——学校口径最能把事情压下去', goto: 'end_boss_wu' });
@@ -165,21 +165,16 @@
 
     function patchEarlyEnding(nodeId, title, body) {
       const node = nodes[nodeId];
-      if (!node || node.__earlyContinuityPatched) return;
-      const oldText = node.text;
-      node.title = title;
-      node.text = function (state) {
-        if (!isEarlyClosure()) return typeof oldText === 'function' ? oldText(state) : oldText;
-        return body();
-      };
-      node.__earlyContinuityPatched = true;
+      if (!node || node.__earlyEndingTextPatched) return;
+      node.text = () => `${body}<br><br><div style="color:#666;font-style:italic;margin-top:20px">—— 结局 · ${title} ——</div>`;
+      node.__earlyEndingTextPatched = true;
     }
 
-    patchEarlyEnding('end_boss_lu', '结局 · 面具之下', () => `你把案子写成陆小姐的故事。<br><br>学校办公室里的当票，薛华立路留下的旧名与烧过的纸灰，再加上203室那封威胁意味浓重的信，都足够让她成为案卷里最醒目的名字。<br><br>报告交上去以后，老孙没有立刻反驳。他只是问你：<span class="sys">“那苏晚亭呢？”</span><br><br>你说不出答案。<br><br>陆小姐确实有秘密，也确实在害怕。可她的秘密是不是足够解释陈明远的死、学校后楼的箱子、那封被重新压平过的信封，你没有证据。<br><br>几天后，薛华立路 22 号 203 室被查封。房间已经空了，墙角只剩一点烧过纸的黑灰。<br><br>案卷上写着：陆姓女子畏罪潜逃。<br><br>这个结论能让许多人点头，也能让巡捕房暂时合上卷宗。<br><br>只是很多年后你再想起她，想起的不是“真凶”，而是一张在雾里不断换名字的脸。<br><br><div style="color:#666;font-style:italic;margin-top:20px">—— 结局 · 面具之下 ——</div>`);
+    patchEarlyEnding('end_boss_lu', '面具之下', `你把案卷写成了一个关于陆小姐的故事。<br><br>203 室、旧名、当票、合影——这些线索足够让她成为最容易被写进去的人。<br><br>报告送出去以后，所有人都松了一口气。因为这份说法把陈明远之死、苏晚亭失踪和光华小学的阴影，都收进了一个女人的旧身份里。<br><br>可你知道，案卷里仍有太多空白：学校后楼的箱子没有说清，黑衣男人的来意没有说清，那些沉默的人也没有真正开口。<br><br>这份报告可以成立。<br><br>但它没有把雾拨开。`);
 
-    patchEarlyEnding('end_boss_zhao', '结局 · 提线木偶', () => `你把案子写成赵先生的故事。<br><br>他收沈玉兰的钱，却始终盯着陆小姐；他出现在茶楼、街角和薛华立路附近，像一根看不见的线，牵着几个人往同一个方向走。<br><br>这份报告很顺。顺到老孙看完后，只问了一句：<span class="sys">“线头在他手里，还是他也被别人牵着？”</span><br><br>你没有回答。<br><br>因为你也知道，赵先生像一个能解释许多事的人，却不像能解释所有事的人。陈明远的恐惧、学校后楼的箱子、苏晚亭的去向，都还隔着一层雾。<br><br>赵先生后来消失了。有人说他去了虹口，有人说他换了名字，也有人说他从一开始就不是这个案子的真正名字。<br><br>案卷上写着：黑衣男子涉案在逃。<br><br>这不是错案里最坏的一种。它至少承认有人在拉线。<br><br>只是你始终没有看见那只手。<br><br><div style="color:#666;font-style:italic;margin-top:20px">—— 结局 · 提线木偶 ——</div>`);
+    patchEarlyEnding('end_boss_zhao', '提线木偶', `你把案卷写成了一个关于赵先生的故事。<br><br>黑衣男人、跟踪、沈玉兰的妹妹——这些线索足够让他成为最像操盘者的人。<br><br>报告里，他成了牵线的人，成了那些校外阴影的名字。<br><br>可你知道，案卷里仍有太多空白：光华小学为什么沉默，陈明远为什么恐惧，苏晚亭为什么一定要追下去。<br><br>这份报告能让许多人点头。<br><br>但它没有让真相完整。`);
 
-    patchEarlyEnding('end_boss_wu', '结局 · 师者无声', () => `你把案子写成吴校长的故事。<br><br>光华小学是所有线索反复回到的地方。照片在那里，陈明远在那里，苏晚亭也在那里留下过痕迹。吴校长的沉默，足够让人相信他知道得比他说的多。<br><br>报告交到巡捕房时，老孙翻得很慢。最后他把纸放下，说：<span class="sys">“学校可以藏秘密，但学校未必就是秘密本身。”</span><br><br>你明白他的意思。<br><br>吴校长当然在遮掩。他替学校遮丑，替董事会挡风，也替自己保住体面。可他是不是能决定陈明远的死，能不能让苏晚亭从上海消失，你没有压得住的证据。<br><br>几天后，光华小学照常上课。校门口重新刷了漆，晨读声从围墙里飘出来，像什么都没有发生过。<br><br>案卷上写着：校方管理失当，另案待查。<br><br>很多人都满意这个写法。它没有抓住真相，却保住了许多人的安静。<br><br><div style="color:#666;font-style:italic;margin-top:20px">—— 结局 · 师者无声 ——</div>`);
+    patchEarlyEnding('end_boss_wu', '师者无声', `你把案卷写成了一个关于吴校长的故事。<br><br>学校、箱子、沉默、那间办公室里的迟疑——这些线索足够让他成为最能承受责任的人。<br><br>报告里，光华小学成了所有秘密的中心，吴校长成了最该开口却始终闭嘴的人。<br><br>可你知道，案卷里仍有太多空白：校外那些人为什么能进出学校，陈明远究竟碰到了什么，苏晚亭又追到了哪里。<br><br>这份报告能把事情压住。<br><br>但它没有真正结束。`);
 
     E.__earlyEndingContinuityPolishPatched = true;
   }
