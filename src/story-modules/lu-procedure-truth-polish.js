@@ -166,6 +166,16 @@
             },
             goto: 'ch4_fu_private_offer'
           });
+        } else {
+          opts.push({
+            text: '🧾 先让她写下能说出口的一小段线索',
+            effect: () => {
+              E.setFlag('v07_lu_statement', true);
+              E.setFlag('v07_lu_statement_fragile', true);
+              E.addClue('陆念薇有限口供', '陆念薇只写下一段很窄的傅启元线索，还不足以独自撑住正式程序。');
+            },
+            goto: 'ch4_fu_private_offer'
+          });
         }
 
         opts.push({
