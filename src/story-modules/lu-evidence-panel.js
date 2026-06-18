@@ -54,6 +54,10 @@
       ].filter(flag => E.getFlag(flag)).length;
     }
 
+    function canOpenEvidenceLayer() {
+      return hasWaybill() || hasClearance() || hasSunProcedureBackstop() || hasDoctorRecord() || evidenceCount() > 0;
+    }
+
     function evidenceSummary() {
       const parts = [];
       if (E.getFlag('lu_presented_waybill')) parts.push('货运单证明光华小学教具箱和福生仓货路能接上');
@@ -66,6 +70,7 @@
 
     function evidenceChoices() {
       const out = [];
+      const evidenceLayerOpen = canOpenEvidenceLayer();
       if (hasWaybill() && !E.getFlag('lu_presented_waybill')) {
         out.push({
           text: '📦 拿出光华货运单——学校只是干净招牌',
@@ -89,7 +94,7 @@
         });
       }
       const wp = witnessProfile();
-      if ((wp.yufang || wp.su || E.hasYufangTestimonyBoost?.()) && !E.getFlag('lu_presented_witnesses')) {
+      if (evidenceLayerOpen && (wp.yufang || wp.su || E.hasYufangTestimonyBoost?.()) && !E.getFlag('lu_presented_witnesses')) {
         out.push({
           text: '👩‍🏫 提到沈玉芳和苏晚亭——她不是唯一会说话的人',
           effect: () => {
