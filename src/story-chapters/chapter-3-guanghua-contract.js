@@ -3,8 +3,8 @@
     if (typeof window === 'undefined') return;
     window.MLT_STORY_CHAPTER_3_GUANGHUA_CONTRACT = {
       module: 'chapter-3-guanghua',
-      phase: 'chen-letter-runtime-takeover',
-      nodes: ['ch3_school_chen_su', 'ch3_school_yufang', 'ch3_school_weird', 'ch3_school_office', 'ch3_chen_letter'],
+      phase: 'wu-present-runtime-takeover',
+      nodes: ['ch3_school_chen_su', 'ch3_school_yufang', 'ch3_school_weird', 'ch3_school_office', 'ch3_chen_letter', 'ch3_wu_present_threat', 'ch3_wu_present_photo'],
       ownedEffects: {
         ch3_school_chen_su: {
           clues: ['苏晚亭与陈明远'],
@@ -28,6 +28,16 @@
           items: ['陈明远的信'],
           flags: ['read_letter'],
         },
+        ch3_wu_present_threat: {
+          clues: ['吴校长补充证词'],
+          items: ['校董会采购线索'],
+          flags: ['wu_procurement_admitted', 'school_wu_confront_started'],
+        },
+        ch3_wu_present_photo: {
+          clues: ['陆小姐与校董会'],
+          contacts: ['傅启元'],
+          flags: ['wu_named_fu', 'school_wu_confront_started'],
+        },
       },
       outboundTargets: {
         ch3_school_chen_su: ['ch3_school_weird', 'ch3_school_office', 'ch3_school'],
@@ -35,6 +45,8 @@
         ch3_school_weird: ['ch3_school_office', 'ch3_school', 'ch3_school_confront_wu'],
         ch3_school_office: ['ch3_chen_letter', 'ch3_school_confront_wu'],
         ch3_chen_letter: ['runtime region flow; verify all emitted targets exist'],
+        ch3_wu_present_threat: ['runtime confrontation flow; verify all emitted targets exist'],
+        ch3_wu_present_photo: ['runtime confrontation flow; verify all emitted targets exist'],
       },
       physicalRemovalAllowed: false,
     };
