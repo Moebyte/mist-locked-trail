@@ -67,10 +67,22 @@ scripts/remove-migrated-chapter3-school-hub-from-story.mjs
 .github/workflows/chapter3-school-hub-physical-removal.yml
 ```
 
+## Current Chapter 3 wrapup migration
+
+`ch3_wrapup` has completed runtime takeover and focused runtime gate wiring. Legacy definition remains in `src/story.js` until the focused gate passes green.
+
+Files:
+
+```text
+src/story-chapters/chapter-3-wrapup.js
+src/story-chapters/chapter-3-wrapup-contract.js
+scripts/check-story-chapter3-wrapup-runtime.mjs
+```
+
 Behavior note:
 
 ```text
-ch3_school is affected by location-hub-flow-polish.js. The focused gate verifies final polished hub behavior, including loop-in-place questioning choices, Wu confrontation unlock, and wrapup exit after the confrontation is closed.
+ch3_wrapup is affected by many final-flow and ending modules. The focused gate verifies final emitted targets, police/Fusheng/pawnshop/hidden-ending exits, hidden_end_unlocked effect, and closure-route availability without hard-coding a single complete choice list.
 ```
 
 ## Current Chapter 3 gates
@@ -85,6 +97,7 @@ scripts/check-story-chapter3-chen-letter-runtime.mjs
 scripts/check-story-chapter3-wu-present-runtime.mjs
 scripts/check-story-chapter3-school-teacher-runtime.mjs
 scripts/check-story-chapter3-school-hub-runtime.mjs
+scripts/check-story-chapter3-wrapup-runtime.mjs
 ```
 
 Idempotent removal guards:
@@ -128,23 +141,24 @@ This full check includes Chapter 2 route smoke, Chapter 3 runtime gates, and all
 Next safe step:
 
 ```text
-Begin the final Chapter 3专项 migration for ch3_wrapup.
+Wait for GitHub Actions to go green on the ch3_wrapup runtime takeover.
 ```
 
-Recommended discipline for `ch3_wrapup`:
+After green:
 
 ```text
-1. run wrapup audit and confirm patch sources;
-2. define wrapup contract and runtime gate;
-3. verify ending exits, evidence conditions, quality gates, and old-save compatibility;
-4. keep legacy story.js definition until runtime takeover and focused gate pass;
-5. only then add the dedicated removal dry-run guard.
+1. add dedicated ch3_wrapup removal dry-run guard;
+2. wire it into check-story-refactor-full.mjs;
+3. wait for GitHub Actions green;
+4. then enter physical removal workflow for ch3_wrapup.
 ```
 
 ## Remaining Chapter 3 migration order
 
 ```text
-1. ch3_wrapup
+1. ch3_wrapup removal dry-run
+2. ch3_wrapup physical removal
+3. Chapter 3 migration closeout
 ```
 
 `ch3_wrapup` is the final Chapter 3 专项迁移对象.
