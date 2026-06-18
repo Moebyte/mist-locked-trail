@@ -79,6 +79,7 @@ const requiredModules = [
   'src/story-modules/causal-echo.js',
   'src/story-modules/ui-responsive.js',
   'src/story-modules/region-gates.js',
+  'src/story-modules/url-search-params-polyfill.js',
 ];
 for (const rel of requiredModules) {
   assert(discoveredModules.includes(rel), `required story module is missing: ${rel}`);
