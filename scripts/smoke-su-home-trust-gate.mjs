@@ -22,12 +22,24 @@ function present(rt, sceneId, itemName, desc = '') {
   return scene.onPresent?.({ name: itemName, desc }, rt.E.state);
 }
 
+const homeTalk = runtime();
+homeTalk.renderNode('ch2_home_talk');
+assert(homeTalk.E.getFlag('su_mother_knows_zhou_fiance'), '问苏母近况后，应记录苏母知道周怀安婚约');
+assert(homeTalk.E.hasClue('苏母知道周怀安婚约'), '问苏母近况后，应获得苏母知道周怀安婚约线索');
+assert(homeTalk.E.hasClue('为情而去说法存疑'), '问苏母近况后，应获得为情而去说法存疑线索');
+const homeTalkText = homeTalk.nodes.ch2_home_talk.text();
+assert(homeTalkText.includes('周先生是个好人') && homeTalkText.includes('这门亲事'), '苏母近况文本应交代周怀安婚约');
+
 const home = runtime({ items: [{ name: '苏晚亭的照片', desc: '' }] });
 home.renderNode('ch2_home_showphoto');
 assert(home.E.hasItem('苏晚亭的银发夹'), '向苏母出示照片后，应获得苏晚亭的银发夹');
 assert(home.E.hasClue('苏母托付信物'), '向苏母出示照片后，应获得苏母托付信物线索');
+assert(home.E.getFlag('su_mother_knows_zhou_fiance'), '向苏母出示照片后，也应记录苏母知道周怀安婚约');
+assert(home.E.hasClue('为情而去说法存疑'), '向苏母出示照片后，应获得为情而去说法存疑线索');
 const homeText = home.nodes.ch2_home_showphoto.text();
 assert(homeText.includes('小银发夹'), '苏母出示照片剧情应交代银发夹');
+assert(homeText.includes('周怀安') || homeText.includes('周先生'), '苏母出示照片剧情应交代周怀安');
+assert(homeText.includes('未婚夫'), '苏母出示照片剧情应明确周怀安身份');
 
 const cousin = runtime();
 const cousinText = cousin.nodes.ch2_home_ask_photo.text();
