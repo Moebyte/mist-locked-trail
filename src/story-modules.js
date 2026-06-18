@@ -25,6 +25,8 @@
     'src/story-chapters/chapter-2-building-enter-contract.js',
     'src/story-chapters/chapter-2-xuehua-203.js',
     'src/story-chapters/chapter-2-xuehua-203-contract.js',
+    'src/story-chapters/chapter-3-guanghua.js',
+    'src/story-chapters/chapter-3-guanghua-contract.js',
     'src/story-chapters/endings.js',
     'src/story-chapters/endings-contract.js',
     'src/story-modules/runtime-contract.js',
