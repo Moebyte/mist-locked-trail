@@ -25,6 +25,14 @@
         && !(E.getFlag('sun_support_in_action') && !E.getFlag('sun_fast_support'));
     }
 
+    function hasExplicitDockSupport() {
+      return fullSupportAtDock()
+        || fastSupportOnly()
+        || E.getFlag('sun_support_available')
+        || E.getFlag('sun_fast_cover_escape')
+        || E.getFlag('sun_support_cover_escape');
+    }
+
     function hasThing(name) {
       return E.hasItem(name) || E.hasClue(name);
     }
@@ -166,6 +174,17 @@
             E.addHeat(1, '补人手需要时间，傅启元可能已经开始清理现场。');
           },
           goto: 'ch4_hospital_late_blockade'
+        };
+      }
+      if (!hasExplicitDockSupport() && typeof E.dockSupportMode === 'function' && E.dockSupportMode() === 'solo') {
+        return {
+          text: '🚓 让老孙立刻封码头，趁现场还没被清干净',
+          effect: () => {
+            E.setFlag('v07_choice_pressure_fu', true);
+            E.setFlag('v07_choice_solo_call_sun_late', true);
+            E.addClue('迟召老孙封码头', '你在医院才让老孙去封码头。命令能传出去，但这不是码头现场已经压住的封锁线。');
+          },
+          goto: 'ch4_lu_confrontation'
         };
       }
       return {
