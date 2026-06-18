@@ -208,15 +208,39 @@ This full check includes the Chapter 3 pre-migration audit, the Chapter 3 runtim
 
 ## Current next step
 
-Next step: wait for the full check after the second-batch runtime takeover.
+Next step: migrate the remaining Chapter 3 nodes in high-risk order.
 
-If it passes, add a dedicated second-batch removal script for:
+Current completed Chapter 3 physical removals:
 
 ```text
+ch3_school_chen_su
 ch3_school_weird
+ch3_school_yufang
 ```
 
-Do not broaden the first-batch removal script without a new batch boundary.
+Current story.js physical removal footprint:
+
+```text
+src/story.js: -693 lines
+```
+
+Recommended next migration target:
+
+```text
+ch3_school_office
+```
+
+Reason:
+
+```text
+1. no onPresent;
+2. no dynamic choices in the legacy base node;
+3. gives key evidence and items, so it needs a dedicated runtime gate;
+4. outbound targets are limited to ch3_chen_letter and ch3_wrapup;
+5. it should be migrated before ch3_chen_letter.
+```
+
+Do not migrate `ch3_wrapup` yet. It must remain the final Chapter 3 专项迁移对象.
 
 ## Chapter 3 migration rule
 

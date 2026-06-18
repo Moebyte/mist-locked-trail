@@ -592,6 +592,52 @@ ch4_dock_escape
 - 迁移前先看 patch 来源。
 - 迁移后 smoke 必须覆盖。
 - 不允许新增第三层 patch。
+- 高风险节点必须按“小批量 runtime takeover → focused gate → removal dry-run → physical removal → workflow 收口”的顺序推进。
+- 每一批都必须有独立的迁移边界；不要把后续批次塞进上一批 removal script。
+
+#### Phase 5 当前后半段策略：第三章剩余节点
+
+第三章已经进入高风险后半段。后续不再按“低风险节点批量迁移”的方式推进，而是按节点责任和 patch 复杂度逐个收束。
+
+已完成并允许视为迁移样板的节点：
+
+```text
+ch3_school_chen_su
+ch3_school_weird
+ch3_school_yufang
+```
+
+推荐后续顺序：
+
+```text
+1. ch3_school_office
+2. ch3_chen_letter
+3. ch3_wu_present_threat / ch3_wu_present_photo
+4. ch3_school_teacher
+5. ch3_school
+6. ch3_wrapup
+```
+
+处理原则：
+
+- `ch3_school_office` 可作为下一批优先对象，但必须检查关键证据、道具和 `got_chen_evidence` flag。
+- `ch3_chen_letter` 应在办公室节点稳定后迁移，因为它依赖办公室搜证后的叙事出口。
+- `ch3_wu_present_threat` 与 `ch3_wu_present_photo` 属于举证结果节点，必须单独处理，不能混入普通学校节点批次。
+- `ch3_school_teacher` 含 `onPresent`，应等两个举证结果节点稳定后再迁。
+- `ch3_school` 是光华小学入口 hub，受多个 location / region / flow 模块影响，不能提前迁。
+- `ch3_wrapup` 是结案和结局前置 hub，必须最后作为专项迁移，不得混入普通节点迁移。
+
+`ch3_wrapup` 专项迁移前必须补充：
+
+```text
+wrapup audit
+wrapup contract
+wrapup runtime gate
+结局出口检查
+证据条件检查
+质量门检查
+旧存档兼容检查
+```
 
 ---
 
