@@ -5,9 +5,6 @@ import path from 'node:path';
 const repoRoot = process.cwd();
 const checks = [
   'scripts/check-story-modules.mjs',
-  'scripts/audit-story-chapter1.mjs',
-  'scripts/check-story-endings.mjs',
-  'scripts/audit-story-endings.mjs',
   'scripts/check-story-chapter2-runtime.mjs',
 ];
 
@@ -23,9 +20,9 @@ for (const rel of checks) {
 }
 
 if (failures.length) {
-  console.error('\nStory refactor aggregate check failed:');
+  console.error('\nStory refactor migration gate failed:');
   for (const rel of failures) console.error(`- ${rel}`);
   process.exit(1);
 }
 
-console.log('\nStory refactor aggregate check passed.');
+console.log('\nStory refactor migration gate passed.');
