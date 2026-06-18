@@ -25,6 +25,10 @@
       return E.getFlag('got_wang_note') || E.hasClue('王巡官遗留纸条') || E.hasItem('半张烟盒纸');
     }
 
+    function homeNeedsVisit() {
+      return !(E.hasClue('母亲证词') && E.getFlag('asked_photo'));
+    }
+
     function after203EvidenceChoices() {
       if (!hasLandlordFushengLead() && hasUniversityXuehuaLead()) {
         return [{ text: '🗺️ 向看门老头出示地图——核对仓库标记', goto: 'ch2_landlord_map' }];
@@ -32,7 +36,12 @@
       if (!hasWangNote()) {
         return [{ text: '📋 回巡捕房——追问福生仓与王巡官留下的线索', goto: 'ch2_police_alt' }];
       }
-      return [{ text: '📚 去光华小学——查沈玉芳和陈老师的线索', goto: 'ch3_school' }];
+      const opts = [
+        { text: '📚 去光华小学——查沈玉芳和陈老师的线索', goto: 'ch3_school' },
+        { text: '📋 去巡捕房——回到老孙那里整理卷宗线索', goto: 'ch2_police_alt' },
+      ];
+      if (homeNeedsVisit()) opts.push({ text: '🏠 去苏家——补问苏晚亭家里的线索', goto: 'ch2_home' });
+      return opts;
     }
 
     function yulanEchoChoices() {
