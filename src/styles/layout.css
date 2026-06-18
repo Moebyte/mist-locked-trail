@@ -1,0 +1,60 @@
+#app{max-width:780px;margin:0 auto;padding:16px 16px 92px;transition:max-width .25s,margin .25s,padding .25s}
+body.game-active #app{padding-bottom:110px}
+
+#top-actions{
+  display:none;
+  position:sticky;
+  top:0;
+  z-index:10;
+  margin:-16px -16px 12px;
+  padding:10px 16px;
+  background:color-mix(in srgb, var(--surface) 90%, transparent);
+  backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--line);
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+.tool-btn{
+  background:
+    linear-gradient(180deg, var(--surface2), var(--surface)),
+    repeating-linear-gradient(0deg, transparent 0 2px, rgba(80,60,30,.02) 2px 4px);
+  border:1px solid var(--line);
+  color:var(--text2);
+  padding:8px 14px;
+  border-radius:2px;
+  font-size:13px;
+  cursor:pointer;
+  font-family:inherit;
+  line-height:1;
+  white-space:nowrap;
+  box-shadow:
+    0 4px 12px rgba(0,0,0,.15),
+    inset 0 1px 0 rgba(255,255,255,.03);
+  transition:.2s;
+  position:relative;
+}
+
+.tool-btn:hover{
+  border-color:var(--gold);
+  color:var(--gold2);
+  transform:translateY(-1px);
+  box-shadow:
+    0 6px 16px rgba(0,0,0,.20),
+    inset 0 1px 0 rgba(255,255,255,.04);
+}
+
+.tool-btn.primary{
+  border-color:var(--gold);
+  color:var(--gold2);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--gold) 15%, var(--surface2)), var(--surface)),
+    repeating-linear-gradient(0deg, transparent 0 2px, rgba(120,90,50,.03) 2px 4px);
+}
+
+.tool-btn.mini{
+  float:right;
+  font-size:11px;
+  padding:5px 10px;
+  border-radius:2px;
+}
