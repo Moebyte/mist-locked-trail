@@ -128,9 +128,40 @@ export function createEngineStub(initialState = {}) {
         if (from?.discovered && to?.discovered) edge.revealed = true;
       }
     },
+    registerDeduction(id, question, options, correctIdx, successNode, failNode, requiredClues) {
+      if (!Array.isArray(this.deductions)) this.deductions = [];
+      this.deductions.push({ id, question, options, correctIdx, successNode, failNode, requiredClues, solved: false });
+    },
+    registerAll() {
+      this.registerDeduction('deduce_chen', '陈明远的真正死因最有可能是？', [
+        'A. 因愧对学生而自杀',
+        'B. 被陆小姐灭口——他发现了她的真实身份',
+        'C. 被吴校长灭口——他发现学校有非法交易',
+        'D. 因情感纠葛被苏晚亭牵连'
+      ], 1, 'deduc_success', 'deduc_fail', ['陈明远坠楼案', '恐吓信', '陆小姐的笔记', '陈明远的信']);
+
+      this.registerDeduction('deduce_lu_zhao', '陆小姐与黑衣男人的真实关系是？', [
+        'A. 情人与合谋——他们一起做敲诈生意',
+        'B. 黑衣男人是陆小姐的上线——陆小姐受他指挥',
+        'C. 黑衣男在追查陆小姐——沈玉兰雇他调查',
+        'D. 没有关系——黑衣男只是恰好去过薛华立路'
+      ], 2, 'deduc_lu_zhao_ok', 'deduc_lu_zhao_fail', ['跟踪黑衣男人', '神秘女子', '沈玉兰的妹妹', '翡翠镯']);
+
+      this.registerDeduction('deduce_fusheng', '福生仓与公董局的关联意味着什么？', [
+        'A. 一场普通的商业纠纷',
+        'B. 法租界高层有人利用学校掩护走私，陈老师和沈玉芳发现了真相',
+        'C. 吴校长私自挪用学校资金',
+        'D. 公董局要拆除光华小学建仓库'
+      ], 1, 'deduc_fusheng_ok', 'deduc_fusheng_fail', ['王巡官遗留纸条', '陈明远的信', '恐吓信', '公董局公文纸', '教具箱走私']);
+    },
     setFlag(k, v) { this.state.flags[k] = v; },
     getFlag(k) { return this.state.flags[k]; },
-    canDeduce() { return true; },
+    canDeduce(id) {
+      const d = Array.isArray(this.deductions) ? this.deductions.find(x => x.id === id) : null;
+      if (!d && typeof this.ensureDeductionRegistered === 'function') return !!this.ensureDeductionRegistered(id);
+      if (!d) return true;
+      return !d.solved && (d.requiredClues || []).every(c => this.hasClue(c));
+    },
     caseStrength() { return { name: '自动剧情测试', desc: 'story-harness 案情强度占位。' }; },
   };
   return E;
