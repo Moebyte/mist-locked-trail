@@ -128,6 +128,31 @@ node scripts/remove-migrated-chapter2-from-story.mjs
 
 The second script is now an idempotent regression check. It should report that no migrated Chapter 2 node definitions remain in `src/story.js`.
 
+### Phase 5 — Chapter 3 high-risk migration
+
+Status: first-batch runtime takeover started.
+
+Selected first batch:
+
+```text
+ch3_school_chen_su
+```
+
+Runtime takeover files:
+
+```text
+src/story-chapters/chapter-3-guanghua.js
+src/story-chapters/chapter-3-guanghua-contract.js
+```
+
+Focused runtime gate:
+
+```text
+scripts/check-story-chapter3-runtime.mjs
+```
+
+Physical removal from `src/story.js` is not allowed yet. The focused gate must pass first, then a dedicated Chapter 3 removal script must be added for the selected batch.
+
 ## Current gate setup
 
 ### Lightweight migration gate
@@ -161,16 +186,14 @@ Also available in GitHub Actions:
 .github/workflows/story-refactor-full-check.yml
 ```
 
-This full check includes the Chapter 3 pre-migration audit.
+This full check includes the Chapter 3 pre-migration audit and the first-batch Chapter 3 runtime gate.
 
 ## Current next step
 
-Next phase: Phase 5 pre-migration audit for Chapter 3.
-
-Do not migrate Chapter 3 nodes yet. First run and review:
+Next step: run and review the full check.
 
 ```bash
-node scripts/audit-story-chapter3.mjs
+node scripts/check-story-refactor-full.mjs
 ```
 
 Audit details are documented in:
@@ -179,26 +202,24 @@ Audit details are documented in:
 docs/chapter3-migration-audit.md
 ```
 
-Purpose:
+If the full check passes, add a dedicated removal script for the selected first batch only:
 
 ```text
-1. list remaining ch3_* nodes in src/story.js;
-2. identify runtime patch sources;
-3. classify risk by effect / onPresent / dynamic choices / hub behavior;
-4. recommend migration batches;
-5. decide the first small batch before any runtime takeover.
+scripts/remove-migrated-chapter3-first-batch-from-story.mjs
 ```
+
+Do not reuse the Chapter 2 removal script for Chapter 3.
 
 ## Chapter 3 migration rule
 
 Chapter 3 belongs to Phase 5 high-risk migration in the framework.
 
-Before moving any `ch3_*` node:
+Before moving any additional `ch3_*` node:
 
 ```text
 1. confirm patch sources;
-2. define the target chapter file, likely src/story-chapters/chapter-3-guanghua.js;
-3. add a focused runtime audit for the selected batch;
+2. define the target chapter file;
+3. add or update a focused runtime audit for the selected batch;
 4. keep legacy story.js definitions until runtime takeover passes;
 5. only then consider physical removal for that batch.
 ```
