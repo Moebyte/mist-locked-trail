@@ -88,6 +88,9 @@ jobs:
       - name: Smoke test final closure flow
         run: node scripts/smoke-final-closure-flow.mjs
 
+      - name: Smoke test legacy quality scope
+        run: node scripts/smoke-legacy-quality-scope.mjs
+
       - name: Smoke test wrapup no-repeat Fusheng entry
         run: node scripts/smoke-wrapup-no-repeat-fusheng-entry.mjs
 
