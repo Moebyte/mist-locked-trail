@@ -103,7 +103,7 @@
 
     function yufangQuickChoice() {
       return {
-        text: '🧾 帮沈玉芳确认关键关系',
+        text: '🧾 把合影、信和日记残页摊开：“这些人，你认得吗？”',
         effect: applyYufangBoost,
         goto: 'ch4_yufang_quick_testimony'
       };
@@ -126,7 +126,7 @@
 
       if (!hasSuHomeTrustProof() && !hasSuHomeTrustToken()) {
         out.push({
-          text: '⚠️ 只能先带沈玉芳突围',
+          text: '⚠️ 苏晚亭往后退了一步，只能先扶沈玉芳离开',
           effect: () => markYufangOnlyEscape('你没有苏母托付的信物，苏晚亭无法确认你是否可信，最终没有跟你离开暗室。'),
           goto: 'ch4_dock_escape'
         });
@@ -194,7 +194,7 @@
           out.push({ text: '🚕 带苏晚亭和沈玉芳离开暗室', goto: 'ch4_dock_escape' });
         } else if (!hasSuHomeTrustToken()) {
           out.push({
-            text: '⚠️ 只能先带沈玉芳突围',
+            text: '⚠️ 苏晚亭不肯动，只能先把沈玉芳扶出去',
             effect: () => markYufangOnlyEscape('你没有苏家信物，沈玉芳愿意跟你走，但苏晚亭始终不肯相信一个陌生人。'),
             goto: 'ch4_dock_escape'
           });
