@@ -13,12 +13,6 @@ function reset(overrides = {}) {
   rt.resetState(overrides);
 }
 
-function textOf(id) {
-  rt.renderNode(id);
-  const node = rt.nodes[id];
-  return typeof node.text === 'function' ? String(node.text(E.state)) : String(node.text || '');
-}
-
 function choices(id) {
   rt.renderNode(id);
   return rt.choicesOf(id).map(choice => ({
@@ -73,7 +67,7 @@ assert(wentTo === 'deduc_success', `答对应进入成功节点，实际 goto=${
 assert(E.deductions[0].solved, '答对应标记 deduction solved');
 assert(E.deducEl.style.display === 'none', '答对后推理面板应关闭');
 
-// 早期 ch4_conclusion 应退役结案系统，只允许回到线索整理，不再归档/指认/周怀安结局分流。
+// 非三证光华小学结束后仍应保留案情推理/表层收束环节，而不是被本模块退役。
 reset({
   flags: {
     school_incomplete_closure: true,
@@ -89,27 +83,15 @@ reset({
     { name: '推理结论：陈明远被灭口', desc: '' },
   ],
 });
-textOf('ch4_conclusion');
 let list = choices('ch4_conclusion');
-assert(hasChoice(list, '回到线索整理继续推理', 'ch3_wrapup'), `早期结案页应回到线索整理，实际 ${JSON.stringify(list)}`);
-assert(!list.some(choice => choice.goto === 'end_archive'), `早期结案页不应再提供归档结局，实际 ${JSON.stringify(list)}`);
-assert(!list.some(choice => choice.goto === 'ch4_accuse'), `早期结案页不应再提供冒然指认，实际 ${JSON.stringify(list)}`);
-assert(!list.some(choice => choice.goto === 'ch4_revisit_zhou'), `早期结案页不应再提供周怀安结局分流，实际 ${JSON.stringify(list)}`);
+assert(hasChoice(list, '残信和疑似遗书', 'ch4_revisit_zhou'), `非三证光华后应保留周怀安表层收束入口，实际 ${JSON.stringify(list)}`);
+assert(hasChoice(list, '暂时归档', 'end_archive'), `非三证光华后应保留暂时归档入口，实际 ${JSON.stringify(list)}`);
+assert(hasChoice(list, '压成一份指认', 'ch4_accuse'), `非三证光华后应保留案情指认入口，实际 ${JSON.stringify(list)}`);
 
-let text = textOf('ch4_accuse');
-assert(text.includes('这不是指认的时候'), `早期指认页应阻止过早指认，实际：${text}`);
 list = choices('ch4_accuse');
-assert(list.length === 1 && list[0].goto === 'ch3_wrapup', `早期指认页只应回到线索整理，实际 ${JSON.stringify(list)}`);
-
-// 完整线不应被早期退役逻辑覆盖。
-reset({
-  flags: {
-    deduced_fusheng: true,
-    rescued_yufang: true,
-  },
-});
-list = choices('ch4_conclusion');
-assert(list.some(choice => choice.goto === 'ch4_accuse'), `完整线仍应保留正常指认/结案选择，实际 ${JSON.stringify(list)}`);
+assert(hasChoice(list, '旧名、当票和203室', 'end_boss_lu'), `案情指认应保留陆小姐表层方向，实际 ${JSON.stringify(list)}`);
+assert(hasChoice(list, '一直在盯陆小姐和沈玉芳', 'end_boss_zhao'), `案情指认应保留赵先生表层方向，实际 ${JSON.stringify(list)}`);
+assert(hasChoice(list, '学校口径最能把事情压下去', 'end_boss_wu'), `案情指认应保留吴校长表层方向，实际 ${JSON.stringify(list)}`);
 
 if (errors.length) {
   console.error('Deduction retry no early ending smoke failed:');
