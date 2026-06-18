@@ -9,6 +9,7 @@ const checks = [
   'scripts/check-story-endings.mjs',
   'scripts/audit-story-endings.mjs',
   'scripts/check-story-chapter2-runtime.mjs',
+  'scripts/smoke-xuehua-choices.mjs',
   'scripts/audit-story-chapter3.mjs',
   'scripts/check-story-chapter3-runtime.mjs',
   'scripts/check-story-chapter3-yufang-runtime.mjs',
