@@ -92,7 +92,7 @@
       const out = [];
       if (hasSuHomeTrustToken() && !hasSuHomeTrustProof()) {
         out.push({
-          text: '🪮 拿出苏母给你的银发夹，让苏晚亭确认你去过苏家',
+          text: '🪮 把银发夹递给苏晚亭：“你母亲让我带来的。”',
           effect: applySuKeepsakeProof,
           goto: 'ch4_su_present_keepsake'
         });
@@ -101,18 +101,18 @@
       const p = yufangEvidenceProfile();
       if (p.count > 0 && !hasYufangBoost()) {
         out.push({
-          text: '🧾 用合影、陈明远的信或日记残页，帮沈玉芳确认关键关系',
+          text: '🧾 把合影、信和日记残页摊开：“这些人，你认得吗？”',
           effect: applyYufangBoost,
           goto: 'ch4_yufang_quick_testimony'
         });
       }
 
       if (!hasSuHomeTrustProof() && !hasSuHomeTrustToken()) {
-        out.push({ text: '⚠️ 没有苏家信物，只能先带沈玉芳突围', goto: 'ch4_dock_escape' });
+        out.push({ text: '⚠️ 外面有脚步声，顾不上解释，先把沈玉芳带出去', goto: 'ch4_dock_escape' });
       } else if (!hasSuHomeTrustProof()) {
-        out.push({ text: '⚠️ 不出示银发夹，强行带她们离开', goto: 'ch4_dock_escape' });
+        out.push({ text: '⚠️ 外面有脚步声，顾不上解释，先带她们冲出去', goto: 'ch4_dock_escape' });
       } else {
-        out.push({ text: '🚕 信任已建立，带苏晚亭和沈玉芳离开暗室', goto: 'ch4_dock_escape' });
+        out.push({ text: '🚕 带苏晚亭和沈玉芳离开暗室', goto: 'ch4_dock_escape' });
       }
 
       // 保留旧 choices 中不重复的特殊撤离/返回选项，避免其他后续补丁失效。
@@ -140,7 +140,7 @@
         const p = yufangEvidenceProfile();
         if (p.count > 0 && !hasYufangBoost()) {
           out.push({
-            text: '🧾 再用手头证据帮沈玉芳确认关键关系',
+            text: '🧾 把合影、信和日记残页摊开：“这些人，你认得吗？”',
             effect: applyYufangBoost,
             goto: 'ch4_yufang_quick_testimony'
           });
@@ -160,19 +160,19 @@
       };
       nodes.ch4_yufang_quick_testimony.text = function (state) {
         const base = typeof oldText === 'function' ? oldText(state) : oldText;
-        return `${base}<br><br><span class="sys">现在暗室里只剩一个问题：苏晚亭是否已经相信你。如果还没有，就必须先拿出苏母给你的信物。</span>`;
+        return `${base}<br><br><span class="sys">外面的脚步声近了。苏晚亭若还不肯信你，那枚银发夹也许是最后一句解释。</span>`;
       };
       nodes.ch4_yufang_quick_testimony.choices = function () {
         const out = [];
         if (hasSuHomeTrustToken() && !hasSuHomeTrustProof()) {
           out.push({
-            text: '🪮 转身把银发夹拿给苏晚亭看',
+            text: '🪮 把银发夹递给苏晚亭：“你母亲让我带来的。”',
             effect: applySuKeepsakeProof,
             goto: 'ch4_su_present_keepsake'
           });
         }
         if (hasSuHomeTrustProof()) out.push({ text: '🚕 带苏晚亭和沈玉芳离开暗室', goto: 'ch4_dock_escape' });
-        else out.push({ text: '⚠️ 没有建立苏晚亭信任，只能先撤沈玉芳', goto: 'ch4_dock_escape' });
+        else out.push({ text: '⚠️ 外面有脚步声，顾不上解释，先把沈玉芳带出去', goto: 'ch4_dock_escape' });
         out.push({ text: '🔙 回到暗室内再判断一次', goto: 'ch4_dock_who_dual' });
         return out;
       };
@@ -189,6 +189,9 @@
       nodes.ch4_dock_who_dual.choices = function (state) {
         return darkroomChoices(oldChoices, state);
       };
+      // 本节点已经把可用物件写成剧情选项，关闭通用“出示手中物件”入口，避免重复展示。
+      nodes.ch4_dock_who_dual.onPresent = null;
+      nodes.ch4_dock_who_dual.presentFilter = () => false;
       nodes.ch4_dock_who_dual.__darkroomPanelPatched = true;
     }
 
