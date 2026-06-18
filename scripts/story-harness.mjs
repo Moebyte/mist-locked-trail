@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
-import { runStoryModuleScripts } from './story-module-loader.mjs';
+import { listStoryModuleScripts, runStoryModuleScripts } from './story-module-loader.mjs';
 
 export function freshState(overrides = {}) {
   return {
@@ -220,13 +220,14 @@ export function loadStoryRuntime(options = {}) {
   const domReadyHandlers = [];
   const E = options.E || createEngineStub(options.initialState || {});
   const documentStub = createDocumentStub(domReadyHandlers);
+  const windowStub = { location: { search: '', hash: '' } };
 
   const context = vm.createContext({
     console,
     E,
     document: documentStub,
     URLSearchParams,
-    window: { location: { search: '', hash: '' } },
+    window: windowStub,
     localStorage: { getItem() { return null; }, setItem() {}, removeItem() {} },
     setTimeout(fn) { if (typeof fn === 'function') fn(); },
     clearTimeout() {},
@@ -244,6 +245,7 @@ export function loadStoryRuntime(options = {}) {
 
   runScript('src/story.js', '\nglobalThis.nodes = nodes;');
   runScript('src/main.js');
+  context.window.MLT_STORY_MODULES = listStoryModuleScripts(repoRoot);
   runStoryModuleScripts(runScript, repoRoot);
   for (const handler of domReadyHandlers) handler();
 
