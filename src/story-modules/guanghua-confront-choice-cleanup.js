@@ -1,5 +1,5 @@
 // ===== 光华校长质询选项清理 =====
-// 目标：校长办公室只做一次性现场对质，不承担缺证导航；缺证就是惩罚，不能回头补问。
+// 目标：校长办公室只做一次性现场对质，不承担缺证导航；缺证时进入叙事化表层结案，而不是开发者式缺证提示。
 
 (function installGuanghuaConfrontChoiceCleanup() {
   function applyGuanghuaConfrontChoiceCleanup() {
@@ -49,6 +49,18 @@
       E.setFlag('wu_understands_su_choice', true);
     }
 
+    function incompleteReasonText() {
+      const phrases = [];
+      if (!hasThreatProof()) phrases.push('陈明远死前究竟被谁逼到墙角，还没有人愿意承认');
+      if (!hasPhotoProof()) phrases.push('陆小姐为什么能自由出入学校，仍能被说成偶然来访');
+      if (!hasUniversityProof()) phrases.push('苏晚亭到底是主动追查，还是只被一段私情拖进来，仍没有旁证替她说话');
+      return phrases.length ? phrases.join('；') + '。' : '这几条线还没有在吴校长面前真正合拢。';
+    }
+
+    function incompleteClosureText() {
+      return `你把该问的都问完了。<br><br>吴校长重新抿紧嘴唇，视线从桌面挪回你脸上。你知道，再空口逼问下去，只会让他退回“巡捕房已经结案”的那套说辞。<br><br><div class="notice"><b>话还没有压到底</b><br>${incompleteReasonText()}<br>现在的材料足够让吴校长改口，却还不足以逼他把学校背后的那层关系放到桌面上。你可以继续追问，也可以接受这个更容易被写进案卷的说法。</div>`;
+    }
+
     function availableEvidenceChoices() {
       const opts = [];
       if (hasThreatProof() && !E.getFlag('presented_threat_to_wu')) {
@@ -67,7 +79,7 @@
       const available = availableEvidenceChoices();
       if (available.length) return available;
       if (allThreePresented()) return [{ text: '🧩 把三件证物合到一起', goto: 'ch3_school_after_confront' }];
-      return [{ text: '🔚 收起材料，结束这次质询', goto: 'ch3_school_confront_incomplete' }];
+      return [{ text: '📁 接受这个较容易成立的说法', goto: 'ch3_school_incomplete_closure' }];
     }
 
     function cleanConfrontText() {
@@ -82,7 +94,7 @@
       if (allThreePresented()) {
         return `三件证物都已经摆过。<br><br>吴校长的脸色比刚才灰了许多。他没有再替学校辩解，只是看着桌面上那些东西，像终于承认这间办公室也在雾里。<br><br>现在可以把它们合在一起了。`;
       }
-      return `你把该问的都问完了。<br><br>吴校长重新抿紧嘴唇，视线从桌面挪回你脸上。你知道，再空口逼问下去，只会让他退回“巡捕房已经结案”的那套说辞。<br><br>这次质询到此为止。没有摆上桌的证物，已经错过了它该出现的时机。`;
+      return incompleteClosureText();
     }
 
     if (nodes.ch3_school_teacher) {
@@ -149,15 +161,10 @@ ${tail}`;
         E.setFlag('school_wu_incomplete_confront', true);
       },
       text: function () {
-        const asked = [];
-        if (E.getFlag('presented_threat_to_wu')) asked.push('恐吓信');
-        if (E.getFlag('presented_photo_to_wu')) asked.push('三人合影');
-        if (E.getFlag('presented_university_to_wu')) asked.push('日记残页');
-        const askedText = asked.length ? `你已经摆上桌的是：${asked.join('、')}。` : '你没有拿出足够硬的证物。';
-        return `${askedText}<br><br>吴校长没有再往下说。他把眼镜重新戴好，声音恢复到一开始那种谨慎的平稳。<br><br><span class="sys">“沈先生，我能说的都说了。学校还有课，我不便久留。”</span><br><br>门外传来上课铃声。你知道，这扇门并不是不能再敲，而是这场对质的气已经散了。缺掉的那一块，只能留在案卷里。`;
+        return `${incompleteClosureText()}<br><br>门外传来上课铃声。你知道，这扇门并不是不能再敲，而是这场对质的气已经散了。缺掉的那一块，只能留在案卷里。`;
       },
       choices: [
-        { text: '🔙 离开光华小学，回去整理线索', goto: 'ch3_wrapup' }
+        { text: '📁 接受这个较容易成立的说法', goto: 'ch3_school_incomplete_closure' }
       ]
     };
 
