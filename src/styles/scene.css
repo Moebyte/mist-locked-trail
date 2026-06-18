@@ -1,0 +1,207 @@
+#log{display:none}
+
+.entry{
+  padding:14px 0;
+  border-bottom:1px dashed color-mix(in srgb, var(--line) 55%, transparent);
+  animation:fadeIn .3s;
+  position:relative;
+}
+
+.entry::before{
+  content:'';
+  position:absolute;
+  left:-12px;
+  top:14px;
+  bottom:14px;
+  width:2px;
+  background:linear-gradient(180deg, transparent, var(--gold), transparent);
+  opacity:.25;
+}
+
+.entry .narration{
+  color:var(--text2);
+  line-height:1.95;
+  font-size:15px;
+  margin-bottom:6px;
+  text-indent:2em;
+}
+
+.entry .narration strong{color:var(--gold2)}
+.entry .narration .hl{color:var(--gold)}
+.entry .narration .sys{color:var(--muted);font-style:italic}
+.entry .narration .danger{color:var(--red)}
+.entry .narration .item{color:var(--gold)}
+
+.entry .speaker{
+  color:var(--gold);
+  font-weight:bold;
+  font-size:14px;
+}
+
+.entry .choice-log{
+  color:var(--muted);
+  font-size:13px;
+  margin-top:4px;
+  padding-left:16px;
+  border-left:2px solid color-mix(in srgb, var(--line) 50%, transparent);
+}
+
+#scene-card{
+  display:none;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--surface) 96%, white 4%), var(--surface)),
+    repeating-linear-gradient(0deg, transparent 0 3px, rgba(80,60,30,.015) 3px 6px);
+  border:1px solid var(--line);
+  border-radius:2px;
+  padding:28px 24px;
+  margin:14px 0;
+  box-shadow:
+    var(--shadow),
+    inset 0 0 60px rgba(0,0,0,.1);
+  animation:cardIn .35s ease-out;
+  position:relative;
+  overflow:hidden;
+}
+
+#scene-card::before{
+  content:'';
+  position:absolute;
+  top:0;
+  right:0;
+  width:40px;
+  height:40px;
+  background:linear-gradient(135deg, var(--line) 0%, transparent 50%);
+  opacity:.4;
+}
+
+#scene-card::after{
+  content:'';
+  position:absolute;
+  inset:6px;
+  border-radius:0;
+  pointer-events:none;
+  border:1px solid rgba(180,160,120,.06);
+}
+
+body.theme-day #scene-card::after{
+  border-color:rgba(100,80,50,.08);
+}
+
+#scene-title{
+  color:var(--gold);
+  font-size:20px;
+  margin-bottom:16px;
+  letter-spacing:4px;
+  flex:0 0 auto;
+  padding-bottom:12px;
+  border-bottom:1px solid color-mix(in srgb, var(--line) 60%, transparent);
+  font-weight:600;
+  position:relative;
+}
+
+#scene-title::before{
+  content:'◈';
+  color:var(--gold);
+  margin-right:10px;
+  font-size:14px;
+  opacity:.7;
+}
+
+#scene-text{
+  line-height:2.0;
+  font-size:15px;
+  margin-bottom:12px;
+  white-space:pre-wrap;
+  flex:1 1 auto;
+  overflow-y:auto;
+  min-height:0;
+  color:var(--text);
+  text-indent:2em;
+}
+
+#scene-card.has-scene-pager #scene-text{padding-bottom:6px}
+
+#scene-text strong{color:var(--gold2)}
+#scene-text .sys{color:var(--muted);font-style:italic}
+#scene-text .hl{color:var(--gold)}
+#scene-text .danger{color:var(--red)}
+
+#scene-pager{
+  align-items:center;
+  gap:8px;
+  margin:4px 0 12px;
+  padding-top:12px;
+  border-top:1px dashed var(--line);
+  flex:0 0 auto;
+}
+
+.scene-page-btn{
+  background:
+    linear-gradient(180deg, var(--surface2), var(--surface)),
+    repeating-linear-gradient(0deg, transparent 0 2px, rgba(80,60,30,.02) 2px 4px);
+  border:1px solid var(--line);
+  color:var(--text2);
+  padding:8px 14px;
+  border-radius:2px;
+  font-size:13px;
+  cursor:pointer;
+  font-family:inherit;
+  line-height:1;
+  transition:.2s;
+  box-shadow:0 4px 12px rgba(0,0,0,.12);
+  letter-spacing:1px;
+}
+
+.scene-page-btn.primary{
+  border-color:var(--gold);
+  color:var(--gold2);
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--gold) 18%, var(--surface2)), var(--surface)),
+    repeating-linear-gradient(0deg, transparent 0 2px, rgba(120,90,50,.02) 2px 4px);
+}
+
+.scene-page-btn:hover:not(:disabled){
+  border-color:var(--gold);
+  color:var(--gold2);
+  transform:translateY(-1px);
+}
+
+.scene-page-btn:disabled{
+  opacity:.36;
+  cursor:not-allowed;
+}
+
+.scene-page-indicator{
+  margin-left:auto;
+  color:var(--muted);
+  font-size:12px;
+  font-family:serif;
+}
+
+.chapter-title{
+  text-align:center;
+  padding:30px 0;
+  color:var(--gold);
+  font-size:20px;
+  letter-spacing:6px;
+  animation:fadeIn .5s;
+  position:relative;
+}
+
+.chapter-title::before,
+.chapter-title::after{
+  content:'—';
+  color:var(--line2);
+  margin:0 12px;
+  opacity:.5;
+}
+
+.chapter-title small{
+  display:block;
+  font-size:12px;
+  color:var(--muted);
+  margin-top:6px;
+  letter-spacing:2px;
+}
+
+#scroll-anchor{height:1px}
