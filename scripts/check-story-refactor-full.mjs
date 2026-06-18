@@ -12,6 +12,7 @@ const checks = [
   'scripts/audit-story-chapter3.mjs',
   'scripts/check-story-chapter3-runtime.mjs',
   'scripts/check-story-chapter3-yufang-runtime.mjs',
+  'scripts/check-story-chapter3-office-runtime.mjs',
   'scripts/remove-migrated-chapter3-first-batch-from-story.mjs',
   'scripts/remove-migrated-chapter3-second-batch-from-story.mjs',
   'scripts/remove-migrated-chapter3-yufang-batch-from-story.mjs',
