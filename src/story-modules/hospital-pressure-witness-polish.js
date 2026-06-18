@@ -126,20 +126,18 @@
 
     function hospitalBadge() {
       const o = E.hospitalOutcomeTier();
-      const t = E.truthCompletenessTier();
       const lines = [];
       if (o.key === 'stable') lines.push('医院里暂时安静。证人被保护得很好，你还有时间整理思路。');
-      else if (o.key === 'stable') lines.push('走廊里还没乱。你能听见护士们的脚步声，但没有傅启元的气味。');
+      else if (o.key === 'controlled') lines.push('走廊里还没乱。你能听见护士们的脚步声，也能听见雨打在玻璃上的声音。');
       else if (o.key === 'tense') lines.push('走廊里的气氛越来越紧。每个人都在等对方先动。');
-      else if (o.key === 'chaotic') lines.push('医院已经失控。有人先动了。你现在不是在救人，是在收尾。');
-      else lines.push('医院还在你的掌控里。可夜还长。');
+      else lines.push('医院已经压不住了。脚步声、低语声和电话铃声挤在一起。');
       return `<br><br><span class="sys">${lines.join(' ')}</span>`;
     }
 
     function dockChoice() {
       if (E.getFlag('dock_sun_pressed_fu')) {
         return {
-          text: '🚓 让老孙守住码头封锁线，别让傅启元擦痕迹',
+          text: '🚓 让老孙守住码头两头，别让人擦掉痕迹',
           effect: () => {
             E.setFlag('v07_choice_hold_blockade', true);
             E.setFlag('v07_pressed_fu_network', true);
@@ -150,7 +148,7 @@
       }
       if (E.getFlag('dock_escaped_during_sun_standoff')) {
         return {
-          text: '⚠️ 让老孙补封码头，但公董局已经插手',
+          text: '⚠️ 让老孙回头封码头，可对方已经惊动了',
           effect: () => {
             E.setFlag('v07_choice_blockade_after_interference', true);
             E.addClue('补封码头受阻', '你们在码头趁乱撤离后，公董局的人已经插手，老孙再去封码头会遇到正式阻力。');
@@ -171,7 +169,7 @@
         };
       }
       return {
-        text: '🚓 让老孙立刻封码头，趁傅启元还没擦干净',
+        text: '🚓 让老孙立刻回码头，趁现场还没被清干净',
         effect: () => E.setFlag('v07_choice_pressure_fu', true),
         goto: 'ch4_hospital_pressure_fu'
       };
@@ -187,7 +185,7 @@
         const wp = E.hospitalWitnessProfile();
         const opts = [
           {
-            text: '🛏️ 先分开保护证人，任何审问等天亮以后',
+            text: '🛏️ 先分开保护证人，任何追问等天亮以后',
             effect: () => {
               E.setFlag('hospital_protect_witnesses', true);
               E.setFlag('hospital_separate_witnesses', true);
@@ -195,7 +193,7 @@
             goto: 'ch4_hospital_protect_witnesses'
           },
           {
-            text: '🩺 先让医生做伤情记录和镇静处理',
+            text: '🩺 先让医生写下伤情和关押痕迹',
             effect: () => {
               E.setFlag('hospital_doctor_record', true);
               E.addClue('医院伤情记录', '教会医院医生记录了沈玉芳与苏晚亭的伤情和长期拘禁痕迹。');
@@ -204,7 +202,7 @@
           },
           dockChoice(),
           {
-            text: '🕯️ 立刻逼陆念薇现身，让三条线当面对质',
+            text: '🕯️ 请陆念薇出来，把她知道的说清楚',
             effect: () => {
               E.setFlag('hospital_early_lu', true);
               E.setFlag('v07_choice_draw_lu', true);
@@ -214,7 +212,7 @@
         ];
         if (wp.su) {
           opts.splice(3, 0, {
-            text: '⚠️ 让苏晚亭立刻指认傅启元',
+            text: '⚠️ 苏晚亭刚醒，还是立刻问她认不认得车里的人',
             effect: () => E.setFlag('hospital_force_su_identify', true),
             goto: 'ch4_hospital_su_identify'
           });
@@ -227,11 +225,11 @@
     nodes.ch4_hospital_doctor_record = {
       title: '教会医院 · 伤情记录',
       weather: 3,
-      text: () => `医生把病房门关上，先检查沈玉芳手腕上的绳痕，又让护士替苏晚亭换下被雨水泡硬的外衣。<br><br>他没有多问，只在病历纸上写下“长期拘禁”“失温”“外伤”“惊厥后虚脱”。<br><br>这不是口供，却比口供更难被傅启元轻易抹掉。${hospitalBadge()}`,
+      text: () => `医生把病房门关上，先检查沈玉芳手腕上的绳痕，又让护士替苏晚亭换下被雨水泡硬的外衣。<br><br>他没有多问，只在病历纸上写下“长期拘禁”“失温”“外伤”“惊厥后虚脱”。<br><br>这不是口供，却比口供更难被人轻易抹掉。${hospitalBadge()}`,
       choices: [
         { text: '🚪 离开病房，去医院走廊', effect: () => { E.setFlag('hospital_protect_witnesses', true); E.setFlag('hospital_separate_witnesses', true); }, goto: 'ch4_lu_confrontation' },
         { text: '📝 趁沈玉芳清醒，先问一段福生仓经过', effect: () => E.setFlag('hospital_interrogate_yufang', true), goto: 'ch4_hospital_yufang_statement' },
-        { text: '🕯️ 让陆念薇现身补上傅启元下一步', effect: () => E.setFlag('hospital_early_lu', true), goto: 'ch4_lu_confrontation' }
+        { text: '🕯️ 请陆念薇出来，把她知道的说清楚', effect: () => E.setFlag('hospital_early_lu', true), goto: 'ch4_lu_confrontation' }
       ]
     };
 
@@ -241,21 +239,21 @@
       effect: () => {
         E.addClue('沈玉芳医院初步证词', '沈玉芳在医院补充说明：福生仓装车前有人反复提到南码头和公董局清场手续。');
       },
-      text: () => `沈玉芳坐在病床边，手指一直攥着被单。<br><br>你只问了两个问题，她就开始发抖。她说福生仓最后几天一直在搬箱子，也听见有人提到“南码头”和“清场手续”。<br><br>这段证词有用，但你也看得出来，她不能再被逼下去了。${hospitalBadge()}`,
+      text: () => `沈玉芳坐在病床边，手指一直攥着被单。<br><br>你只问了两个问题，她就开始发抖。她说福生仓最后几天一直在搬箱子，也听见有人提到“南码头”和“清场手续”。<br><br>这段话有用，但你也看得出来，她不能再被逼下去了。${hospitalBadge()}`,
       choices: [
         { text: '🛏️ 停止追问，先保护证人', effect: () => { E.setFlag('hospital_protect_witnesses', true); E.setFlag('hospital_separate_witnesses', true); }, goto: 'ch4_hospital_protect_witnesses' },
         { text: '🩺 让医生补上伤情记录', when: () => !E.getFlag('hospital_doctor_record'), effect: () => { E.setFlag('hospital_doctor_record', true); E.addClue('医院伤情记录', '教会医院医生记录了沈玉芳与苏晚亭的伤情和长期拘禁痕迹。'); }, goto: 'ch4_hospital_doctor_record' },
-        { text: '🕯️ 根据她的话，逼陆念薇现身', goto: 'ch4_lu_confrontation' }
+        { text: '🕯️ 带着她这几句话，去见陆念薇', goto: 'ch4_lu_confrontation' }
       ]
     };
 
     nodes.ch4_hospital_su_identify = {
       title: '教会医院 · 苏晚亭醒来',
       weather: 5,
-      text: () => `苏晚亭醒得很短。她听见傅启元的名字时，手指突然抓紧床单，呼吸也乱了。<br><br>你可以得到一句极有力的指认，但这会把她重新推回福生仓那扇暗门后面。<br><br>这不是不能问，而是现在问，代价太高。${hospitalBadge()}`,
+      text: () => `苏晚亭醒得很短。她听见码头那辆黑车时，手指突然抓紧床单，呼吸也乱了。<br><br>你可以继续问下去，也许能得到一句很重的话。可这会把她重新推回福生仓那扇暗门后面。<br><br>这不是不能问，而是现在问，代价太高。${hospitalBadge()}`,
       choices: [
-        { text: '🛏️ 停止指认，先保护她和沈玉芳', effect: () => { E.setFlag('hospital_protect_witnesses', true); E.setFlag('hospital_separate_witnesses', true); }, goto: 'ch4_hospital_protect_witnesses' },
-        { text: '🕯️ 带着这句指认，逼陆念薇现身', effect: () => E.setFlag('hospital_early_lu', true), goto: 'ch4_lu_confrontation' }
+        { text: '🛏️ 停止追问，先保护她和沈玉芳', effect: () => { E.setFlag('hospital_protect_witnesses', true); E.setFlag('hospital_separate_witnesses', true); }, goto: 'ch4_hospital_protect_witnesses' },
+        { text: '🕯️ 带着她这点反应，去见陆念薇', effect: () => E.setFlag('hospital_early_lu', true), goto: 'ch4_lu_confrontation' }
       ]
     };
 
@@ -267,8 +265,8 @@
       };
       nodes.ch4_hospital_protect_witnesses.choices = [
         { text: '🩺 让医生补上伤情记录', when: () => !E.getFlag('hospital_doctor_record'), effect: () => { E.setFlag('hospital_doctor_record', true); E.addClue('医院伤情记录', '教会医院医生记录了沈玉芳与苏晚亭的伤情和长期拘禁痕迹。'); }, goto: 'ch4_hospital_doctor_record' },
-        { text: '📝 只问沈玉芳一段福生仓经过', effect: () => E.setFlag('hospital_interrogate_yufang', true), goto: 'ch4_hospital_yufang_statement' },
-        { text: '🕯️ 等证人稳住后，再逼陆念薇现身', goto: 'ch4_lu_confrontation' }
+        { text: '📝 只问沈玉芳一小段福生仓经过', effect: () => E.setFlag('hospital_interrogate_yufang', true), goto: 'ch4_hospital_yufang_statement' },
+        { text: '🕯️ 等证人稳住后，再请陆念薇出来', goto: 'ch4_lu_confrontation' }
       ];
       nodes.ch4_hospital_protect_witnesses.__pressureWitnessChoicesPatched = true;
     }
