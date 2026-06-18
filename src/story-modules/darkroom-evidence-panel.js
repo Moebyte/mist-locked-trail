@@ -216,6 +216,30 @@
       nodes.ch4_yufang_quick_testimony.__darkroomPanelPatched = true;
     }
 
+    if (nodes.ch4_dock_who && !nodes.ch4_dock_who.__darkroomSinglePanelPatched) {
+      const oldChoices = nodes.ch4_dock_who.choices;
+      nodes.ch4_dock_who.choices = function (state) {
+        const old = typeof oldChoices === 'function' ? oldChoices(state) : oldChoices;
+        const out = [];
+        if (Array.isArray(old)) {
+          for (const choice of old) {
+            const text = choice.text || choice.fogText || '';
+            if (text.includes('出示')) continue;
+            if (choice.goto === 'ch4_dock_escape') {
+              out.push({ ...choice, text: '🚕 扶着沈玉芳离开暗室' });
+              continue;
+            }
+            out.push(choice);
+          }
+        }
+        return out;
+      };
+      // 这里是单人暗室页：已经确认是沈玉芳，不需要再显示通用“出示手中物件”。
+      nodes.ch4_dock_who.onPresent = null;
+      nodes.ch4_dock_who.presentFilter = () => false;
+      nodes.ch4_dock_who.__darkroomSinglePanelPatched = true;
+    }
+
     if (nodes.ch4_dock_who_dual && !nodes.ch4_dock_who_dual.__darkroomPanelPatched) {
       const oldText = nodes.ch4_dock_who_dual.text;
       const oldChoices = nodes.ch4_dock_who_dual.choices;
