@@ -61,8 +61,8 @@
       effect: () => addDockPaperEvidence('福生仓账房里的'),
       text: () => `临时账房只是用木板隔出来的一角。桌上压着一只蓝封公文夹，边角沾了雨水，纸页已经卷起。<br><br>你翻开最上面一页，只看见几行字：<span class="sys">“三日内清走，别留痕迹。”</span><br><br>落款没有名字，只有公董局常用的蓝封纸角。<br><br>你把这页纸收好。就在这时，货架后面传来木箱轻碰的声音。有人还在仓库里。`,
       choices: [
-        { text: '🚶 放慢脚步，贴着货架继续往深处移动', effect: () => E.setFlag('dock_moved_slowly', true), goto: 'ch4_dock_shelf_approach' },
-        { text: '⚠️ 不再耽搁，直接穿过账房旁的空道', effect: () => addHeat(1, '你从账房旁的空道快步穿过，门板轻轻撞了一下墙。', 'dock_inner_office_rushed'), goto: 'ch4_dock_shelf_approach' }
+        { text: '🚶 压低身子，贴着货架继续往里走', effect: () => E.setFlag('dock_moved_slowly', true), goto: 'ch4_dock_shelf_approach' },
+        { text: '⚠️ 门外有动静，快步穿过账房旁的空道', effect: () => addHeat(1, '你从账房旁的空道快步穿过，门板轻轻撞了一下墙。', 'dock_inner_office_rushed'), goto: 'ch4_dock_shelf_approach' }
       ]
     };
 
@@ -73,7 +73,7 @@
       effect: () => addDockPaperEvidence('福生仓临时账房残留的'),
       text: () => `账房里的灯还热着，椅子被人推倒在地。<br><br>桌上只剩半张蓝封纸角，被压在墨水瓶下面。你抽出来，看见上面写着：<span class="sys">“三日内清走，别留痕迹。”</span><br><br>外面有人催促装车，脚步声离窗户越来越近。你不能在这里久留。`,
       choices: [
-        { text: '🚶 贴着货架继续往深处移动', effect: () => E.setFlag('dock_moved_slowly', true), goto: 'ch4_dock_shelf_approach_limited' },
+        { text: '🚶 压低身子，贴着货架继续往里走', effect: () => E.setFlag('dock_moved_slowly', true), goto: 'ch4_dock_shelf_approach_limited' },
         { text: '⚠️ 把蓝封纸塞进怀里，立刻穿过空道', effect: () => addHeat(1, '你匆忙离开账房，椅脚在地上刮出一声短响。', 'dock_inner_office_rushed'), goto: 'ch4_dock_shelf_approach_limited' }
       ]
     };
@@ -85,9 +85,9 @@
       effect: () => E.setFlag('dock_reached_crate_area', true),
       text: () => `你贴着货架往里走。麻袋、油布和空木箱把通道切成几段，稍不留神就会碰出声响。<br><br>穿过第二排货架后，你终于看见那排标着“光华小学·教学器材”的木箱。箱盖有被撬过的痕迹，旁边散着草绳和钉子。<br><br>敲击声就在木箱后面的墙里。<br><br>现在你才真正到了仓库核心。`,
       choices: [
-        { text: '📦 先检查旁边的教具箱', goto: 'ch4_dock_crates' },
-        { text: '🔦 先循着敲击声去仓库深处', effect: () => addHeat(1, '你绕过木箱直接去找声音来源，脚步节奏变得急了。', 'skipped_crates_for_sound'), goto: 'ch4_dock_locked_door' },
-        { text: '⚠️ 直接跨过散落草绳，抢到木箱后面', effect: () => addHeat(1, '你跨过草绳时踢到一枚钉子，声音在货架间弹了一下。', 'dock_reached_crate_area_fast'), goto: 'ch4_dock_locked_door' },
+        { text: '📦 蹲下翻开旁边那只教具箱', goto: 'ch4_dock_crates' },
+        { text: '🔦 敲击声还在，先往木箱后面摸过去', effect: () => addHeat(1, '你绕过木箱直接去找声音来源，脚步节奏变得急了。', 'skipped_crates_for_sound'), goto: 'ch4_dock_locked_door' },
+        { text: '⚠️ 跨过草绳，抢到木箱后面', effect: () => addHeat(1, '你跨过草绳时踢到一枚钉子，声音在货架间弹了一下。', 'dock_reached_crate_area_fast'), goto: 'ch4_dock_locked_door' },
         { text: '🗂️ 回头看一眼临时账房里的公文夹', when: () => !E.getFlag('dock_clearance_seen_inside'), goto: 'ch4_dock_inner_office' }
       ]
     };
@@ -99,9 +99,9 @@
       effect: () => E.setFlag('dock_reached_crate_area', true),
       text: () => `货架已经空了一半，地上拖着新鲜车辙和草绳。<br><br>你弯腰穿过油布，听见外面有人喊“快点”。<br><br>右侧还有几只没搬走的木箱，上面仍写着“光华小学·教学器材”。更深处的敲击声断断续续，像是随时会被外面的装车声盖住。`,
       choices: [
-        { text: '📦 冒险翻查旁边的教具箱', goto: 'ch4_dock_crates' },
-        { text: '🔦 先循着敲击声去仓库深处', effect: () => addHeat(1, '你绕过木箱直接去找声音来源，脚步节奏变得急了。', 'skipped_crates_for_sound'), goto: 'ch4_dock_locked_door' },
-        { text: '⚠️ 直接跨过散落草绳，抢到木箱后面', effect: () => addHeat(1, '你跨过草绳时踢到一枚钉子，声音在货架间弹了一下。', 'dock_reached_crate_area_fast'), goto: 'ch4_dock_locked_door' },
+        { text: '📦 冒险翻开旁边那只教具箱', goto: 'ch4_dock_crates' },
+        { text: '🔦 敲击声还在，先往木箱后面摸过去', effect: () => addHeat(1, '你绕过木箱直接去找声音来源，脚步节奏变得急了。', 'skipped_crates_for_sound'), goto: 'ch4_dock_locked_door' },
+        { text: '⚠️ 跨过草绳，抢到木箱后面', effect: () => addHeat(1, '你跨过草绳时踢到一枚钉子，声音在货架间弹了一下。', 'dock_reached_crate_area_fast'), goto: 'ch4_dock_locked_door' },
         { text: '🗂️ 回头看一眼账房里的蓝封纸', when: () => !E.getFlag('dock_clearance_seen_inside'), goto: 'ch4_dock_inner_office_limited' }
       ]
     };
