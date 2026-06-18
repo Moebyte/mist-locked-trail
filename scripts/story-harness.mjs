@@ -22,7 +22,41 @@ export function freshState(overrides = {}) {
   };
 }
 
+function createElementStub(extra = {}) {
+  return {
+    style: {},
+    innerHTML: '',
+    textContent: '',
+    className: '',
+    title: '',
+    onclick: null,
+    appendChild() {},
+    scrollIntoView() {},
+    addEventListener() {},
+    setAttribute() {},
+    removeAttribute() {},
+    querySelector() { return createElementStub(); },
+    querySelectorAll() { return []; },
+    classList: { add() {}, remove() {}, toggle() {}, contains() { return false; } },
+    ...extra,
+  };
+}
+
+function createDeductionModalStub() {
+  const optionContainer = createElementStub({ innerHTML: '' });
+  const question = createElementStub({ textContent: '' });
+  return createElementStub({
+    style: { display: 'none' },
+    querySelector(selector) {
+      if (selector === '.deduc-question') return question;
+      if (selector === '.deduc-options') return optionContainer;
+      return createElementStub();
+    },
+  });
+}
+
 export function createEngineStub(initialState = {}) {
+  const deducEl = createDeductionModalStub();
   const E = {
     state: freshState(initialState),
     saveKey: 'story-harness',
@@ -31,7 +65,11 @@ export function createEngineStub(initialState = {}) {
     titleEl: {},
     textEl: {},
     choicesEl: { innerHTML: '', querySelector() { return null; }, querySelectorAll() { return []; }, appendChild() {} },
+    toastEl: createElementStub(),
+    deducEl,
+    graphEl: createElementStub({ querySelector() { return createElementStub({ innerHTML: '' }); } }),
     relationData: { nodes: [], edges: [] },
+    deductions: [],
     init() {},
     freshState() { return freshState(); },
     toast() {},
@@ -44,7 +82,12 @@ export function createEngineStub(initialState = {}) {
     showPresentBtn() {},
     applyWeatherClass() {},
     ambientLine() {},
-    openDeduction() {},
+    openDeduction(id) {
+      this.lastOpenedDeduction = id;
+      this.deducEl.style.display = 'flex';
+      return true;
+    },
+    closeDeduction() { this.deducEl.style.display = 'none'; },
     setWeather(i) { this.state.weatherIdx = i; },
     renderAtmosphere() { return ''; },
     setTime(day, hour, minute) { this.state.inGameTime = { day: day || 1, hour: hour || 14, minute: minute || 0 }; },
@@ -94,24 +137,25 @@ export function createEngineStub(initialState = {}) {
 }
 
 export function createDocumentStub(domReadyHandlers) {
+  const elements = new Map();
+  function getOrCreate(id) {
+    if (!elements.has(id)) {
+      elements.set(id, createElementStub({ id }));
+    }
+    return elements.get(id);
+  }
+
   return {
     addEventListener(event, handler) {
       if (event === 'DOMContentLoaded') domReadyHandlers.push(handler);
     },
-    body: { classList: { add() {}, remove() {}, toggle() {}, contains() { return false; } }, appendChild() {} },
+    body: createElementStub(),
     head: { appendChild() {} },
-    getElementById() {
-      return {
-        style: {},
-        innerHTML: '',
-        textContent: '',
-        appendChild() {},
-        scrollIntoView() {},
-        addEventListener() {},
-      };
+    getElementById(id) {
+      return getOrCreate(id);
     },
     createElement() {
-      return { className: '', textContent: '', title: '', onclick: null, style: {}, appendChild() {} };
+      return createElementStub();
     },
     write() {},
   };
@@ -161,6 +205,8 @@ export function loadStoryRuntime(options = {}) {
     runScript,
     resetState(overrides = {}) {
       E.state = freshState(overrides);
+      if (E.deducEl?.style) E.deducEl.style.display = 'none';
+      E.lastOpenedDeduction = null;
     },
     renderNode(id) {
       const node = nodes[id];
