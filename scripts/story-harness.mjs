@@ -93,8 +93,9 @@ export function createEngineStub(initialState = {}) {
   return E;
 }
 
-export function createDocumentStub(domReadyHandlers) {
+export function createDocumentStub(domReadyHandlers, locationStub = { href: 'http://localhost/', search: '', hash: '', pathname: '/' }) {
   return {
+    location: locationStub,
     addEventListener(event, handler) {
       if (event === 'DOMContentLoaded') domReadyHandlers.push(handler);
     },
@@ -121,18 +122,25 @@ export function loadStoryRuntime(options = {}) {
   const repoRoot = options.repoRoot || process.cwd();
   const domReadyHandlers = [];
   const E = options.E || createEngineStub(options.initialState || {});
-  const documentStub = createDocumentStub(domReadyHandlers);
+  const locationStub = options.location || { href: 'http://localhost/', search: '', hash: '', pathname: '/' };
+  const documentStub = createDocumentStub(domReadyHandlers, locationStub);
+  const windowStub = { location: locationStub };
 
   const context = vm.createContext({
     console,
     E,
     document: documentStub,
-    window: {},
+    window: windowStub,
+    location: locationStub,
+    URL,
+    URLSearchParams,
     localStorage: { getItem() { return null; }, setItem() {} },
     setTimeout(fn) { if (typeof fn === 'function') fn(); },
     clearTimeout() {},
   });
   context.globalThis = context;
+  context.window = context;
+  context.location = locationStub;
 
   function read(rel) {
     return fs.readFileSync(path.join(repoRoot, rel), 'utf8');
