@@ -143,11 +143,8 @@
     if (!choice) return choice;
     if (isRepeatedFushengEntry(choice)) return null;
     const text = textOf(choice);
-    if (isFushengActionStage() && (choice.goto === 'ch4_conclusion' || text.includes('回顾现有证据') || text.includes('证据链仍不完整'))) {
-      return { ...choice, text: '🔙 回顾现有证据（暂不行动）', goto: 'ch4_conclusion' };
-    }
-    if (hasDockEvidence() && (choice.goto === 'ch4_conclusion' || text.includes('回顾现有证据') || text.includes('证据链仍不完整'))) {
-      return { ...choice, text: '🔙 回顾现有证据，准备收束', goto: 'ch4_conclusion' };
+    if (choice.goto === 'ch4_conclusion' || text.includes('回顾现有证据') || text.includes('证据链仍不完整') || text.includes('封卷')) {
+      return { ...choice, text: '📁 就此落笔，先把案子封卷', goto: 'ch4_conclusion' };
     }
     return choice;
   }
@@ -182,10 +179,40 @@
     node.__runtimeFushengDeductionChoicePatched = true;
   }
 
+  function presentOnce(item, itemName, flag) {
+    if (typeof E.presentOnce === 'function') return E.presentOnce(item, itemName, flag);
+    if (item && item.name === itemName && !E.getFlag(flag)) {
+      E.setFlag(flag, true);
+      return true;
+    }
+    return false;
+  }
+
+  function patchDarkroomPresentCompatibility() {
+    const node = nodes.ch4_dock_who_dual;
+    if (!node || node.__runtimeDarkroomPresentCompatPatched) return;
+    const oldOnPresent = node.onPresent;
+    node.onPresent = function (item, state) {
+      const oldResult = typeof oldOnPresent === 'function' ? oldOnPresent(item, state) : null;
+      if (oldResult) return oldResult;
+      if (presentOnce(item, '苏晚亭的银发夹', 'presented_su_keepsake')) return { goto: 'ch4_su_present_keepsake' };
+      if (presentOnce(item, '三人合影', 'presented_photo_to_yufang_dual')) return { goto: 'ch4_yufang_present_photo_dual' };
+      if (presentOnce(item, '陈明远的信', 'presented_letter_to_yufang_dual')) return { goto: 'ch4_yufang_present_letter_dual' };
+      if (presentOnce(item, '未寄出的信', 'presented_unsent_letter_to_yufang_dual')) return { goto: 'ch4_yufang_present_letter_dual' };
+      if (presentOnce(item, '日记残页', 'presented_diary_to_yufang_dual')) return { goto: 'ch4_yufang_present_diary_dual' };
+      if (presentOnce(item, '苏晚亭日记残页', 'presented_diary_to_yufang_dual')) return { goto: 'ch4_yufang_present_diary_dual' };
+      return null;
+    };
+    // 玩家界面仍由 darkroom-evidence-panel 的剧情选项驱动；这里不重新打开通用出示菜单。
+    if (typeof node.presentFilter !== 'function') node.presentFilter = () => false;
+    node.__runtimeDarkroomPresentCompatPatched = true;
+  }
+
   function applyRuntimeBugfixes() {
     patchDeductionRegistry();
     patchDockRoutes();
     patchWrapupFushengDeductionChoice();
+    patchDarkroomPresentCompatibility();
   }
 
   // 立即补一层：start/loadGame 后的 registerAll 会走去重登记。
