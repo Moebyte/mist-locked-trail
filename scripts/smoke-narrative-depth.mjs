@@ -168,11 +168,12 @@ function testPressureAffectsDockRoute() {
   reports.push(`PASS 压力热度影响福生仓路线：未进入 ${safeRoute}，已进入低压 ${deepSearch}，高压 ${hotRoute}`);
 }
 
-function testLateNaturalEnding() {
+function testRetiredDeadlineEnding() {
   h.resetState({ flags: { missed_deadline: true } });
   const ending = E.v07ResolveEnding();
-  if (ending !== 'end_too_late') throw new Error(`超期路线预期 end_too_late，实际 ${ending}`);
-  reports.push('PASS 超期状态自然分流到 end_too_late');
+  if (ending === 'end_too_late') throw new Error('硬时间结局已退役，不应再主动分流到 end_too_late');
+  if (ending !== 'end_archive' && ending !== 'end_evidence_only') throw new Error(`硬时间退役后应分流到归档/证据收束，实际 ${ending}`);
+  reports.push(`PASS 硬时间结局已退役，missed_deadline 分流到 ${ending}`);
 }
 
 function testFuOfferBranches() {
@@ -194,7 +195,7 @@ try {
   testHiddenButNotTrueHiddenWithoutSuRescue();
   testConclusionChoicesRespectHiddenGate();
   testPressureAffectsDockRoute();
-  testLateNaturalEnding();
+  testRetiredDeadlineEnding();
   testFuOfferBranches();
 } catch (err) {
   errors.push(err.message);
