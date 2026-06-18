@@ -73,6 +73,7 @@ export function createEngineStub(initialState = {}) {
     init() {},
     freshState() { return freshState(); },
     toast() {},
+    go(id) { this.lastGoto = id; },
     logChoice() {},
     logNarration() {},
     updateStatus() {},
@@ -88,6 +89,28 @@ export function createEngineStub(initialState = {}) {
       return true;
     },
     closeDeduction() { this.deducEl.style.display = 'none'; },
+    submitDeduction(id, chosenIdx) {
+      const d = Array.isArray(this.deductions) ? this.deductions.find(x => x.id === id) : null;
+      if (!d) return false;
+      if (chosenIdx === d.correctIdx) {
+        d.solved = true;
+        if (this.deducEl?.style) this.deducEl.style.display = 'none';
+        this.toast('✅ 推理正确！拼图又完整了一块。');
+        if (typeof this.go === 'function') this.go(d.successNode);
+        return true;
+      }
+      this.setFlag(`deduction_${id}_wrong_once`, true);
+      if (this.deducEl?.style) this.deducEl.style.display = 'flex';
+      this.toast('再想想。这个答案还压不住现有证据。');
+      try {
+        const container = this.deducEl?.querySelector?.('.deduc-options');
+        const old = container?.querySelector?.('.deduc-feedback');
+        if (!old && container?.appendChild) {
+          container.appendChild(createElementStub({ className: 'deduc-feedback', textContent: '再想想。这个答案还压不住现有证据。' }));
+        }
+      } catch {}
+      return false;
+    },
     setWeather(i) { this.state.weatherIdx = i; },
     renderAtmosphere() { return ''; },
     setTime(day, hour, minute) { this.state.inGameTime = { day: day || 1, hour: hour || 14, minute: minute || 0 }; },
@@ -238,6 +261,7 @@ export function loadStoryRuntime(options = {}) {
       E.state = freshState(overrides);
       if (E.deducEl?.style) E.deducEl.style.display = 'none';
       E.lastOpenedDeduction = null;
+      E.lastGoto = null;
     },
     renderNode(id) {
       const node = nodes[id];
