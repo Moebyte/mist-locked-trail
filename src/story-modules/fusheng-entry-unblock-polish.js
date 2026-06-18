@@ -75,13 +75,13 @@
     function addFushengChoices(base) {
       const out = Array.isArray(base) ? base.slice() : [];
       const review = out.find(choice => choice?.goto === 'ch4_conclusion' || String(choice?.text || choice?.fogText || '').includes('回顾'))
-        || { text: '🔙 回顾现有证据（暂不行动）', goto: 'ch4_conclusion' };
+        || { text: '🔙 先把桌上的材料再看一遍', goto: 'ch4_conclusion' };
 
       if (!hasGoto(out, 'ch4_suzhou_creek')) {
-        out.unshift({ text: '🔦 下一步：不找支援，独自去福生仓', goto: 'ch4_suzhou_creek' });
+        out.unshift({ text: '🔦 不等别人，先去福生仓探一探', goto: 'ch4_suzhou_creek' });
       }
       if (!hasSunSupport() && !hasGoto(out, 'ch4_sun_support')) {
-        out.splice(1, 0, { text: '🚓 下一步：去巡捕房找老孙商量福生仓', goto: 'ch4_sun_support' });
+        out.splice(1, 0, { text: '🚓 先去巡捕房，把福生仓的事告诉老孙', goto: 'ch4_sun_support' });
       }
       if (!out.includes(review) && !hasGoto(out, 'ch4_conclusion')) out.push(review);
       return out.filter((choice, idx, arr) => {
@@ -100,7 +100,7 @@
       nodes.ch3_wrapup.text = function (state) {
         const base = typeof oldText === 'function' ? oldText(state) : oldText;
         if (!shouldOfferFushengEntry()) return base;
-        return `${base}<br><br><span class="sys"><b>行动入口已解锁：</b>前两段推理已经完成。现在应进入福生仓行动，可以独自潜入，也可以先找老孙支援。</span>`;
+        return `${base}<br><br><span class="sys">桌上的碎片终于指向同一片雾：福生仓。现在再坐在事务所里推下去，只会让人被转走。你得去苏州河边看看，也可以先把老孙拉进来。</span>`;
       };
       nodes.ch3_wrapup.choices = function (state) {
         const base = choicesOf(oldChoices, state);
@@ -116,7 +116,7 @@
       nodes.ch4_conclusion.text = function (state) {
         const base = typeof oldText === 'function' ? oldText(state) : oldText;
         if (!shouldOfferFushengEntry()) return base;
-        return `${base}<br><br><div class="notice"><b>⛵ 还不能结案</b><br>陈明远之死和陆念薇暗线已经推清，福生仓行动入口应当打开。现在不是归档，而是去苏州河码头。</div>`;
+        return `${base}<br><br><div class="notice"><b>⛵ 雾还没有散</b><br>陈明远的死、陆小姐的旧名和王巡官留下的纸，最后都把你推向苏州河边的福生仓。现在不是落笔结案的时候。</div>`;
       };
       nodes.ch4_conclusion.choices = function (state) {
         const base = choicesOf(oldChoices, state);
