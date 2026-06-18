@@ -3,7 +3,8 @@
 // 这些选项会跳到 ch4_zhou_present_jade / jade_premature / chen_letter / su_last_letter
 // / wang_note / threat 等节点。旧剧情或补丁里并不总能保证这些节点存在，
 // 会导致点击选项后场景丢失，用户看到类似回到开头/重开的异常。
-// 本模块补齐所有周怀安举证目标节点，不改变主线证据判定。
+// 本模块补齐所有周怀安举证目标节点，并补清“为什么要拿翡翠镯问周怀安”：
+// 不是让他鉴定手镯，而是问苏晚亭是否曾向未婚夫提过“陆念”这个名字。
 
 (function installZhouJadePresentNodeFix() {
   function applyZhouJadePresentNodeFix() {
@@ -34,17 +35,50 @@
       return out;
     }
 
+    function patchPawnshopMotivation() {
+      if (!nodes.ch4_pawnshop || nodes.ch4_pawnshop.__zhouJadeMotivationPatched) return;
+      const oldText = nodes.ch4_pawnshop.text;
+      const oldChoices = nodes.ch4_pawnshop.choices;
+      nodes.ch4_pawnshop.text = function (state) {
+        const base = typeof oldText === 'function' ? oldText(state) : oldText;
+        return `${base}<br><br>真正值得追问的，不只是这只镯子值多少钱，而是内侧那两个字：<span class="sys">“陆念”</span>。<br><br>苏晚亭失踪前有没有向周怀安提过这个名字？她有没有说过改名、旧案、一个人能不能摆脱过去？周怀安未必认识镯子，却可能记得苏晚亭说过的话。`;
+      };
+      nodes.ch4_pawnshop.choices = function (state) {
+        const base = typeof oldChoices === 'function' ? oldChoices(state) : oldChoices;
+        if (!Array.isArray(base)) return base;
+        return base.map(choice => {
+          if (choice.goto === 'ch4_revisit_zhou' || String(choice.text || '').includes('回访周怀安')) {
+            return { ...choice, text: '🏮 回访周怀安——问他是否听苏晚亭提过“陆念”' };
+          }
+          return choice;
+        });
+      };
+      nodes.ch4_pawnshop.__zhouJadeMotivationPatched = true;
+    }
+
+    patchPawnshopMotivation();
+
     if (!nodes.ch4_zhou_present_jade) {
       nodes.ch4_zhou_present_jade = {
         title: '举证 · 翡翠镯',
         weather: 5,
         effect: () => {
           E.setFlag('presented_jade_to_zhou', true);
-          E.addClue('周怀安识出陆念', '周怀安看到翡翠镯和当票后，说“陆念”这个名字不像是凭空来的，陆小姐与旧案之间的联系更重了。');
+          E.addClue('周怀安识出陆念', '周怀安看到翡翠镯和当票后，想起苏晚亭曾提过“陆念”和改名的话题，说明苏晚亭早已注意到陆小姐的旧名。');
         },
-        text: () => `你把翡翠镯放在校样旁边。<br><br>周怀安先是一怔，随后把镯子拿近了些。灯光从玉色里透过去，照出一圈冷冷的绿。<br><br><span class="sys">“陆念……”</span><br><br>他低声念出当票上的名字。<br><br><span class="sys">“晚亭以前没有跟我提过这个人。但她失踪前那阵子，确实常常像是在替谁担心。”</span><br><br>翡翠镯没有直接告诉你苏晚亭在哪里，也不能证明陆小姐就是答案。<br><br>但它让“陆念”这个名字从纸面上浮了起来。这个名字不再只是当票上的两个字，而是一个会让周怀安沉默很久的影子。`,
+        text: () => `你把翡翠镯放在校样旁边，没有急着问它是谁的。<br><br>你只是把镯子内侧翻给周怀安看。<br><br><span class="sys">“陆念。”</span><br><br>你问他：<span class="sys">“苏小姐失踪前，有没有对你提过这个名字？”</span><br><br>周怀安原本茫然的眼神，慢慢变了。<br><br><span class="sys">“她没有拿给我看过这只镯子。”</span><br><br>他停了一下，像是在回想一个当时被自己轻轻放过去的细节。<br><br><span class="sys">“但她提过这个名字。她说，如果一个人换了名字，过去犯过的错是不是也能一笔勾销。我当时以为她在说论文里的女性人物，没有追问。”</span><br><br>翡翠镯没有直接告诉你苏晚亭在哪里，也不能证明陆小姐就是答案。<br><br>但它让“陆念”这个名字从当票和玉镯上，转到了苏晚亭生前说过的话里。苏晚亭早就注意到了陆小姐的旧名。`,
         choices: afterEvidenceChoices
       };
+    } else if (!nodes.ch4_zhou_present_jade.__zhouJadeMotivationPatched) {
+      const oldEffect = nodes.ch4_zhou_present_jade.effect;
+      nodes.ch4_zhou_present_jade.effect = function (state) {
+        if (typeof oldEffect === 'function') oldEffect(state);
+        E.setFlag('presented_jade_to_zhou', true);
+        E.addClue('周怀安识出陆念', '周怀安看到翡翠镯和当票后，想起苏晚亭曾提过“陆念”和改名的话题，说明苏晚亭早已注意到陆小姐的旧名。');
+      };
+      nodes.ch4_zhou_present_jade.text = () => `你把翡翠镯放在校样旁边，没有急着问它是谁的。<br><br>你只是把镯子内侧翻给周怀安看。<br><br><span class="sys">“陆念。”</span><br><br>你问他：<span class="sys">“苏小姐失踪前，有没有对你提过这个名字？”</span><br><br>周怀安原本茫然的眼神，慢慢变了。<br><br><span class="sys">“她没有拿给我看过这只镯子。”</span><br><br>他停了一下，像是在回想一个当时被自己轻轻放过去的细节。<br><br><span class="sys">“但她提过这个名字。她说，如果一个人换了名字，过去犯过的错是不是也能一笔勾销。我当时以为她在说论文里的女性人物，没有追问。”</span><br><br>翡翠镯没有直接告诉你苏晚亭在哪里，也不能证明陆小姐就是答案。<br><br>但它让“陆念”这个名字从当票和玉镯上，转到了苏晚亭生前说过的话里。苏晚亭早就注意到了陆小姐的旧名。`;
+      nodes.ch4_zhou_present_jade.choices = afterEvidenceChoices;
+      nodes.ch4_zhou_present_jade.__zhouJadeMotivationPatched = true;
     }
 
     if (!nodes.ch4_zhou_present_jade_premature) {
@@ -53,9 +87,9 @@
         weather: 5,
         effect: () => {
           E.setFlag('presented_jade_to_zhou_premature', true);
-          E.addClue('周怀安看到翡翠镯', '周怀安看到翡翠镯和“陆念”这个名字，但这只能说明陆小姐可疑，还不能解释苏晚亭的去向。');
+          E.addClue('周怀安看到翡翠镯', '周怀安看到翡翠镯和“陆念”这个名字，但这只能说明苏晚亭可能听过陆念，还不能解释她的去向。');
         },
-        text: () => `你把翡翠镯放在周怀安面前。<br><br>他看了很久，最后只问了一句：<br><br><span class="sys">“这和晚亭有什么关系？”</span><br><br>你能说出的，只有当票、旧名和一些还没接上的碎片。<br><br>这只镯子让陆小姐变得更可疑，却不能把苏晚亭带回来，也不能替你解释陈明远为什么会死。<br><br>周怀安把镯子轻轻推回给你。<br><br><span class="sys">“沈先生，我要的不是一个可疑的名字。我要知道晚亭在哪里。”</span>`,
+        text: () => `你把翡翠镯放在周怀安面前。<br><br>你问他，苏晚亭有没有提过<span class="sys">“陆念”</span>这个名字。<br><br>周怀安看了很久，最后只说：<br><br><span class="sys">“我好像听她说过一次。可这和晚亭失踪有什么关系？”</span><br><br>你能说出的，只有当票、旧名和一些还没接上的碎片。<br><br>这只镯子让陆小姐变得更可疑，却不能把苏晚亭带回来，也不能替你解释陈明远为什么会死。<br><br>周怀安把镯子轻轻推回给你。<br><br><span class="sys">“沈先生，我要的不是一个可疑的名字。我要知道晚亭在哪里。”</span>`,
         choices: afterEvidenceChoices
       };
     }
