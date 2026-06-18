@@ -176,7 +176,7 @@ runtime targets exist, instead of hard-coding a single final outbound pair.
 
 ### Current Chapter 3 runtime takeover
 
-`ch3_wu_present_threat` and `ch3_wu_present_photo` have completed runtime takeover and focused runtime gate wiring.
+`ch3_wu_present_threat` and `ch3_wu_present_photo` have completed runtime takeover, focused runtime gate wiring, and removal dry-run guard wiring.
 
 Files:
 
@@ -184,6 +184,7 @@ Files:
 src/story-chapters/chapter-3-guanghua.js
 src/story-chapters/chapter-3-guanghua-contract.js
 scripts/check-story-chapter3-wu-present-runtime.mjs
+scripts/remove-migrated-chapter3-wu-present-from-story.mjs
 ```
 
 Important behavior note:
@@ -195,7 +196,7 @@ The focused gate verifies the owned effects plus the final emitted runtime targe
 after the confrontation cleanup patch rewrites the choices.
 ```
 
-Legacy definitions remain in `src/story.js`. Do not physically remove them until the runtime gate passes green and a dedicated removal dry-run guard has been added.
+Legacy definitions remain in `src/story.js`. Do not physically remove them until the removal dry-run passes green in GitHub Actions.
 
 ### Current Chapter 3 gates and removal guards
 
@@ -217,6 +218,7 @@ scripts/remove-migrated-chapter3-second-batch-from-story.mjs
 scripts/remove-migrated-chapter3-yufang-batch-from-story.mjs
 scripts/remove-migrated-chapter3-office-from-story.mjs
 scripts/remove-migrated-chapter3-chen-letter-from-story.mjs
+scripts/remove-migrated-chapter3-wu-present-from-story.mjs
 ```
 
 Manual verification workflows already收口:
@@ -262,26 +264,26 @@ Also available in GitHub Actions:
 .github/workflows/story-refactor-full-check.yml
 ```
 
-This full check currently includes Chapter 3 runtime gates and all existing Chapter 3 removal guards, including the Wu present runtime gate.
+This full check currently includes Chapter 3 runtime gates and all existing Chapter 3 removal guards, including the Wu present runtime and removal dry-run gates.
 
 ## Current next step
 
 Next safe step:
 
 ```text
-Wait for GitHub Actions to go green on the ch3_wu_present_threat / ch3_wu_present_photo runtime takeover.
+Wait for GitHub Actions to go green on the ch3_wu_present_threat / ch3_wu_present_photo removal dry-run.
 ```
 
 After that:
 
 ```text
-1. add a dedicated ch3_wu_present removal script;
-2. wire it into check-story-refactor-full.mjs as dry-run only;
-3. wait for GitHub Actions green;
-4. then enter the physical removal workflow for the two Wu present nodes.
+1. create temporary ch3_wu_present physical-removal workflow;
+2. let it run full check -> --write -> full check -> commit src/story.js;
+3. verify src/story.js deletion footprint increases;
+4. convert the temporary workflow to manual idempotent verification only.
 ```
 
-Do not physically remove `ch3_wu_present_threat` or `ch3_wu_present_photo` until runtime takeover, focused gate, and removal dry-run have all passed green.
+Do not physically remove `ch3_wu_present_threat` or `ch3_wu_present_photo` until the removal dry-run has passed green.
 
 ## Remaining Chapter 3 migration order
 
