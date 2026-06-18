@@ -31,7 +31,13 @@ function hasChoice(list, fragment, goto) {
   return list.some(choice => choice.text.includes(fragment) && (!goto || choice.goto === goto));
 }
 
-// 前期缺关键前置时，光华小学应允许表层结案，但提示必须是叙事内语言，不是开发者缺证清单。
+function assertNoSpoilerNames(text, label) {
+  for (const word of ['傅启元', '福生仓', '公董局']) {
+    assert(!text.includes(word), `${label} 不应提前点名 ${word}，实际：${text}`);
+  }
+}
+
+// 前期缺关键前置时，光华小学应允许表层结案，但提示必须是叙事内语言，不是开发者缺证清单，也不能剧透后续专名。
 reset({
   flags: {
     asked_about_chen: true,
@@ -51,8 +57,10 @@ reset({
 let text = textOf('ch3_school_confront_wu');
 assert(text.includes('话还没有压到底'), `缺证时吴校长质询页应使用叙事阻滞提示，实际：${text}`);
 assert(text.includes('陈明远死前究竟被谁逼到墙角') && text.includes('苏晚亭到底是主动追查'), `缺证提示应写成叙事空白，实际：${text}`);
+assert(text.includes('学校背后的那层关系'), `缺证提示应使用非剧透表达，实际：${text}`);
 assert(!text.includes('你还缺：'), `缺证提示不应出现开发者清单“你还缺”，实际：${text}`);
 assert(!text.includes('203 室恐吓信') && !text.includes('苏晚亭大学日记残页'), `缺证提示不应直接列道具名，实际：${text}`);
+assertNoSpoilerNames(text, '缺证提示');
 let list = choices('ch3_school_confront_wu');
 assert(hasChoice(list, '接受这个较容易成立的说法', 'ch3_school_incomplete_closure'), `缺证时应提供叙事化表层结案入口，实际 ${JSON.stringify(list)}`);
 
@@ -61,6 +69,7 @@ text = textOf('ch3_school_incomplete_closure');
 assert(text.includes('不完整的答案'), `表层结案节点应说明答案不完整，实际：${text}`);
 assert(text.includes('太容易被接受的答案'), `表层结案节点应强调这是表层答案，实际：${text}`);
 assert(!text.includes('你还缺：'), `表层结案节点不应出现开发者清单，实际：${text}`);
+assertNoSpoilerNames(text, '表层结案节点');
 list = choices('ch3_school_incomplete_closure');
 assert(hasChoice(list, '接受这个较容易成立的说法', 'ch4_conclusion'), `表层结案应回到结案整理，实际 ${JSON.stringify(list)}`);
 
@@ -70,6 +79,7 @@ assert(E.hasClue('光华小学不完整结论'), '表层结案应加入不完整
 
 text = textOf('ch3_wrapup');
 assert(text.includes('光华小学线索只到表层'), `表层结案后 wrapup 应提示只到表层，实际：${text}`);
+assertNoSpoilerNames(text, '表层结案后的整理页提示');
 
 // 三证齐全时，不应显示表层结案入口。
 reset({
