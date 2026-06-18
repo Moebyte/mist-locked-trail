@@ -9,6 +9,8 @@
     'src/story-chapters/chapter-2-home-fixed-contract.js',
     'src/story-chapters/chapter-2-home-talk.js',
     'src/story-chapters/chapter-2-home-talk-contract.js',
+    'src/story-chapters/chapter-2-leave-home.js',
+    'src/story-chapters/chapter-2-leave-home-contract.js',
     'src/story-chapters/chapter-2-frenchtown-entry.js',
     'src/story-chapters/chapter-2-frenchtown-entry-contract.js',
     'src/story-chapters/chapter-2-frenchtown-tail.js',
