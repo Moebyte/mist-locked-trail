@@ -29,7 +29,8 @@
         if (typeof oldEffect === 'function') oldEffect(state);
         E.addClue('203 室恐吓信', '信上只有一句话：如果你不说，他们下一个就是你。');
       };
-      nodes.ch2_203_search.choices = [{ text: '📚 去光华小学——照片里的学校还没说完', goto: 'ch3_school' }];
+      // Do not override ch2_203_search.choices here. xuehua-choice-polish owns the
+      // post-203 route matrix so the player can still return to police or Su home.
       nodes.ch2_203_search.__earlyMistPerspectivePatched = true;
     }
 
