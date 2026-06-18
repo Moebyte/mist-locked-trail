@@ -177,6 +177,8 @@
 
     E.routeDockDeepByPressure = function () {
       if (this.getFlag('missed_both_due_to_return_tool')) return 'ch4_dock_empty_after_return';
+      // 强行开锁是累计风险，不是一票否决：无论支援减免如何，至少进入“只剩一人/痕迹”档，但不直接空暗室。
+      if (this.getFlag('dock_broke_lock_no_tool')) return 'ch4_dock_deep_trace';
       const tier = this.dockHeatTier();
       if (tier.key === 'high') return 'ch4_dock_deep_empty_heat';
       if (tier.key === 'mid') return 'ch4_dock_deep_trace';
