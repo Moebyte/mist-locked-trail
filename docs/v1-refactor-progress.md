@@ -223,9 +223,9 @@ disables direct evidence presentation, and rewrites choices based on the state o
 school questioning and confrontation closure.
 ```
 
-### Current Chapter 3 runtime takeover
+### Current Chapter 3 removal dry-run
 
-`ch3_school` has completed runtime takeover and focused runtime gate wiring.
+`ch3_school` has completed runtime takeover, focused runtime gate wiring, and removal dry-run guard wiring.
 
 Files:
 
@@ -233,6 +233,7 @@ Files:
 src/story-chapters/chapter-3-guanghua.js
 src/story-chapters/chapter-3-guanghua-contract.js
 scripts/check-story-chapter3-school-hub-runtime.mjs
+scripts/remove-migrated-chapter3-school-hub-from-story.mjs
 ```
 
 Important behavior note:
@@ -243,7 +244,7 @@ the final polished hub behavior, including loop-in-place questioning choices,
 Wu confrontation unlock, and wrapup exit after the confrontation is closed.
 ```
 
-Legacy definition remains in `src/story.js`. Do not physically remove it until the runtime gate passes green and a dedicated removal dry-run guard has been added.
+Legacy definition remains in `src/story.js`. Do not physically remove it until the removal dry-run passes green in GitHub Actions.
 
 ### Current Chapter 3 gates and removal guards
 
@@ -269,6 +270,7 @@ scripts/remove-migrated-chapter3-office-from-story.mjs
 scripts/remove-migrated-chapter3-chen-letter-from-story.mjs
 scripts/remove-migrated-chapter3-wu-present-from-story.mjs
 scripts/remove-migrated-chapter3-school-teacher-from-story.mjs
+scripts/remove-migrated-chapter3-school-hub-from-story.mjs
 ```
 
 Manual verification workflows already收口:
@@ -316,23 +318,23 @@ Also available in GitHub Actions:
 .github/workflows/story-refactor-full-check.yml
 ```
 
-This full check currently includes Chapter 2 route smoke, Chapter 3 runtime gates, and all existing Chapter 3 removal guards, including the school hub runtime gate.
+This full check currently includes Chapter 2 route smoke, Chapter 3 runtime gates, and all existing Chapter 3 removal guards, including the school hub runtime and removal dry-run gates.
 
 ## Current next step
 
 Next safe step:
 
 ```text
-Wait for GitHub Actions to go green on the ch3_school runtime takeover.
+Wait for GitHub Actions to go green on the ch3_school removal dry-run.
 ```
 
 After that:
 
 ```text
-1. add a dedicated ch3_school removal script;
-2. wire it into check-story-refactor-full.mjs as dry-run only;
-3. wait for GitHub Actions green;
-4. then enter the physical removal workflow for ch3_school.
+1. create temporary ch3_school physical-removal workflow;
+2. let it run full check -> --write -> full check -> commit src/story.js;
+3. verify src/story.js deletion footprint increases;
+4. convert the temporary workflow to manual idempotent verification only.
 ```
 
 Do not physically remove `ch3_school` until runtime takeover, focused gate, and removal dry-run have all passed green.
