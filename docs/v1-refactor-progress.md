@@ -18,18 +18,18 @@ Phase 1: styles.css split complete
 Phase 2: chapter loading scaffold complete
 Phase 3: endings runtime takeover complete
 Phase 4: Chapter 2 runtime takeover and physical removal complete
-Phase 5: Chapter 3 high-risk migration in progress
+Phase 5: Chapter 3 high-risk migration complete
 ```
 
 ## Chapter 3 migration discipline
 
-Chapter 3 must continue to use this sequence:
+Chapter 3 used this sequence:
 
 ```text
 runtime takeover -> focused runtime gate -> removal dry-run -> physical removal -> workflow收口
 ```
 
-No direct Chapter 3 deletion should happen without a dedicated removal script and a focused runtime gate.
+No direct Chapter 3 deletion happened without a dedicated removal script and a focused runtime gate.
 
 ## Completed Chapter 3 physical removals
 
@@ -45,12 +45,13 @@ ch3_wu_present_threat
 ch3_wu_present_photo
 ch3_school_teacher
 ch3_school
+ch3_wrapup
 ```
 
 Current `src/story.js` physical removal footprint:
 
 ```text
-src/story.js: -849 lines
+src/story.js: -887 lines
 ```
 
 ## Completed Chapter 3 school hub migration
@@ -67,9 +68,9 @@ scripts/remove-migrated-chapter3-school-hub-from-story.mjs
 .github/workflows/chapter3-school-hub-physical-removal.yml
 ```
 
-## Current Chapter 3 wrapup migration
+## Completed Chapter 3 wrapup migration
 
-`ch3_wrapup` has completed runtime takeover, focused runtime gate wiring, removal dry-run guard wiring, and temporary physical-removal workflow creation. The legacy definition remains in `src/story.js` until the workflow completes `--write`, reruns the full check, and commits the deletion.
+`ch3_wrapup` has completed runtime takeover, focused runtime gate wiring, removal dry-run guard wiring, physical removal, and workflow收口.
 
 Files:
 
@@ -127,11 +128,6 @@ Manual verification workflows already收口:
 .github/workflows/chapter3-wu-present-physical-removal.yml
 .github/workflows/chapter3-school-teacher-physical-removal.yml
 .github/workflows/chapter3-school-hub-physical-removal.yml
-```
-
-Temporary physical-removal workflow awaiting bot deletion commit:
-
-```text
 .github/workflows/chapter3-wrapup-physical-removal.yml
 ```
 
@@ -150,24 +146,20 @@ This full check includes Chapter 2 route smoke, Chapter 3 runtime gates, and all
 Next safe step:
 
 ```text
-Wait for GitHub Actions to run the ch3_wrapup physical-removal workflow and commit the src/story.js deletion.
+Chapter 3 migration is closed. Do not start additional structural migration without a new scoped plan.
 ```
 
-After the bot commit appears:
+Suggested post-closeout posture:
 
 ```text
-1. verify the bot commit only removes ch3_wrapup from src/story.js;
-2. convert .github/workflows/chapter3-wrapup-physical-removal.yml to manual idempotent verification only;
-3. update this checkpoint with the final src/story.js footprint;
-4. close out Chapter 3 migration.
+1. keep v1_refactor green;
+2. limit future changes to bug fixes, copy edits, and release polish;
+3. avoid expanding v1 into a new framework;
+4. use lessons from this refactor for the next Twine/SugarCube project.
 ```
 
 ## Remaining Chapter 3 migration order
 
 ```text
-1. ch3_wrapup workflow bot deletion commit
-2. ch3_wrapup workflow收口
-3. Chapter 3 migration closeout
+None. Chapter 3 专项迁移对象 have all been completed.
 ```
-
-`ch3_wrapup` is the final Chapter 3 专项迁移对象.
