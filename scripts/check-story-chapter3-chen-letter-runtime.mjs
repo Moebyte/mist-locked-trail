@@ -1,0 +1,204 @@
+#!/usr/bin/env node
+import fs from 'node:fs';
+import path from 'node:path';
+import vm from 'node:vm';
+import { runStoryModuleScripts } from './story-module-loader.mjs';
+
+const repoRoot = process.cwd();
+const loadErrors = [];
+const errors = [];
+const domReadyHandlers = [];
+
+function read(rel) {
+  return fs.readFileSync(path.join(repoRoot, rel), 'utf8');
+}
+
+function freshState(overrides = {}) {
+  return {
+    chapter: 0,
+    flags: {},
+    clues: [],
+    items: [],
+    contacts: [],
+    endings: [],
+    sceneLog: [],
+    currentScene: null,
+    visitedNodes: {},
+    weatherIdx: 0,
+    pressure: { heat: 0, deadline: { day: 2, hour: 23, minute: 0 } },
+    inGameTime: { day: 2, hour: 9, minute: 0 },
+    ...overrides,
+  };
+}
+
+const E = {
+  state: freshState(),
+  saveKey: 'chapter-3-chen-letter-runtime-audit',
+  logEl: null,
+  sceneEl: null,
+  titleEl: null,
+  textEl: null,
+  choicesEl: null,
+  freshState,
+  init() {}, toast() {}, saveGame() {}, updateStatus() {}, openDeduction() {}, openPanel() {}, scroll() {}, showPresentBtn() {}, applyWeatherClass() {}, ambientLine() {}, logChoice() {}, logNarration() {},
+  addClue(name, desc = '') { if (!this.hasClue(name)) this.state.clues.push({ name, desc }); },
+  hasClue(name) { return this.state.clues.some(c => c.name === name); },
+  addItem(name, desc = '') { if (!this.hasItem(name)) this.state.items.push({ name, desc }); },
+  hasItem(name) { return this.state.items.some(i => i.name === name); },
+  addContact(name) { if (!this.state.contacts.includes(name)) this.state.contacts.push(name); },
+  discoverRelation(name) { this.addContact(name); },
+  registerRelation() {},
+  setFlag(k, v = true) { this.state.flags[k] = v; },
+  getFlag(k) { return this.state.flags[k]; },
+  canDeduce() { return true; },
+  caseStrength() { return { name: 'audit', desc: 'audit' }; },
+  deadlinePhase() { return 'safe'; },
+  v07InvestigationQuality() { return { score: 0, reasons: [] }; },
+  pressureLabel() { return 'safe'; },
+  setWeather(i) { this.state.weatherIdx = i; },
+  renderAtmosphere() { return ''; },
+  setTime(day, hour, minute) { this.state.inGameTime = { day: day || 1, hour: hour || 14, minute: minute || 0 }; },
+  advanceTime() {}, spendTime() {}, checkDeadline() {}, minutesUntilDeadline() { return 999; }, timeToMinutes() { return 0; }, addHeat() {},
+};
+
+function makeElement() {
+  return {
+    style: {},
+    dataset: {},
+    className: '',
+    id: '',
+    innerHTML: '',
+    textContent: '',
+    title: '',
+    value: '',
+    checked: false,
+    disabled: false,
+    children: [],
+    classList: { add() {}, remove() {}, toggle() {}, contains() { return false; } },
+    appendChild(child) { this.children.push(child); return child; },
+    removeChild(child) { this.children = this.children.filter(item => item !== child); return child; },
+    insertBefore(child) { this.children.push(child); return child; },
+    replaceChildren(...children) { this.children = children; },
+    addEventListener() {},
+    removeEventListener() {},
+    setAttribute(name, value) { this[name] = value; },
+    getAttribute(name) { return this[name]; },
+    removeAttribute(name) { delete this[name]; },
+    querySelector() { return makeElement(); },
+    querySelectorAll() { return []; },
+    scrollIntoView() {},
+    focus() {},
+    blur() {},
+    click() {},
+  };
+}
+
+const locationStub = { href: 'http://localhost/', search: '', hash: '', pathname: '/' };
+const documentStub = {
+  body: makeElement(),
+  head: makeElement(),
+  documentElement: makeElement(),
+  location: locationStub,
+  write() {},
+  addEventListener(event, handler) { if (event === 'DOMContentLoaded') domReadyHandlers.push(handler); },
+  removeEventListener() {},
+  getElementById() { return makeElement(); },
+  createElement() { return makeElement(); },
+  createTextNode(text = '') { return { textContent: text }; },
+  querySelector() { return makeElement(); },
+  querySelectorAll() { return []; },
+};
+
+const context = vm.createContext({
+  console,
+  E,
+  document: documentStub,
+  window: { location: locationStub },
+  location: locationStub,
+  URL,
+  URLSearchParams,
+  localStorage: { getItem() { return null; }, setItem() {}, removeItem() {} },
+  sessionStorage: { getItem() { return null; }, setItem() {}, removeItem() {} },
+  navigator: { userAgent: 'node' },
+  history: { pushState() {}, replaceState() {} },
+  setTimeout(fn) { if (typeof fn === 'function') fn(); return 0; },
+  clearTimeout() {},
+  setInterval() { return 0; },
+  clearInterval() {},
+});
+context.globalThis = context;
+context.window = context;
+context.location = locationStub;
+context.self = context;
+
+E.logEl = makeElement();
+E.sceneEl = makeElement();
+E.titleEl = makeElement();
+E.textEl = makeElement();
+E.choicesEl = makeElement();
+
+function runScript(rel, suffix = '') {
+  try {
+    vm.runInContext(read(rel) + suffix, context, { filename: rel });
+  } catch (error) {
+    loadErrors.push(`${rel}: ${error.message}`);
+  }
+}
+
+function resetState(overrides = {}) {
+  E.state = freshState(overrides);
+}
+
+function choiceTargets(id, overrides = {}) {
+  resetState(overrides);
+  const node = context.nodes?.[id];
+  const choices = typeof node?.choices === 'function' ? node.choices(E.state) : node?.choices;
+  return (Array.isArray(choices) ? choices : [])
+    .map(choice => typeof choice.goto === 'function' ? choice.goto(E.state) : choice.goto)
+    .filter(Boolean);
+}
+
+function assert(condition, message) {
+  if (!condition) errors.push(message);
+}
+
+runScript('src/story.js', '\nglobalThis.nodes = nodes;');
+runScript('src/main.js');
+runStoryModuleScripts(runScript, repoRoot);
+for (const handler of domReadyHandlers) {
+  try { handler(); } catch (error) { loadErrors.push(`DOMContentLoaded handler: ${error.message}`); }
+}
+
+if (loadErrors.length) {
+  console.error('\nChapter 3 Chen letter runtime gate failed to load runtime:');
+  for (const error of loadErrors) console.error(`- ${error}`);
+  process.exit(1);
+}
+
+const node = context.nodes?.ch3_chen_letter;
+assert(Boolean(node), 'missing ch3_chen_letter runtime node');
+assert(context.window.MLT_STORY_CHAPTER_3_GUANGHUA_NODES?.includes('ch3_chen_letter'), 'owned node list should include ch3_chen_letter');
+assert(context.window.MLT_STORY_CHAPTER_3_GUANGHUA_CONTRACT?.nodes?.includes('ch3_chen_letter'), 'contract should include ch3_chen_letter');
+assert(typeof node?.text === 'function' || typeof node?.text === 'string', 'ch3_chen_letter should have renderable text');
+assert(!node?.onPresent, 'ch3_chen_letter should not define onPresent');
+
+resetState();
+if (typeof node?.effect === 'function') node.effect(E.state);
+assert(E.state.clues.some(item => item.name === '陈明远的信'), 'ch3_chen_letter should grant 陈明远的信 clue');
+assert(E.state.items.some(item => item.name === '陈明远的信'), 'ch3_chen_letter should grant 陈明远的信 item');
+assert(E.state.flags.read_letter === true, 'ch3_chen_letter should set read_letter flag');
+
+const targets = choiceTargets('ch3_chen_letter');
+for (const target of ['ch3_school_confront_wu', 'ch3_school']) {
+  assert(targets.includes(target), `ch3_chen_letter should keep polished outbound target ${target}`);
+  assert(Boolean(context.nodes?.[target]), `ch3_chen_letter has missing goto target ${target}`);
+}
+assert(Boolean(context.nodes?.ch3_wrapup), 'ch3_wrapup should remain available as a later flow target');
+
+if (errors.length) {
+  console.error('\nChapter 3 Chen letter runtime gate failed:');
+  for (const error of errors) console.error(`- ${error}`);
+  process.exit(1);
+}
+
+console.log('Chapter 3 Chen letter runtime gate passed.');
