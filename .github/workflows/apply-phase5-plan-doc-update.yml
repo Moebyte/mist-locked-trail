@@ -7,6 +7,7 @@ on:
       - v1_refactor
     paths:
       - .github/workflows/apply-phase5-plan-doc-update.yml
+      - scripts/apply-phase5-plan-doc-update.mjs
 
 permissions:
   contents: write
