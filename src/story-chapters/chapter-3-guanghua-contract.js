@@ -3,9 +3,13 @@
     if (typeof window === 'undefined') return;
     window.MLT_STORY_CHAPTER_3_GUANGHUA_CONTRACT = {
       module: 'chapter-3-guanghua',
-      phase: 'school-teacher-runtime-takeover',
-      nodes: ['ch3_school_teacher', 'ch3_school_chen_su', 'ch3_school_yufang', 'ch3_school_weird', 'ch3_school_office', 'ch3_chen_letter', 'ch3_wu_present_threat', 'ch3_wu_present_photo'],
+      phase: 'school-hub-runtime-takeover',
+      nodes: ['ch3_school', 'ch3_school_teacher', 'ch3_school_chen_su', 'ch3_school_yufang', 'ch3_school_weird', 'ch3_school_office', 'ch3_chen_letter', 'ch3_wu_present_threat', 'ch3_wu_present_photo'],
       ownedEffects: {
+        ch3_school: {
+          contacts: ['吴校长'],
+          flags: ['chapter:3'],
+        },
         ch3_school_teacher: {
           clues: ['陈明远坠楼案'],
           contacts: ['陈明远'],
@@ -45,6 +49,7 @@
         },
       },
       outboundTargets: {
+        ch3_school: ['runtime location hub flow; verify all emitted targets exist'],
         ch3_school_teacher: ['runtime school/confrontation flow; verify all emitted targets exist'],
         ch3_school_chen_su: ['ch3_school_weird', 'ch3_school_office', 'ch3_school'],
         ch3_school_yufang: ['ch3_school_teacher', 'ch3_school_weird', 'ch3_school_office', 'ch3_school', 'ch3_school_confront_wu'],
