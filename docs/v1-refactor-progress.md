@@ -174,6 +174,29 @@ The focused gate therefore verifies the owned effect and verifies that all emitt
 runtime targets exist, instead of hard-coding a single final outbound pair.
 ```
 
+### Current Chapter 3 runtime takeover
+
+`ch3_wu_present_threat` and `ch3_wu_present_photo` have completed runtime takeover and focused runtime gate wiring.
+
+Files:
+
+```text
+src/story-chapters/chapter-3-guanghua.js
+src/story-chapters/chapter-3-guanghua-contract.js
+scripts/check-story-chapter3-wu-present-runtime.mjs
+```
+
+Important behavior note:
+
+```text
+ch3_wu_present_threat and ch3_wu_present_photo are affected by
+guanghua-school-flow-polish.js and guanghua-confront-choice-cleanup.js.
+The focused gate verifies the owned effects plus the final emitted runtime targets
+after the confrontation cleanup patch rewrites the choices.
+```
+
+Legacy definitions remain in `src/story.js`. Do not physically remove them until the runtime gate passes green and a dedicated removal dry-run guard has been added.
+
 ### Current Chapter 3 gates and removal guards
 
 Focused runtime gates:
@@ -183,6 +206,7 @@ scripts/check-story-chapter3-runtime.mjs
 scripts/check-story-chapter3-yufang-runtime.mjs
 scripts/check-story-chapter3-office-runtime.mjs
 scripts/check-story-chapter3-chen-letter-runtime.mjs
+scripts/check-story-chapter3-wu-present-runtime.mjs
 ```
 
 Idempotent removal guards:
@@ -238,25 +262,23 @@ Also available in GitHub Actions:
 .github/workflows/story-refactor-full-check.yml
 ```
 
-This full check currently includes Chapter 3 runtime gates and all existing Chapter 3 removal guards, including `ch3_chen_letter`.
+This full check currently includes Chapter 3 runtime gates and all existing Chapter 3 removal guards, including the Wu present runtime gate.
 
 ## Current next step
 
 Next safe step:
 
 ```text
-Begin runtime takeover for ch3_wu_present_threat / ch3_wu_present_photo.
+Wait for GitHub Actions to go green on the ch3_wu_present_threat / ch3_wu_present_photo runtime takeover.
 ```
 
-Recommended discipline for the next batch:
+After that:
 
 ```text
-1. confirm patch sources affecting the two present-time Wu nodes;
-2. migrate runtime definitions into the target Chapter 3 module;
-3. add or update a focused runtime audit for the selected batch;
-4. keep legacy story.js definitions until the focused runtime gate passes;
-5. add a dedicated removal script and wire it into check-story-refactor-full.mjs as dry-run only;
-6. only after GitHub Actions is green, enter the physical removal workflow.
+1. add a dedicated ch3_wu_present removal script;
+2. wire it into check-story-refactor-full.mjs as dry-run only;
+3. wait for GitHub Actions green;
+4. then enter the physical removal workflow for the two Wu present nodes.
 ```
 
 Do not physically remove `ch3_wu_present_threat` or `ch3_wu_present_photo` until runtime takeover, focused gate, and removal dry-run have all passed green.
@@ -266,7 +288,7 @@ Do not physically remove `ch3_wu_present_threat` or `ch3_wu_present_photo` until
 Recommended remaining order:
 
 ```text
-1. ch3_wu_present_threat / ch3_wu_present_photo
+1. ch3_wu_present_threat / ch3_wu_present_photo physical removal
 2. ch3_school_teacher
 3. ch3_school
 4. ch3_wrapup
