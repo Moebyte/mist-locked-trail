@@ -132,7 +132,7 @@
       const positivesText = positives.length ? positives.slice(0, 5).join('；') : '桌上还没有足够能落笔的东西';
       const gapText = gaps.length ? `<br><span class="sys">还没完全落稳的地方：${gaps.slice(0, 3).join('；')}${gaps.length > 3 ? '等' : ''}。</span>` : '';
       const penaltyText = q.penalties.length ? `<br><span class="sys">麻烦在于：${q.penalties.join('；')}。</span>` : '';
-      return `<b>📋 案卷状态 · ${q.label}</b><br><span class="sys">已经能写进案卷的：${positivesText}。</span>${gapText}${penaltyText}`;
+      return `<b>📋 案件质量 · ${q.label} · ${q.points}/10</b><br><span class="sys">已经能写进案卷的：${positivesText}。</span>${gapText}${penaltyText}`;
     }
 
     function pressureLine(p) {
@@ -144,7 +144,13 @@
           : p.label === '紧张'
             ? '对方已有风声，但局面还没有完全失控。'
             : '行动还在可控范围内。';
-      return `<b>⚠️ 外面的风声 · ${p.label}</b><br><span class="sys">${line}${notes}</span>`;
+      return `<b>⚠️ 压力指数 · ${p.label} · ${p.value}/8</b><br><span class="sys">${line}${notes}</span>`;
+    }
+
+    function fushengTruthLine() {
+      if (E.getFlag('deduced_fusheng')) return '✅ 福生仓真相推理：已完成';
+      if (dockEvidenceReady()) return '⚫ 福生仓真相推理：未完成。福生仓现场证据已经到手，只差最后一步推理。';
+      return '⚫ 福生仓真相推理：未完成。福生仓现场证据尚未完全到手。';
     }
 
     function summaryHtml() {
@@ -162,10 +168,10 @@
       ].join('　');
 
       const hint = !E.getFlag('deduced_fusheng') && dockEvidenceReady()
-        ? '<br><span class="sys">福生仓现场的东西已经摆在桌上。还差一次把它们串起来的判断。</span>'
+        ? '<br><span class="sys">福生仓现场证据已经到手。现在不要急着落笔，先把公董局、货运单和清场纸串成最后一步推理。</span>'
         : '';
 
-      return `<br><br><div style="border:1px solid var(--line);padding:10px;border-radius:4px;margin:8px 0">${qualityLine(q)}<br><br>${pressureLine(p)}<br>${checks}${hint}</div><br>现在落笔，结局会顺着你手里这份案卷走。`;
+      return `<br><br><div style="border:1px solid var(--line);padding:10px;border-radius:4px;margin:8px 0">${qualityLine(q)}<br><br>${pressureLine(p)}<br><br>${fushengTruthLine()}<br>${checks}${hint}</div><br>现在落笔，结局会顺着你手里这份案卷走。`;
     }
 
     function hasFushengDeductionChoice(choices) {
@@ -184,7 +190,7 @@
       nodes.ch4_conclusion.choices = function (state) {
         const opts = choicesOf(oldChoices, state).slice();
         if (!E.getFlag('deduced_fusheng') && dockEvidenceReady() && !hasFushengDeductionChoice(opts)) {
-          opts.unshift({ text: '🧩 把福生仓、货运单和清场纸串起来', effect: () => E.openDeduction('deduce_fusheng') });
+          opts.unshift({ text: '🧩 先推理——福生仓与公董局的真相', effect: () => E.openDeduction('deduce_fusheng') });
         }
         return opts;
       };
