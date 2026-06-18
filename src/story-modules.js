@@ -73,7 +73,8 @@
     'src/story-modules/status-polish.js',
     'src/story-modules/ending-layout-polish.js',
     'src/story-modules/solo-heat-delay-outcomes.js',
-    'src/story-modules/runtime-bugfixes.js'
+    'src/story-modules/runtime-bugfixes.js',
+    'src/story-modules/dev-mode-panel.js'
   ];
 
   window.MLT_STORY_MODULES = modules.slice();
