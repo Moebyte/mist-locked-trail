@@ -3,6 +3,30 @@
     if (typeof nodes === 'undefined') return;
 
     Object.assign(nodes, {
+      ch3_school: {
+        title: '光华小学',
+        time: {d:2, h:9, m:0},
+        weather: 2,
+        text: (s) => {
+          let extra = '';
+          if (E.getFlag('talked_to_woman')) extra += '\n\n沈玉芳也在这里教书——她的失踪跟这一切有没有关系？';
+          return `光华小学坐落在法租界边缘，一栋灰砖三层楼建筑。操场上空荡荡的，旗杆上挂着民国国旗，在秋风中翻卷。
+
+你走进校门，门卫拦住你。你出示了证件，说你是来调查陈老师坠楼案的。
+
+门卫的脸色变了一下，放你进去了。
+
+校长的办公室在二楼。你敲门进去——校长姓<b>吴</b>，五十多岁，秃顶，戴一副金丝眼镜。他听你说明来意后，表情很复杂。
+
+<span class="sys">"陈老师的事……已经结案了。自杀，巡捕房认定的。"</span>${extra}`;
+        },
+        effect: (s) => { E.addContact('吴校长'); E.discoverRelation('吴校长'); s.chapter = 3; },
+        choices: [
+          { text: '💬 问陈老师的事', goto: 'ch3_school_teacher' },
+          { text: '💬 问沈玉芳的事', when: (s) => E.getFlag('sister_case'), hint: '你还不知道沈玉芳这条线。先去茶楼接触沈玉兰。', goto: 'ch3_school_yufang' },
+        ],
+      },
+
       ch3_school_teacher: {
         title: '关于陈老师',
         onPresent: (item, s) => {
@@ -221,7 +245,7 @@
 
     if (typeof window !== 'undefined') {
       window.MLT_STORY_CHAPTER_3_GUANGHUA_READY = true;
-      window.MLT_STORY_CHAPTER_3_GUANGHUA_NODES = ['ch3_school_teacher', 'ch3_school_chen_su', 'ch3_school_yufang', 'ch3_school_weird', 'ch3_school_office', 'ch3_chen_letter', 'ch3_wu_present_threat', 'ch3_wu_present_photo'];
+      window.MLT_STORY_CHAPTER_3_GUANGHUA_NODES = ['ch3_school', 'ch3_school_teacher', 'ch3_school_chen_su', 'ch3_school_yufang', 'ch3_school_weird', 'ch3_school_office', 'ch3_chen_letter', 'ch3_wu_present_threat', 'ch3_wu_present_photo'];
     }
   }
 
