@@ -70,10 +70,10 @@
         out.push({ text: '📩 把陈明远的信递给老孙', goto: 'ch4_sun_present_chen_letter' });
       }
       if (hasFushengLocation() && !E.getFlag('sun_presented_fusheng_location')) {
-        out.push({ text: '📍 在地图上点出福生仓位置', goto: 'ch4_sun_present_fusheng_location' });
+        out.push({ text: '📍 在地图上点出福生仓的位置', goto: 'ch4_sun_present_fusheng_location' });
       }
       if (hasThreatLetter() && !E.getFlag('sun_presented_threat_letter')) {
-        out.push({ text: '📄 把 203 室恐吓信摊开', goto: 'ch4_sun_present_threat' });
+        out.push({ text: '📄 把 203 室那封恐吓信摊开', goto: 'ch4_sun_present_threat' });
       }
       return out;
     }
@@ -82,7 +82,7 @@
       const out = evidenceChoices();
       if (hasCoreSupport()) {
         out.push({
-          text: '🚓 低调支援：派一个信得过的人跟我走',
+          text: '🚓 压低声音：“派一个信得过的人跟我走。”',
           effect: () => {
             E.setFlag('sun_support_available', true);
             E.setFlag('sun_fast_support', true);
@@ -93,7 +93,7 @@
       }
       if (hasStrongSupport()) {
         out.push({
-          text: '🚨 调齐人手：今晚把福生仓两头封住',
+          text: '🚨 对老孙说：“今晚得把福生仓两头封住。”',
           effect: () => {
             E.setFlag('sun_support_available', true);
             E.setFlag('sun_full_support', true);
@@ -162,7 +162,7 @@
         E.setFlag('sun_presented_threat_letter', true);
         E.addClue('老孙看到恐吓信', '老孙看到 203 室恐吓信，确认陈明远、苏晚亭和沈玉芳这些知情者都处在威胁之下。');
       },
-      text: () => `你拿出 203 室恐吓信。<br><br><span class="sys">“我知道那晚你看到了什么。如果你不说，他们下一个就是你。”</span><br><br>老孙骂了一句脏话。<br><br><span class="sys">“这不是一个人失踪，是有人在清理知情者。”</span><br><br>这封信不能单独决定行动，但它足够说明：再拖下去，会有人被继续灭口。`,
+      text: () => `你拿出 203 室那封恐吓信。<br><br><span class="sys">“我知道那晚你看到了什么。如果你不说，他们下一个就是你。”</span><br><br>老孙骂了一句脏话。<br><br><span class="sys">“这不是一个人失踪，是有人在清理知情者。”</span><br><br>这封信不能单独决定行动，但它足够说明：再拖下去，会有人被继续灭口。`,
       choices: supportChoices
     };
 
