@@ -137,7 +137,7 @@
     function dockChoice() {
       if (E.getFlag('dock_sun_pressed_fu')) {
         return {
-          text: '🚓 让老孙守住码头两头，别让人擦掉痕迹',
+          text: '🚓 让老孙守住码头封锁线，别让傅启元擦痕迹',
           effect: () => {
             E.setFlag('v07_choice_hold_blockade', true);
             E.setFlag('v07_pressed_fu_network', true);
@@ -148,7 +148,7 @@
       }
       if (E.getFlag('dock_escaped_during_sun_standoff')) {
         return {
-          text: '⚠️ 让老孙回头封码头，可对方已经惊动了',
+          text: '⚠️ 公董局已经插手，让老孙回头补封码头',
           effect: () => {
             E.setFlag('v07_choice_blockade_after_interference', true);
             E.addClue('补封码头受阻', '你们在码头趁乱撤离后，公董局的人已经插手，老孙再去封码头会遇到正式阻力。');
@@ -169,7 +169,7 @@
         };
       }
       return {
-        text: '🚓 让老孙立刻回码头，趁现场还没被清干净',
+        text: '🚓 让老孙立刻封码头，趁现场还没被清干净',
         effect: () => E.setFlag('v07_choice_pressure_fu', true),
         goto: 'ch4_hospital_pressure_fu'
       };
@@ -225,87 +225,17 @@
     nodes.ch4_hospital_doctor_record = {
       title: '教会医院 · 伤情记录',
       weather: 3,
-      text: () => `医生把病房门关上，先检查沈玉芳手腕上的绳痕，又让护士替苏晚亭换下被雨水泡硬的外衣。<br><br>他没有多问，只在病历纸上写下“长期拘禁”“失温”“外伤”“惊厥后虚脱”。<br><br>这不是口供，却比口供更难被人轻易抹掉。${hospitalBadge()}`,
-      choices: [
-        { text: '🚪 离开病房，去医院走廊', effect: () => { E.setFlag('hospital_protect_witnesses', true); E.setFlag('hospital_separate_witnesses', true); }, goto: 'ch4_lu_confrontation' },
-        { text: '📝 趁沈玉芳清醒，先问一段福生仓经过', effect: () => E.setFlag('hospital_interrogate_yufang', true), goto: 'ch4_hospital_yufang_statement' },
-        { text: '🕯️ 请陆念薇出来，把她知道的说清楚', effect: () => E.setFlag('hospital_early_lu', true), goto: 'ch4_lu_confrontation' }
-      ]
-    };
-
-    nodes.ch4_hospital_yufang_statement = {
-      title: '教会医院 · 沈玉芳初步证词',
-      weather: 4,
-      effect: () => {
-        E.addClue('沈玉芳医院初步证词', '沈玉芳在医院补充说明：福生仓装车前有人反复提到南码头和公董局清场手续。');
-      },
-      text: () => `沈玉芳坐在病床边，手指一直攥着被单。<br><br>你只问了两个问题，她就开始发抖。她说福生仓最后几天一直在搬箱子，也听见有人提到“南码头”和“清场手续”。<br><br>这段话有用，但你也看得出来，她不能再被逼下去了。${hospitalBadge()}`,
-      choices: [
-        { text: '🛏️ 停止追问，先保护证人', effect: () => { E.setFlag('hospital_protect_witnesses', true); E.setFlag('hospital_separate_witnesses', true); }, goto: 'ch4_hospital_protect_witnesses' },
-        { text: '🩺 让医生补上伤情记录', when: () => !E.getFlag('hospital_doctor_record'), effect: () => { E.setFlag('hospital_doctor_record', true); E.addClue('医院伤情记录', '教会医院医生记录了沈玉芳与苏晚亭的伤情和长期拘禁痕迹。'); }, goto: 'ch4_hospital_doctor_record' },
-        { text: '🕯️ 带着她这几句话，去见陆念薇', goto: 'ch4_lu_confrontation' }
-      ]
+      text: () => `医生把病房门半掩上。<br><br>他没有问案子，只问伤口、失温、惊厥和长期拘禁反应。你第一次觉得，有些纸不是用来证明谁有罪，而是证明一个人确实从黑暗里出来过。<br><br>${hospitalBadge()}`,
+      choices: [{ text: '🕯️ 拿着医生记录，去见陆念薇', goto: 'ch4_lu_confrontation' }]
     };
 
     nodes.ch4_hospital_su_identify = {
-      title: '教会医院 · 苏晚亭醒来',
-      weather: 5,
-      text: () => `苏晚亭醒得很短。她听见码头那辆黑车时，手指突然抓紧床单，呼吸也乱了。<br><br>你可以继续问下去，也许能得到一句很重的话。可这会把她重新推回福生仓那扇暗门后面。<br><br>这不是不能问，而是现在问，代价太高。${hospitalBadge()}`,
-      choices: [
-        { text: '🛏️ 停止追问，先保护她和沈玉芳', effect: () => { E.setFlag('hospital_protect_witnesses', true); E.setFlag('hospital_separate_witnesses', true); }, goto: 'ch4_hospital_protect_witnesses' },
-        { text: '🕯️ 带着她这点反应，去见陆念薇', effect: () => E.setFlag('hospital_early_lu', true), goto: 'ch4_lu_confrontation' }
-      ]
+      title: '教会医院 · 过早辨认',
+      weather: 3,
+      effect: () => E.setFlag('hospital_force_su_identify', true),
+      text: () => `你推开病房门时，苏晚亭刚刚醒。<br><br>她看见门口的人影，手指猛地抓住床单。你问她认不认得傅启元，问她见没见过陆念薇，问她还记不记得福生仓的门。<br><br>每问一句，她的呼吸就乱一分。沈玉芳站在旁边，脸色比走廊的墙还白。<br><br>你得到了几个破碎的词，却把她刚刚恢复的一点信任又推回暗处。${hospitalBadge()}`,
+      choices: [{ text: '🛏️ 先停下，重新保护证人', effect: () => E.setFlag('hospital_protect_witnesses', true), goto: 'ch4_hospital_protect_witnesses' }]
     };
-
-    if (nodes.ch4_hospital_protect_witnesses && !nodes.ch4_hospital_protect_witnesses.__pressureWitnessChoicesPatched) {
-      const oldText = nodes.ch4_hospital_protect_witnesses.text;
-      nodes.ch4_hospital_protect_witnesses.text = function (state) {
-        const base = typeof oldText === 'function' ? oldText(state) : oldText;
-        return `${base}${hospitalBadge()}`;
-      };
-      nodes.ch4_hospital_protect_witnesses.choices = [
-        { text: '🩺 让医生补上伤情记录', when: () => !E.getFlag('hospital_doctor_record'), effect: () => { E.setFlag('hospital_doctor_record', true); E.addClue('医院伤情记录', '教会医院医生记录了沈玉芳与苏晚亭的伤情和长期拘禁痕迹。'); }, goto: 'ch4_hospital_doctor_record' },
-        { text: '📝 只问沈玉芳一小段福生仓经过', effect: () => E.setFlag('hospital_interrogate_yufang', true), goto: 'ch4_hospital_yufang_statement' },
-        { text: '🕯️ 等证人稳住后，再请陆念薇出来', goto: 'ch4_lu_confrontation' }
-      ];
-      nodes.ch4_hospital_protect_witnesses.__pressureWitnessChoicesPatched = true;
-    }
-
-    if (nodes.ch4_lu_confrontation && !nodes.ch4_lu_confrontation.__pressureWitnessTextPatched) {
-      const oldText = nodes.ch4_lu_confrontation.text;
-      nodes.ch4_lu_confrontation.text = function (state) {
-        const base = typeof oldText === 'function' ? oldText(state) : oldText;
-        return `${base}${hospitalBadge()}`;
-      };
-      nodes.ch4_lu_confrontation.__pressureWitnessTextPatched = true;
-    }
-
-    if (typeof E.v07InvestigationQuality === 'function' && !E.__hospitalQualityPatched) {
-      const oldQuality = E.v07InvestigationQuality.bind(E);
-      E.v07InvestigationQuality = function () {
-        const quality = oldQuality();
-        const outcome = this.hospitalOutcomeTier();
-        const truth = this.truthCompletenessTier();
-        if (outcome.key === 'stable') {
-          quality.score += 1;
-          quality.reasons.push('医院线稳定，证人保护与伤情记录支撑证词可信度');
-        }
-        if (outcome.key === 'unstable') {
-          quality.score = Math.min(quality.score, 8);
-          quality.reasons.push('医院线失控，证人状态和程序压力削弱证词质量');
-        }
-        if (truth.key === 'complete') {
-          quality.score += 1;
-          quality.reasons.push('双证人与陆念薇证词补齐，真相链条完整');
-        }
-        if (truth.key === 'partial' || truth.key === 'weak') {
-          quality.score = Math.min(quality.score, 8);
-          quality.reasons.push('医院线真相完整度不足，结案质量存在上限');
-        }
-        return quality;
-      };
-      E.__hospitalQualityPatched = true;
-    }
 
     E.__hospitalPressureWitnessPolishPatched = true;
   }
