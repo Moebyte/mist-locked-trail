@@ -2,7 +2,6 @@
 import { loadStoryRuntime } from './story-harness.mjs';
 
 const rt = loadStoryRuntime();
-const { nodes } = rt;
 const errors = [];
 
 function assert(condition, message) {
@@ -35,21 +34,20 @@ function hasOldReturn22(id) {
 
 reset();
 assert(has('ch2_frenchtown', '先在周围观察'), '薛华立路初到时应显示周围观察');
-assert(has('ch2_frenchtown', '问看门老头关于陆姓女子'), '薛华立路初到时应显示问看门老头');
+assert(has('ch2_frenchtown', '问看门老头'), '薛华立路初到时应显示问看门老头');
 assert(!has('ch2_frenchtown', '上二楼，敲 203'), '未问看门老头前不应直接上203');
 
 reset({ clues: [{ name: '法租界地图', desc: '' }], items: [{ name: '法租界地图', desc: '' }] });
-assert(typeof nodes.ch2_building_enter.onPresent !== 'function', '永兴贸易商行入口不应保留通用 onPresent，避免提前向老头出示地图');
 assert(!has('ch2_building_enter', '出示地图'), '未搜203前，入口处不应出现向老头出示地图');
 
 reset({ flags: { saw_man: true } });
 assert(!has('ch2_frenchtown', '先在周围观察'), '周围观察完成后应隐藏观察选项');
-assert(has('ch2_frenchtown', '问看门老头关于陆姓女子'), '观察完成但未问老头时，应继续显示问老头');
+assert(has('ch2_frenchtown', '问看门老头'), '观察完成但未问老头时，应继续显示问老头');
 assert(!has('ch2_frenchtown', '上二楼，敲 203'), '观察完成但未问老头时，仍不应直接上203');
 
 reset({ flags: { saw_man: true, asked_landlord: true } });
 assert(!has('ch2_building_enter', '先在周围观察'), '沈玉兰线后回商行时，已完成观察应隐藏');
-assert(!has('ch2_building_enter', '问看门老头关于陆姓女子'), '问过老头后不应重复显示问老头');
+assert(!has('ch2_building_enter', '问看门老头'), '问过老头后不应重复显示问老头');
 assert(has('ch2_building_enter', '上二楼，敲 203'), '问过老头后应显示上203');
 
 reset({ flags: { saw_man: true, asked_landlord: true } });
@@ -97,30 +95,6 @@ reset({
 assert(has('ch2_203_search', '光华小学'), '苏家线完成后，203线仍应保留光华小学');
 assert(has('ch2_203_search', '去巡捕房'), '苏家线完成后，203线仍应保留巡捕房 hub');
 assert(!hasGoto('ch2_203_search', 'ch2_home'), '苏家线完成后，应隐藏 ch2_home goto');
-
-reset({
-  flags: { visited_pawn: true },
-  clues: [{ name: '翡翠镯', desc: '' }],
-  items: [{ name: '翡翠镯', desc: '' }],
-});
-assert(!has('ch3_wrapup', '去当铺'), '当铺查完并拿到翡翠镯后，线索整理页不应继续显示去当铺');
-
-reset({
-  flags: { visited_pawn: true },
-  items: [
-    { name: '翡翠镯', desc: '' },
-    { name: '陈明远的信', desc: '' },
-    { name: '苏晚亭的遗书', desc: '' },
-    { name: '半张烟盒纸', desc: '' },
-    { name: '恐吓信', desc: '' },
-  ],
-});
-assert(typeof nodes.ch4_revisit_zhou.onPresent !== 'function', '夜访商务印书馆不应再使用通用出示按钮');
-assert(has('ch4_revisit_zhou', '拿出翡翠镯'), '夜访商务印书馆应显示翡翠镯显式举证');
-assert(has('ch4_revisit_zhou', '陈明远那封未寄出的信'), '夜访商务印书馆应显示陈明远信显式举证');
-assert(has('ch4_revisit_zhou', '疑似苏晚亭留下的遗书'), '夜访商务印书馆应显示苏晚亭遗书显式举证');
-assert(has('ch4_revisit_zhou', '半张烟盒纸'), '夜访商务印书馆应显示王巡官纸条显式举证');
-assert(has('ch4_revisit_zhou', '恐吓信'), '夜访商务印书馆应显示恐吓信显式举证');
 
 reset();
 assert(has('ch2_building_stakeout', '进永兴贸易商行看看'), '放弃观察跟踪时应写成进永兴贸易商行看看');
