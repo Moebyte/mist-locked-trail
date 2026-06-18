@@ -85,6 +85,7 @@
     'src/story-modules/causal-echo.js',
     'src/story-modules/casebook-graph-polish.js',
     'src/story-modules/deduction-registry-final-fix.js',
+    'src/story-modules/wrapup-dock-stage-final-fix.js',
     'src/story-modules/dev-mode-panel.js',
     'src/story-modules/dev-diagnostic-export.js'
   ];
