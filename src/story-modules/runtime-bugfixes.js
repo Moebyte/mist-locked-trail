@@ -215,11 +215,41 @@
     node.__runtimeDarkroomPresentCompatPatched = true;
   }
 
+  function hasFushengEntryKey() {
+    return E.getFlag('got_wang_note') || hasThing('王巡官遗留纸条') || hasThing('半张烟盒纸') || hasThing('福生仓地址') || hasThing('福生仓位置');
+  }
+
+  function hasDarkroomLead() {
+    return E.getFlag('sister_case')
+      || E.getFlag('talked_to_woman')
+      || E.getFlag('dock_reached_crate_area')
+      || E.getFlag('dock_reached_crate_area_fast')
+      || E.getFlag('found_door_tool')
+      || E.getFlag('dock_hid_in_crate')
+      || E.getFlag('dock_guard_chase_no_hide')
+      || hasThing('沈玉芳')
+      || hasThing('沈玉兰的妹妹')
+      || hasThing('沈玉芳与陈明远')
+      || hasThing('沈玉芳人质线')
+      || hasThing('仓库暗室');
+  }
+
+  function patchFushengDeepGateTail() {
+    if (typeof E.routeDockDeepByPressure !== 'function' || E.__runtimeFushengDeepGateTailPatched) return;
+    const oldRouteDockDeepByPressure = E.routeDockDeepByPressure.bind(E);
+    E.routeDockDeepByPressure = function () {
+      if (hasFushengEntryKey() && !hasDarkroomLead()) return 'ch4_dock_no_darkroom';
+      return oldRouteDockDeepByPressure();
+    };
+    E.__runtimeFushengDeepGateTailPatched = true;
+  }
+
   function applyRuntimeBugfixes() {
     patchDeductionRegistry();
     patchDockRoutes();
     patchWrapupFushengDeductionChoice();
     patchDarkroomPresentCompatibility();
+    patchFushengDeepGateTail();
   }
 
   // 立即补一层：start/loadGame 后的 registerAll 会走去重登记。
