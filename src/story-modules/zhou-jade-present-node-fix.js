@@ -15,6 +15,10 @@
       return E.hasItem?.(name) || E.hasClue?.(name);
     }
 
+    function zhouHasBothLetters() {
+      return E.getFlag('presented_chen_letter_to_zhou') && E.getFlag('presented_su_last_letter_to_zhou');
+    }
+
     function hasMoreZhouEvidence() {
       return (hasThing('翡翠镯') && !E.getFlag('presented_jade_to_zhou') && !E.getFlag('presented_jade_to_zhou_premature'))
         || (hasThing('陈明远的信') && !E.getFlag('presented_chen_letter_to_zhou'))
@@ -27,7 +31,24 @@
     }
 
     function afterEvidenceChoices() {
+      if (zhouHasBothLetters()) {
+        return [{ text: '🕯️ 把残信和疑似遗书并在一起，听他说完', goto: 'end_zhou_chen_letter' }];
+      }
       const out = [];
+      if (E.getFlag('presented_chen_letter_to_zhou') && !E.getFlag('presented_su_last_letter_to_zhou') && hasThing('苏晚亭疑似遗书')) {
+        out.push({
+          text: '📨 把那封疑似遗书也推过去',
+          effect: () => E.setFlag('presented_su_last_letter_to_zhou', true),
+          goto: 'ch4_zhou_present_su_last_letter'
+        });
+      }
+      if (E.getFlag('presented_su_last_letter_to_zhou') && !E.getFlag('presented_chen_letter_to_zhou') && (hasThing('陈明远残信') || hasThing('陈明远的信'))) {
+        out.push({
+          text: '📨 再把陈明远残信递过去',
+          effect: () => E.setFlag('presented_chen_letter_to_zhou', true),
+          goto: 'ch4_zhou_present_chen_letter'
+        });
+      }
       if (hasMoreZhouEvidence()) {
         out.push({ text: '📨 继续拿出别的东西给周怀安看', goto: 'ch4_revisit_zhou' });
       }
@@ -105,7 +126,7 @@
         text: () => {
           const altered = hasThing('陈明远残信') || E.getFlag('chen_letter_packet_altered');
           if (altered) {
-            return `你把陈明远那封残信递过去。<br><br>周怀安先看见开头的四个字：<span class="sys">“晚亭吾爱。”</span><br><br>他的眼神停住了。信纸下半截缺失，留下的只有学校、箱子、恐吓、203，还有一通不该相信的电话。<br><br>这封信没有把案子讲完，却足够说明：苏晚亭不是无缘无故失踪，她追着陈明远留下的碎片，走进了一团更深的雾。`;
+            return `你把陈明远那封残信递过去。<br><br>周怀安先看见开头的四个字：<span class="sys">“晚亭吾爱。”</span><br><br>他的眼神在那四个字上停住，像是终于在雾里抓到一根能解释所有事的线。<br><br>信纸下半截缺了，留下的话并不完整：学校、箱子、恐吓、203，还有一通不该相信的电话。可对周怀安来说，最刺眼的不是缺口，而是称呼。<br><br><span class="sys">“他这样叫她。”</span><br><br>他说得很轻，像怕惊动什么。<br><br>这封信没有把案子讲完，却足够把周怀安的心往另一个方向推过去。`;
           }
           return `你把陈明远那封未寄出的信递给周怀安。<br><br>他读得很慢，读到“不要相信第一通电话”时，手指在纸边停了一下。<br><br><span class="sys">“晚亭不是自己走的。”</span><br><br>周怀安抬起头，声音发哑。<br><br><span class="sys">“她是在替别人追一个答案。陈老师把线索留给她，她就一定会继续往下查。”</span><br><br>这封信没有给出完整真相，却让周怀安明白：苏晚亭的失踪不能被写成私情，也不能被写成逃离。`;
         },
@@ -119,9 +140,9 @@
         weather: 5,
         effect: () => {
           E.setFlag('presented_su_last_letter_to_zhou', true);
-          E.addClue('周怀安读到苏晚亭疑似遗书', '周怀安读到疑似苏晚亭留下的遗书，但这份纸页是否可信，仍要看苏家与其他证据能否对上。');
+          E.addClue('周怀安读到苏晚亭疑似遗书', '周怀安读到疑似苏晚亭留下的遗书，被“为情而去”的说法击中。');
         },
-        text: () => `你把那张疑似苏晚亭留下的遗书推过去。<br><br>周怀安看得很慢。第一遍，他像是不相信那是苏晚亭的字；第二遍，他又像是在逼自己承认一种更容易承受的答案。<br><br>可你也知道，这张纸太安静，安静得像有人替所有人把结论写好。<br><br>它可以成为疑点，却不能独自替苏晚亭作证。`,
+        text: () => `你把那张疑似苏晚亭留下的遗书推过去。<br><br>周怀安看得很慢。第一遍，他像是不相信那是苏晚亭的字；第二遍，他又像是终于找到了一个可以解释一切的答案。<br><br><span class="sys">“她……原来已经把话说到这一步了。”</span><br><br>他的手指压在那句<span class="sys">“此身既已入雾，愿随他而去”</span>上，指节一点点发白。<br><br>这封遗书太安静，安静得像有人替所有人把结论写好。可你手里的证据不够，不能当着他的面推翻它。<br><br>周怀安低声问：<span class="sys">“陈明远那封残信，也给我看看吧。我要知道她最后走向的人，到底是谁。”</span>`,
         choices: afterEvidenceChoices
       };
     }
