@@ -54,6 +54,38 @@ runtime patch sources
 recommended migration batch
 ```
 
+## Audit findings
+
+The current Chapter 3 surface is smaller than Chapter 2, but it is more risky because `src/story-modules/guanghua-school-flow-polish.js` owns much of the final runtime behavior.
+
+High-risk or patch-owned nodes:
+
+```text
+ch3_school                  patched hub choices
+ch3_school_teacher          patched onPresent and choices
+ch3_school_yufang           patched choices
+ch3_school_weird            patched choices
+ch3_school_office           patched text/effect/choices
+ch3_chen_letter             patched choices
+ch3_wu_present_threat       patched effect/choices
+ch3_wu_present_photo        patched effect/choices
+ch3_wrapup                  patched gate choices; high-risk hub
+```
+
+Additional runtime-only nodes are created by `guanghua-school-flow-polish.js` and should not be treated as legacy `story.js` removal candidates:
+
+```text
+ch3_school_confront_wu
+ch3_wu_present_university
+ch3_school_after_confront
+```
+
+The safest first target is therefore a single unpatched node:
+
+```text
+ch3_school_chen_su
+```
+
 ## Batch meaning
 
 ```text
@@ -69,11 +101,11 @@ The first Chapter 3 migration batch should be small and boring.
 Prefer nodes that satisfy:
 
 ```text
-risk=low
+risk=low or small medium
 patchSources=none
 onPresent=no
 dynamicChoices=no
-goto count <= 2
+goto count <= 3
 ```
 
 Avoid in the first batch:
@@ -92,4 +124,32 @@ Before adding `src/story-chapters/chapter-3-guanghua.js`, document the selected 
 
 ## Selected first batch
 
-Pending audit output.
+```text
+ch3_school_chen_su
+```
+
+Reason:
+
+```text
+1. no onPresent;
+2. no dynamic choices;
+3. no known story-modules patch source;
+4. not a hub;
+5. only writes the localized clue 苏晚亭与陈明远 and flag chen_su_link;
+6. choices point back into already-existing Chapter 3 nodes.
+```
+
+Target file:
+
+```text
+src/story-chapters/chapter-3-guanghua.js
+```
+
+Required companion files before deletion:
+
+```text
+src/story-chapters/chapter-3-guanghua-contract.js
+scripts/check-story-chapter3-runtime.mjs
+```
+
+Physical deletion from `src/story.js` is not allowed until the focused Chapter 3 runtime gate passes.
