@@ -91,6 +91,9 @@ jobs:
       - name: Smoke test legacy quality scope
         run: node scripts/smoke-legacy-quality-scope.mjs
 
+      - name: Smoke test legacy quality text
+        run: node scripts/smoke-legacy-quality-text.mjs
+
       - name: Smoke test wrapup no-repeat Fusheng entry
         run: node scripts/smoke-wrapup-no-repeat-fusheng-entry.mjs
 
