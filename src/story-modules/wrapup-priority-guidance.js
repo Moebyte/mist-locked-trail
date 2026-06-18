@@ -104,6 +104,17 @@
       return `<br><br><span class="sys"><b>建议下一步：</b>${stage}</span>`;
     }
 
+    function incompleteGuanghuaNotice() {
+      if (!E.getFlag('school_incomplete_closure')) return '';
+      return '<br><br><div class="notice"><b>光华小学线索只到表层</b><br>你选择按现有材料整理结案。陈明远、苏晚亭和陆小姐之间的关系可以被写成一份案情说明，但学校背后是否还有更深的安排，仍然留在雾里。</div>';
+    }
+
+    function appendIncompleteGuanghuaNotice(text) {
+      const notice = incompleteGuanghuaNotice();
+      if (!notice || String(text).includes('光华小学线索只到表层')) return text;
+      return `${text}${notice}`;
+    }
+
     function openDeductionEffect(id) {
       return () => {
         if (typeof E.openDeductionSafe === 'function') E.openDeductionSafe(id);
@@ -134,6 +145,7 @@
     }
 
     function stageHint() {
+      if (E.getFlag('school_incomplete_closure')) return '光华小学线索只到表层。现在可以封卷，也可以承认这只是一个容易被接受的答案。';
       if (!E.getFlag('deduced_chen')) {
         return E.canDeduce('deduce_chen')
           ? '先把陈明远之死推清楚。现在证据已经够了，不要急着去码头。'
@@ -160,6 +172,7 @@
 
     function actionStageSummary() {
       const parts = [];
+      if (E.getFlag('school_incomplete_closure')) parts.push('光华小学线索只到表层');
       if (E.getFlag('deduced_chen')) parts.push('陈明远之死已经推清');
       if (E.getFlag('deduced_lu_zhao')) parts.push('黑衣男人与陆小姐的关系已经推清');
       if (hasThing('王巡官遗留纸条') || hasThing('福生仓位置') || hasThing('福生仓标识')) parts.push('福生仓入口已经锁定');
@@ -169,7 +182,7 @@
     }
 
     function compactWrapupText() {
-      return `你在办公室里把线索重新排了一遍。<br><br><span class="sys">${actionStageSummary()}。</span><br><br>这里已经不是“再补线索”的阶段，而是要决定下一步行动路线。${recommendText(stageHint())}`;
+      return appendIncompleteGuanghuaNotice(`你在办公室里把线索重新排了一遍。<br><br><span class="sys">${actionStageSummary()}。</span><br><br>这里已经不是“再补线索”的阶段，而是要决定下一步行动路线。${recommendText(stageHint())}`);
     }
 
     function pickStageChoices(choices) {
@@ -219,7 +232,7 @@
         const visited = E.getFlag('ch3_wrapup_visited');
         E.setFlag('ch3_wrapup_visited', true);
         if (visited && base.length > 200) return compactWrapupText();
-        return `${base}${recommendText(stageHint())}`;
+        return appendIncompleteGuanghuaNotice(`${base}${recommendText(stageHint())}`);
       };
 
       nodes.ch3_wrapup.choices = function (state) {
