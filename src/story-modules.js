@@ -84,6 +84,7 @@
     'src/story-modules/wrapup-no-repeat-fusheng-entry-fix.js',
     'src/story-modules/causal-echo.js',
     'src/story-modules/yulan-echo-route-order-fix.js',
+    'src/story-modules/su-home-early-keepsake-window.js',
     'src/story-modules/casebook-graph-polish.js',
     'src/story-modules/deduction-registry-final-fix.js',
     'src/story-modules/wrapup-dock-stage-final-fix.js',
