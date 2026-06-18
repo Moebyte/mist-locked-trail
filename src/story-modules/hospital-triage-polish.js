@@ -1,6 +1,7 @@
 // ===== 医院后门安置 / 分诊缓冲节点 =====
 // 目标：逃离码头后，不直接跳到医院走廊争执，而是先给玩家一个安置证人的缓冲节点。
 // 这个节点用少量分数调节 hospitalPressure / hospitalControl / witnessStability。
+// 注意：周怀安过早入场的 pressure/witness 影响由 lu-procedure-truth-polish.js 统一处理，避免重复计分。
 
 (function installHospitalTriagePolish() {
   function applyHospitalTriagePolish() {
@@ -24,7 +25,6 @@
         let score = oldPressure();
         if (this.getFlag('hospital_triage_settle_witness')) score -= 1;
         if (this.getFlag('hospital_triage_backdoor_guard')) score -= 1;
-        if (this.getFlag('hospital_triage_zhou_early')) score += 1;
         if (this.getFlag('hospital_triage_direct_corridor')) score += 1;
         return Math.max(0, Math.min(10, score));
       };
@@ -47,7 +47,6 @@
       E.witnessStabilityScore = function () {
         let score = oldWitness();
         if (this.getFlag('hospital_triage_settle_witness')) score += 1;
-        if (this.getFlag('hospital_triage_zhou_early')) score -= 1;
         if (this.getFlag('hospital_triage_direct_corridor')) score -= 1;
         return Math.max(0, Math.min(10, score));
       };
