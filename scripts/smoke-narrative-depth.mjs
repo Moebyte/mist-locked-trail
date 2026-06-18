@@ -102,14 +102,14 @@ function testHighQualityNaturalEnding() {
 function testHiddenEndingRequiresSchoolThreeProofs() {
   h.resetState({ flags: rescueReadyFlags({ rescued_yufang: true, deduced_fusheng: true, fu_waybill_exposed: true, fu_clearance_exposed: true, v07_witnesses_protected: true, v07_lu_confronted: true, v07_rejected_fu_deal: true }) });
   const ending = E.v07ResolveEnding();
-  if (ending === 'end_conspiracy_detail' || ending === 'end_true_hidden') throw new Error('未完成校长三证物质询时，不应进入隐藏/真隐藏结局');
+  if (ending === 'end_conspiracy_detail' || ending === 'end_true_hidden' || ending === 'end_hidden_truth') throw new Error('未完成校长三证物质询时，不应进入隐藏/真隐藏结局');
   reports.push(`PASS 隐藏结局需要校长三证物闭环，未完成时分流到 ${ending}`);
 }
 
 function testHiddenEndingRequiresYufangRescue() {
   h.resetState({ flags: highQualityFlags({ rescued_yufang: false, rescued_su: false, found_su_at_dock: false, school_wu_three_proofs: true, school_wu_full_confront: true }) });
   const ending = E.v07ResolveEnding();
-  if (ending === 'end_conspiracy_detail' || ending === 'end_true_hidden') throw new Error(`未救出沈玉芳时，不应进入隐藏/真隐藏结局；实际 ${ending}`);
+  if (ending === 'end_conspiracy_detail' || ending === 'end_true_hidden' || ending === 'end_hidden_truth') throw new Error(`未救出沈玉芳时，不应进入隐藏/真隐藏结局；实际 ${ending}`);
   reports.push(`PASS 隐藏结局需要救出沈玉芳，未救出任何人时分流到 ${ending}`);
 }
 
@@ -118,10 +118,14 @@ function testHiddenButNotTrueHiddenWithoutSuRescue() {
     flags: highQualityFlags({
       rescued_su: false,
       found_su_at_dock: false,
+      presented_su_keepsake: false,
       su_moved_from_dock: true,
       rescued_yufang: true,
       school_wu_three_proofs: true,
       school_wu_full_confront: true,
+      hospital_protect_witnesses: true,
+      hospital_doctor_record: true,
+      v07_lu_statement: true,
     })
   });
   const finalScore = finalQualityScore();
