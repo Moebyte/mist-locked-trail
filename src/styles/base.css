@@ -1,0 +1,27 @@
+*{margin:0;padding:0;box-sizing:border-box}
+
+html{height:100%;overflow-x:hidden}
+
+body{
+  background:
+    radial-gradient(ellipse 35% 25% at 15% 5%, rgba(200,160,80,.08), transparent 60%),
+    radial-gradient(ellipse 25% 20% at 85% 10%, rgba(180,140,60,.06), transparent 50%),
+    repeating-linear-gradient(0deg, transparent 0 2px, rgba(80,60,30,.015) 2px 4px),
+    linear-gradient(180deg, var(--bg2), var(--bg) 42%, #080604);
+  color:var(--text);
+  font-family:'Noto Serif SC','Source Han Serif SC','SimSun','STSong','Times New Roman',serif;
+  min-height:100vh;
+  transition:background .45s,color .25s;
+  overflow-x:hidden;
+}
+
+body::before{
+  content:'';
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:-1;
+  background:
+    linear-gradient(90deg, transparent, rgba(180,160,120,.02), transparent),
+    radial-gradient(circle at 50% 25%, rgba(200,170,120,.03), transparent 35%);
+}
