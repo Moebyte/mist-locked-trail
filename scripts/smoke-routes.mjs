@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import fs from 'node:fs';
+import { listStoryChapterScripts } from './story-chapter-loader.mjs';
 import path from 'node:path';
 import vm from 'node:vm';
 
@@ -89,6 +90,7 @@ function runScript(rel, suffix = '') {
 }
 
 runScript('src/story.js', '\nglobalThis.nodes = nodes;');
+for (const rel of listStoryChapterScripts(repoRoot)) runScript(rel);
 runScript('src/main.js');
 if (exists('src/v0.6.1-fixes.js')) runScript('src/v0.6.1-fixes.js');
 for (const handler of domReadyHandlers) handler();

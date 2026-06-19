@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
 import { readStoryModuleSources, runStoryModuleScripts } from './story-module-loader.mjs';
+import { listStoryChapterScripts } from './story-chapter-loader.mjs';
 
 const repoRoot = process.cwd();
 const errors = [];
@@ -92,6 +93,7 @@ function runScript(rel, suffix = '') {
 }
 
 runScript('src/story.js', '\nglobalThis.nodes = nodes;');
+for (const rel of listStoryChapterScripts(repoRoot)) runScript(rel);
 runScript('src/main.js');
 runStoryModuleScripts(runScript, repoRoot);
 for (const handler of domReadyHandlers) handler();
@@ -161,7 +163,7 @@ for (const [id, node] of Object.entries(nodes)) {
   }
 }
 
-const sourceText = [read('src/story.js'), read('src/main.js'), readStoryModuleSources(read, repoRoot)].join('\n');
+const sourceText = [read('src/story.js'), ...listStoryChapterScripts(repoRoot).map(read), read('src/main.js'), readStoryModuleSources(read, repoRoot)].join('\n');
 const itemNames = [...new Set([
   ...[...sourceText.matchAll(/E\.addItem\(['"`]([^'"`]+)['"`]/g)].map(m => m[1]),
   '半张烟盒纸', '福生仓地址', '翡翠镯', '三人合影', '陈明远的信', '未寄出的信', '铁钎', '光华货运单', '清场指令'

@@ -21,7 +21,18 @@ const E = {
 function strip(s){return s.replace(/<[^>]*>/g,'').replace(/&[^;]+;/g,' ').replace(/\s+/g,' ').trim()}
 
 try {
-  const code = fs.readFileSync('src/story.js','utf8').replace('const nodes =','var nodes =');
+  const chapterFiles = (() => {
+    const manifest = fs.readFileSync('src/story-chapters.js', 'utf8');
+    const files = [];
+    for (const quote of ["'", '"']) {
+      for (const part of manifest.split(quote)) {
+        if (part.startsWith('src/story/') && part.endsWith('.js')) files.push(part);
+      }
+    }
+    return [...new Set(files)];
+  })();
+  const storyCode = [fs.readFileSync('src/story.js','utf8'), ...chapterFiles.map(f => fs.readFileSync(f,'utf8'))].join('\n');
+  const code = storyCode.replace(/const nodes =/g, 'var nodes =');
   const sandbox = vm.createContext({E,console,String,Number,Boolean,Array,Object,Math,RegExp,Date,setTimeout,window:{}});
   vm.runInContext(code, sandbox);
   const nodes = sandbox.nodes;

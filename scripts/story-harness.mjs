@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
 import { listStoryModuleScripts, runStoryModuleScripts } from './story-module-loader.mjs';
+import { listStoryChapterScripts } from './story-chapter-loader.mjs';
 
 export function freshState(overrides = {}) {
   return {
@@ -244,6 +245,9 @@ export function loadStoryRuntime(options = {}) {
   }
 
   runScript('src/story.js', '\nglobalThis.nodes = nodes;');
+  for (const rel of listStoryChapterScripts(repoRoot)) {
+    runScript(rel);
+  }
   runScript('src/main.js');
   context.window.MLT_STORY_MODULES = listStoryModuleScripts(repoRoot);
   runStoryModuleScripts(runScript, repoRoot);

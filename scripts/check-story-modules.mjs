@@ -23,9 +23,11 @@ assert(indexHtml.includes(STORY_MODULE_ENTRY), 'index.html 应加载 src/story-m
 assert(!indexHtml.includes('src/patches.js'), 'index.html 不应继续加载 src/patches.js');
 assert(!exists('src/patches.js'), 'src/patches.js 已退役，不应再次出现');
 
+const STORY_CHAPTER_ENTRY = 'src/story-chapters.js';
+
 const directStoryScripts = [...indexHtml.matchAll(/src="(src\/[^"]+\.js)"/g)]
   .map(m => m[1])
-  .filter(src => src !== 'src/engine.js' && src !== 'src/story.js' && src !== 'src/main.js' && src !== STORY_MODULE_ENTRY);
+  .filter(src => src !== 'src/engine.js' && src !== 'src/story.js' && src !== 'src/main.js' && src !== STORY_MODULE_ENTRY && src !== STORY_CHAPTER_ENTRY);
 assert(directStoryScripts.length === 0, `index.html 不应直接加载故事模块：${directStoryScripts.join(', ')}`);
 
 const modulesJs = read(STORY_MODULE_ENTRY);
