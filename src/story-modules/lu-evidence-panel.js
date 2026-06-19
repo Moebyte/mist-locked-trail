@@ -2,6 +2,7 @@
 // 目标：陆念薇是否能正式留名，不再只是隐藏分数；
 // 玩家能看见自己用哪些证据压住她：货运单、清场指令、证人、老孙支援、医生记录。
 // 处理方式：不废除 lu-procedure-truth-polish 的程序选择，而是在其前面追加可见举证层。
+// 节奏规则：未举证时只显示举证选项；至少压住两项后，才显示处置陆念薇的程序选项，避免 7 个选项堆在同一页。
 
 (function installLuEvidencePanel() {
   function applyLuEvidencePanel() {
@@ -41,7 +42,7 @@
     }
 
     function hasDoctorRecord() {
-      return E.getFlag('hospital_doctor_record') || hasThing('医院医生记录') || hasThing('医生记录');
+      return E.getFlag('hospital_doctor_record') || hasThing('医院医生记录') || hasThing('医生记录') || hasThing('医院伤情记录');
     }
 
     function evidenceCount() {
@@ -132,6 +133,35 @@
       return [{ text: '🔙 继续和陆念薇谈条件', goto: 'ch4_lu_confrontation' }];
     }
 
+    function normalizeProcedureChoices(choices) {
+      if (!Array.isArray(choices)) return [];
+      const seen = new Set();
+      return choices.filter(choice => {
+        const key = choice.goto || String(choice.text || choice.fogText || '');
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      }).map(choice => {
+        if (choice.goto === 'ch4_fu_private_offer' && String(choice.text || '').includes('避开走廊')) {
+          return { ...choice, text: '🧾 让她写下傅启元的下一步安排' };
+        }
+        return choice;
+      });
+    }
+
+    function stagedChoices(state, oldChoices) {
+      const evidence = evidenceChoices();
+      const procedure = normalizeProcedureChoices(typeof oldChoices === 'function' ? oldChoices(state) : oldChoices);
+      const count = evidenceCount();
+
+      if (evidence.length && count < 2) {
+        return evidence.slice(0, 4);
+      }
+
+      if (procedure.length) return procedure;
+      return evidence.slice(0, 4);
+    }
+
     nodes.ch4_lu_present_waybill = {
       title: '举证 · 光华货运单',
       weather: 1,
@@ -182,15 +212,11 @@
       nodes.ch4_lu_confrontation.text = function (state) {
         const base = typeof oldText === 'function' ? oldText(state) : oldText;
         const tier = typeof E.luOutputTier === 'function' ? E.luOutputTier() : { label: '未知', credibility: 0, risk: 0 };
-        return `${base}<br><br><div class="notice"><b>陆念薇当前压力</b><br>${evidenceSummary()}。<br><br>可信度：${tier.credibility ?? '—'}；程序风险：${tier.risk ?? '—'}；状态：${tier.label || '未知'}。</div>`;
+        const phase = evidenceCount() < 2 && evidenceChoices().length ? '先举证压住她，再决定如何处置。' : '她已经被证据压住，可以决定如何处置。';
+        return `${base}<br><br><div class="notice"><b>陆念薇当前压力</b><br>${evidenceSummary()}。<br>${phase}<br><br>可信度：${tier.credibility ?? '—'}；程序风险：${tier.risk ?? '—'}；状态：${tier.label || '未知'}。</div>`;
       };
       nodes.ch4_lu_confrontation.choices = function (state) {
-        const out = evidenceChoices();
-        const procedure = typeof oldChoices === 'function' ? oldChoices(state) : oldChoices;
-        if (Array.isArray(procedure)) {
-          for (const choice of procedure) out.push(choice);
-        }
-        return out;
+        return stagedChoices(state, oldChoices);
       };
       nodes.ch4_lu_confrontation.__luEvidencePanelPatched = true;
     }
