@@ -52,9 +52,10 @@ const requiredModules = [
   'src/story-modules/runtime-contract.js',
   'src/story-modules/consistency.js',
   'src/story-modules/evidence.js',
-  'src/story-modules/evidence-polish.js',
   'src/story-modules/narrative-depth.js',
   'src/story-modules/causal-echo.js',
+  'src/story-modules/present-flow-cleanup.js',
+  'src/story-modules/sun-support-evidence-panel.js',
   'src/story-modules/ui-responsive.js',
   'src/story-modules/region-gates.js',
 ];

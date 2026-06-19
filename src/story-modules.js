@@ -7,7 +7,6 @@
     'src/story-modules/runtime-contract.js',
     'src/story-modules/consistency.js',
     'src/story-modules/evidence.js',
-    'src/story-modules/evidence-polish.js',
     'src/story-modules/narrative-depth.js',
     'src/story-modules/engine-ui-runtime-restore.js',
     'src/story-modules/ui-responsive.js',
