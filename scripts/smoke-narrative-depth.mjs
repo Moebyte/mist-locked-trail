@@ -17,6 +17,20 @@ function choiceTargets(sceneId) {
   return h.choicesOf(sceneId).map(c => typeof c.goto === 'function' ? c.goto(E.state) : c.goto);
 }
 
+function runChoice(sceneId, predicate, label) {
+  h.renderNode(sceneId);
+  const choices = h.choicesOf(sceneId);
+  const choice = choices.find(predicate);
+  if (!choice) {
+    const available = choices.map(c => c.text || c.fogText || '').join(' | ');
+    throw new Error(`找不到${label}选项，当前选项：${available}`);
+  }
+  if (typeof choice.effect === 'function') choice.effect(E.state);
+  const target = typeof choice.goto === 'function' ? choice.goto(E.state) : choice.goto;
+  if (target) h.go(target);
+  return target;
+}
+
 function rescueReadyFlags(extra = {}) {
   return {
     found_su_at_dock: true,
@@ -75,7 +89,14 @@ function testHospitalConflict() {
 }
 
 function testHighQualityNaturalEnding() {
-  h.resetState({ flags: hiddenReadyFlags({ deduced_fusheng: true, fu_waybill_exposed: true, fu_clearance_exposed: true }) });
+  h.resetState({ flags: hiddenReadyFlags({
+    deduced_fusheng: true,
+    fu_waybill_exposed: true,
+    fu_clearance_exposed: true,
+    sun_full_support: true,
+    dock_full_support_entry: true,
+    hospital_doctor_record: true,
+  }) });
   h.renderNode('ch4_dock_escape_finish');
   h.goByTarget('ch4_hospital_triage');
   h.goByTarget('ch4_hospital_conflict');
@@ -83,7 +104,7 @@ function testHighQualityNaturalEnding() {
   h.assertFlag('v07_witnesses_protected');
   h.goByTarget('ch4_lu_confrontation');
   h.assertFlag('v07_lu_confronted');
-  h.goByText('交给老孙');
+  runChoice('ch4_lu_confrontation', c => String(c.text || c.fogText || '').includes('正式口供') || String(c.text || c.fogText || '').includes('老孙'), '陆念薇正式口供');
   h.assertFlag('v07_lu_to_sun');
   h.goByText('拒绝交易');
   h.assertFlag('v07_rejected_fu_deal');
