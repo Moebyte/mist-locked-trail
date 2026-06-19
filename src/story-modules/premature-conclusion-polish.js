@@ -68,6 +68,23 @@
       return hasChenBadRouteLetter() && hasSuLastLetter() && !knowsZhouFianceFromSuHome();
     }
 
+    function addBadRouteLetters() {
+      if (!isBadRouteLocked()) return;
+      E.setFlag('chen_letter_packet_altered', true);
+      if (!E.hasItem('陈明远残信')) {
+        E.addItem('陈明远残信', '陈明远留给苏晚亭的信，但信纸下半截缺失，信封边缘像被重新压过。开头仍是“晚亭吾爱”。');
+      }
+      if (!E.hasClue('陈明远残信')) {
+        E.addClue('陈明远残信', '陈明远残信只留下“晚亭吾爱”、后楼箱子、恐吓和“不要相信第一通电话”等碎片，关键去向被切断。');
+      }
+      if (!E.hasItem('苏晚亭疑似遗书')) {
+        E.addItem('苏晚亭疑似遗书', '夹在残信信封内层的纸，字迹像苏晚亭，内容把她的失踪解释为“为情而去”。');
+      }
+      if (!E.hasClue('苏晚亭疑似遗书')) {
+        E.addClue('苏晚亭疑似遗书', '陈明远残信信封夹层里藏着一份疑似苏晚亭留下的遗书，把她的失踪指向“为情而去”。');
+      }
+    }
+
     function missingEvidenceText() {
       if (!hasUniversityXuehuaLead()) return '你没有查过圣约翰大学，苏晚亭失踪前真正去过哪里仍是空白。';
       if (!hasLandlordFushengLead()) return '你没有查清薛华立路地图标记背后的仓库名。';
@@ -89,20 +106,40 @@
       const oldText = nodes.ch3_chen_letter.text;
       nodes.ch3_chen_letter.effect = function (state) {
         if (typeof oldEffect === 'function') oldEffect(state);
-        if (isBadRouteLocked()) {
-          E.setFlag('chen_letter_packet_altered', true);
-          E.addItem('陈明远残信', '陈明远留给苏晚亭的信，但信纸下半截缺失，信封边缘像被重新压过。开头仍是“晚亭吾爱”。');
-          E.addClue('陈明远残信', '陈明远残信只留下“晚亭吾爱”、后楼箱子、恐吓和“不要相信第一通电话”等碎片，关键去向被切断。');
-          E.addItem('苏晚亭疑似遗书', '夹在残信信封内层的纸，字迹像苏晚亭，内容把她的失踪解释为“为情而去”。');
-          E.addClue('苏晚亭疑似遗书', '陈明远残信信封夹层里藏着一份疑似苏晚亭留下的遗书，把她的失踪指向“为情而去”。');
-        }
+        addBadRouteLetters();
       };
       nodes.ch3_chen_letter.text = function (state) {
         const base = typeof oldText === 'function' ? oldText(state) : oldText;
         if (!isBadRouteLocked()) return base;
+        addBadRouteLetters();
         return `${base}<br><br>你把信纸重新折好时，才注意到信封边缘压得很平，像是曾经被人重新封过。信纸下半截也不见了，断口整齐，不像被岁月磨掉。<br><br>信封内层还有一道很浅的夹缝，里面藏着另一张纸。<br><br>纸上的字迹很像苏晚亭，句子却短得像被刻意压住：<br><br><span class="sys">“我自知愧对明远，也无颜再见周先生。此身既已入雾，愿随他而去。”</span><br><br>如果只看这个信封，答案几乎已经替你排好了：陈明远爱过苏晚亭，苏晚亭也像是追着他走进了雾里。<br><br>可你手里的线索太少，还不能判断这个信封究竟保留了什么，又拿走了什么。`;
       };
       nodes.ch3_chen_letter.__suLastLetterPatched = true;
+    }
+
+    if (nodes.ch3_school && !nodes.ch3_school.__prematureSchoolLetterEffectPatched) {
+      const oldChoices = nodes.ch3_school.choices;
+      nodes.ch3_school.choices = function (state) {
+        return choicesOf(oldChoices, state).map(choice => {
+          const text = choice.text || choice.fogText || '';
+          if (!text.includes('看陈明远那封未寄出的信')) return choice;
+          const oldEffect = choice.effect;
+          return {
+            ...choice,
+            effect: function (s) {
+              if (typeof oldEffect === 'function') oldEffect(s);
+              addBadRouteLetters();
+            }
+          };
+        });
+      };
+      nodes.ch3_school.__prematureSchoolLetterEffectPatched = true;
+    }
+
+    // Repair already-existing saves where the hub route showed the suspected note text
+    // but never ran ch3_chen_letter.effect.
+    if (E.getFlag('read_letter') && E.getFlag('school_last_detail') === 'letter') {
+      addBadRouteLetters();
     }
 
     if (nodes.ch3_wrapup && !nodes.ch3_wrapup.__prematureWrapupPatched) {
