@@ -16,6 +16,22 @@
       return E.hasItem?.(name) || E.hasClue?.(name);
     }
 
+    function hasClearanceEvidence() {
+      return E.getFlag('scene_confirmed_clearance_order')
+        || E.getFlag('dock_clearance_seen_inside')
+        || E.getFlag('fu_clearance_exposed')
+        || hasThing('清场指令')
+        || hasThing('公董局公文纸')
+        || hasThing('现场确认：清场指令');
+    }
+
+    function normalizeClearanceFlags() {
+      if (!hasClearanceEvidence()) return;
+      E.setFlag('scene_confirmed_clearance_order', true);
+      E.setFlag('dock_clearance_seen_inside', true);
+      E.setFlag('fu_clearance_exposed', true);
+    }
+
     function confirmClearance(prefix = '福生仓现场') {
       E.setFlag('scene_confirmed_clearance_order', true);
       E.setFlag('dock_clearance_seen_inside', true);
@@ -49,8 +65,9 @@
     }
 
     function confirmedSummary() {
+      normalizeClearanceFlags();
       const parts = [];
-      if (E.getFlag('scene_confirmed_clearance_order') || hasThing('清场指令') || hasThing('公董局公文纸')) parts.push('清场指令/蓝封公文纸');
+      if (hasClearanceEvidence()) parts.push('清场指令/蓝封公文纸');
       if (E.getFlag('scene_confirmed_waybill_crates') || hasThing('光华货运单') || hasThing('教具箱走私')) parts.push('光华教具箱/货运单');
       if (E.getFlag('scene_confirmed_darkroom_marks') || hasThing('仓库暗室') || hasThing('现场确认：暗室关押痕迹')) parts.push('暗室关押痕迹');
       if (E.getFlag('scene_confirmed_fu_lu_conversation') || E.getFlag('dock_sun_pressed_fu') || hasThing('现场确认：码头对话')) parts.push('码头上露出的对话');
@@ -86,6 +103,9 @@
       node[`__${key}Patched`] = true;
     }
 
+    // 兼容旧存档：如果已经通过账房读过蓝封公文纸，但没有新面板 flag，先补齐 flag，避免重复显示“回头看蓝封纸”。
+    normalizeClearanceFlags();
+
     // 账房/蓝封纸节点：进入账房时原剧情已经读取并收好蓝封纸，不再额外塞“现场确认”按钮。
     for (const id of ['ch4_dock_inner_office', 'ch4_dock_inner_office_limited', 'ch4_dock_inside']) {
       if (nodes[id] && !nodes[id].__sceneClearanceEffectPatched) {
@@ -93,6 +113,7 @@
         nodes[id].effect = function (state) {
           if (typeof oldEffect === 'function') oldEffect(state);
           if (id === 'ch4_dock_inside') confirmClearance('福生仓入口处');
+          else normalizeClearanceFlags();
         };
         nodes[id].__sceneClearanceEffectPatched = true;
       }
@@ -110,10 +131,10 @@
     }
     addPanelText('ch4_dock_crates');
 
-    // 货架核心区域：只补现场确认面板，不额外添加与“检查教具箱”重复的选项。
+    // 货架核心区域：只补现场确认面板，不额外添加与已读蓝封纸、教具箱重复的选项。
     for (const id of ['ch4_dock_shelf_approach', 'ch4_dock_shelf_approach_limited']) {
       addPanelText(id);
-      appendChoice(id, () => E.getFlag('scene_confirmed_clearance_order') ? null : {
+      appendChoice(id, () => hasClearanceEvidence() ? null : {
         text: '📄 回头看一眼账房里的蓝封纸',
         effect: () => confirmClearance('你回头在账房'),
         goto: id.includes('limited') ? 'ch4_dock_inner_office_limited' : 'ch4_dock_inner_office'
@@ -146,7 +167,7 @@
       E.v07InvestigationQuality = function () {
         const quality = oldQuality();
         let confirmed = 0;
-        if (this.getFlag('scene_confirmed_clearance_order')) confirmed += 1;
+        if (this.getFlag('scene_confirmed_clearance_order') || this.getFlag('dock_clearance_seen_inside') || this.hasItem?.('清场指令') || this.hasClue?.('公董局公文纸')) confirmed += 1;
         if (this.getFlag('scene_confirmed_waybill_crates')) confirmed += 1;
         if (this.getFlag('scene_confirmed_darkroom_marks')) confirmed += 1;
         if (this.getFlag('scene_confirmed_fu_lu_conversation')) confirmed += 1;
