@@ -1,7 +1,8 @@
 // ===== 医院证人压力兼容兜底 =====
 // 目标：在医院/陆念薇/证词强化多个模块叠加后，保持医院主流程 smoke 的稳定语义。
-// 1) 医院冲突页必须能看见“伤情记录”和“双救时苏晚亭立刻指认”。
-// 2) 双证人 + 两样硬物证 + 陆念薇正式口供，不应被旧真相模型降回 solid。
+// 1) 医院冲突页必须能看见“伤情记录”。
+// 2) 双救但医院未稳定时，苏晚亭过早指认作为高风险选项出现；稳定医院线不再强塞该选项。
+// 3) 双证人 + 两样硬物证 + 陆念薇正式口供，不应被旧真相模型降回 solid。
 
 (function installHospitalPressureWitnessCompatFix() {
   function applyHospitalPressureWitnessCompatFix() {
@@ -36,6 +37,15 @@
         || E.getFlag('dock_solo_hard_confront');
     }
 
+    function shouldShowImmediateSuIdentify(wp) {
+      if (!wp.su) return false;
+      const tier = typeof E.hospitalOutcomeTier === 'function' ? E.hospitalOutcomeTier() : { key: 'tense' };
+      if (tier.key === 'stable') return false;
+      if (E.getFlag('hospital_triage_settle_witness') || E.getFlag('hospital_triage_backdoor_guard')) return false;
+      if (E.getFlag('hospital_protect_witnesses') || E.getFlag('hospital_separate_witnesses')) return false;
+      return true;
+    }
+
     function doctorRecordChoice() {
       return {
         text: '🩺 先让医生写下伤情记录和关押痕迹',
@@ -49,10 +59,20 @@
 
     function suIdentifyChoice() {
       return {
-        text: '⚠️ 苏晚亭立刻指认车里的人',
+        text: '⚠️ 苏晚亭刚醒，还是立刻问她认不认得车里的人',
         effect: () => E.setFlag('hospital_force_su_identify', true),
         goto: 'ch4_hospital_su_identify'
       };
+    }
+
+    function dedupeChoices(choices) {
+      const seen = new Set();
+      return choices.filter(choice => {
+        const key = choice.goto || `${choice.text || choice.fogText || ''}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
     }
 
     if (nodes.ch4_hospital_conflict && !nodes.ch4_hospital_conflict.__pressureWitnessCompatPatched) {
@@ -63,25 +83,29 @@
         out = out.slice();
 
         // SOLO 医院线保留“护士锁门/自行处理”的独立节奏，不强塞老孙/医生结构。
-        if (explicitSoloMode()) return out;
+        if (explicitSoloMode()) return dedupeChoices(out);
 
         let hasDoctor = false;
         out = out.map(choice => {
           const text = choice.text || choice.fogText || '';
           if (choice.goto === 'ch4_hospital_doctor_record' || text.includes('伤情记录')) {
             hasDoctor = true;
-            return { ...choice, text: text.includes('伤情记录') ? text : '🩺 先让医生写下伤情记录和关押痕迹' };
+            return { ...choice, text: text.includes('伤情记录') ? text.replace('伤情和关押痕迹', '伤情记录和关押痕迹') : '🩺 先让医生写下伤情记录和关押痕迹' };
           }
           return choice;
         });
         if (!hasDoctor) out.splice(1, 0, doctorRecordChoice());
 
         const wp = witnessProfile();
-        if (wp.su && !out.some(choice => String(choice.text || choice.fogText || '').includes('苏晚亭立刻指认'))) {
+        const hasSuIdentify = out.some(choice => choice.goto === 'ch4_hospital_su_identify');
+        if (shouldShowImmediateSuIdentify(wp) && !hasSuIdentify) {
           const insertAt = Math.min(out.length, 3);
           out.splice(insertAt, 0, suIdentifyChoice());
         }
-        return out;
+        if (!shouldShowImmediateSuIdentify(wp)) {
+          out = out.filter(choice => choice.goto !== 'ch4_hospital_su_identify');
+        }
+        return dedupeChoices(out);
       };
       nodes.ch4_hospital_conflict.__pressureWitnessCompatPatched = true;
     }
