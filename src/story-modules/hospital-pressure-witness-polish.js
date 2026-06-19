@@ -142,6 +142,15 @@
       return `<br><br><span class="sys">${lines.join(' ')}</span>`;
     }
 
+    function shouldShowImmediateSuIdentify(wp) {
+      if (!wp.su) return false;
+      const tier = typeof E.hospitalOutcomeTier === 'function' ? E.hospitalOutcomeTier() : { key: 'tense' };
+      if (tier.key === 'stable') return false;
+      if (E.getFlag('hospital_triage_settle_witness') || E.getFlag('hospital_triage_backdoor_guard')) return false;
+      if (E.getFlag('hospital_protect_witnesses') || E.getFlag('hospital_separate_witnesses')) return false;
+      return true;
+    }
+
     function dockChoice() {
       if (E.getFlag('dock_sun_pressed_fu')) {
         return {
@@ -212,7 +221,7 @@
             goto: 'ch4_hospital_protect_witnesses'
           },
           {
-            text: '🩺 先让医生写下伤情和关押痕迹',
+            text: '🩺 先让医生写下伤情记录和关押痕迹',
             effect: () => {
               E.setFlag('hospital_doctor_record', true);
               E.addClue('医院伤情记录', '教会医院医生记录了沈玉芳与苏晚亭的伤情和长期拘禁痕迹。');
@@ -229,7 +238,7 @@
             goto: 'ch4_lu_confrontation'
           }
         ];
-        if (wp.su) {
+        if (shouldShowImmediateSuIdentify(wp)) {
           opts.splice(3, 0, {
             text: '⚠️ 苏晚亭刚醒，还是立刻问她认不认得车里的人',
             effect: () => E.setFlag('hospital_force_su_identify', true),
