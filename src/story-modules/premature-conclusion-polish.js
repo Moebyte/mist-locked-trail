@@ -111,7 +111,6 @@
       nodes.ch3_chen_letter.text = function (state) {
         const base = typeof oldText === 'function' ? oldText(state) : oldText;
         if (!isBadRouteLocked()) return base;
-        addBadRouteLetters();
         return `${base}<br><br>你把信纸重新折好时，才注意到信封边缘压得很平，像是曾经被人重新封过。信纸下半截也不见了，断口整齐，不像被岁月磨掉。<br><br>信封内层还有一道很浅的夹缝，里面藏着另一张纸。<br><br>纸上的字迹很像苏晚亭，句子却短得像被刻意压住：<br><br><span class="sys">“我自知愧对明远，也无颜再见周先生。此身既已入雾，愿随他而去。”</span><br><br>如果只看这个信封，答案几乎已经替你排好了：陈明远爱过苏晚亭，苏晚亭也像是追着他走进了雾里。<br><br>可你手里的线索太少，还不能判断这个信封究竟保留了什么，又拿走了什么。`;
       };
       nodes.ch3_chen_letter.__suLastLetterPatched = true;
@@ -134,12 +133,6 @@
         });
       };
       nodes.ch3_school.__prematureSchoolLetterEffectPatched = true;
-    }
-
-    // Repair already-existing saves where the hub route showed the suspected note text
-    // but never ran ch3_chen_letter.effect.
-    if (E.getFlag('read_letter') && E.getFlag('school_last_detail') === 'letter') {
-      addBadRouteLetters();
     }
 
     if (nodes.ch3_wrapup && !nodes.ch3_wrapup.__prematureWrapupPatched) {
