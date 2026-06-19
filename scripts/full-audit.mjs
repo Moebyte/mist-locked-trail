@@ -5,20 +5,14 @@
  */
 
 import fs from 'fs';
+import { listStoryModuleScripts } from './story-module-loader.mjs';
 
 const baseDir = 'src';
 const storyCode = fs.readFileSync(baseDir + '/story.js', 'utf8');
 const engineCode = fs.readFileSync(baseDir + '/engine.js', 'utf8');
 const mainCode = fs.readFileSync(baseDir + '/main.js', 'utf8');
 
-const moduleFiles = [
-  'src/story-modules/runtime-contract.js',
-  'src/story-modules/consistency.js',
-  'src/story-modules/evidence.js',
-  'src/story-modules/evidence-polish.js',
-  'src/story-modules/narrative-depth.js',
-  'src/story-modules/ui-responsive.js',
-];
+const moduleFiles = listStoryModuleScripts();
 
 // Setup global stubs
 globalThis.window = { addEventListener: () => {} };
@@ -31,13 +25,12 @@ for (const f of moduleFiles) {
   combined += '\n' + fs.readFileSync(f, 'utf8');
 }
 combined += '\n' + mainCode + '\n';
-combined += '\n;globalThis.__nodes = nodes; globalThis.__E = E; globalThis.__applyGameplayImprovements = applyGameplayImprovements;';
+combined += '\n;globalThis.__nodes = nodes; globalThis.__E = E;';
 
 const fn = new Function(combined);
 fn();
 
-try { globalThis.__applyGameplayImprovements(); } catch(e) {}
-for (const name of ['applyRuntimeContract', 'applyConsistencyImprovements', 'applyEvidenceImprovements', 'applyEvidencePolishImprovements', 'applyNarrativeDepthV07', 'applyUIResponsive']) {
+for (const name of ['applyRuntimeContract', 'applyConsistencyImprovements', 'applyEvidenceImprovements', 'applyNarrativeDepthV07', 'applyUIResponsive']) {
   if (typeof globalThis[name] === 'function') {
     try { globalThis[name](); } catch(e) {}
   }
