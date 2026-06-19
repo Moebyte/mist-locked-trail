@@ -1,7 +1,7 @@
 // ===== 证据不足路线收口 =====
 // 目标：玩家过早从光华小学回到线索整理时，不再用“正常破案”口吻误导。
 // 1) 光华小学后若关键前置断裂，不允许倒回大学 / 苏家 / 巡捕房补课，坏路线成立。
-// 2) 坏路线可通过“陈明远残信 + 苏晚亭疑似遗书”触发《吾爱晚亭》；玩家初见时不知道信封被整理过。
+// 2) 只有“接案 → 巡捕房拿卷宗 → 直接去光华小学”的特定坏路线，才会得到“陈明远残信 + 苏晚亭疑似遗书”，并触发《吾爱晚亭》。
 // 3) 如果苏家线确认苏母知道周怀安婚约，则“为情而去”说法站不稳，不再触发《吾爱晚亭》。
 // 4) 前置线索充足的正常路线不会获得疑似遗书，也不会被周怀安彩蛋截走。
 (function installPrematureConclusionPolish() {
@@ -68,8 +68,48 @@
       return hasChenBadRouteLetter() && hasSuLastLetter() && !knowsZhouFianceFromSuHome();
     }
 
-    function addBadRouteLetters() {
-      if (!isBadRouteLocked()) return;
+    function hasDetourBeforeSchool(log, firstSchoolIndex) {
+      const detourPrefixes = [
+        'ch2_univ',
+        'ch2_university',
+        'ch2_home',
+        'ch2_frenchtown',
+        'ch2_landlord',
+        'ch2_xuehua',
+        'ch4_'
+      ];
+      return log.slice(0, firstSchoolIndex).some(id => detourPrefixes.some(prefix => id.startsWith(prefix)));
+    }
+
+    function tookPoliceToSchoolShortcut() {
+      const hasCaseFile = E.getFlag('got_case_file') || E.hasItem('卷宗摘抄');
+      if (!hasCaseFile) return false;
+
+      const log = Array.isArray(E.state?.sceneLog) ? E.state.sceneLog : [];
+      if (log.length) {
+        const firstSchoolIndex = log.findIndex(id => id.startsWith('ch3_school'));
+        const policeFileIndex = log.findIndex(id => id === 'ch2_police_file');
+        if (firstSchoolIndex < 0 || policeFileIndex < 0 || policeFileIndex > firstSchoolIndex) return false;
+        return !hasDetourBeforeSchool(log, firstSchoolIndex);
+      }
+
+      // Fallback for older saves/tests without sceneLog: require the police file and absence of known detours.
+      return !hasUniversityXuehuaLead()
+        && !hasLandlordFushengLead()
+        && !E.getFlag('home_talk_done')
+        && !E.getFlag('asked_photo')
+        && !E.getFlag('asked_mother_photo')
+        && !E.getFlag('shown_photo_to_mother')
+        && !E.getFlag('asked_landlord')
+        && !E.getFlag('shown_map_to_landlord');
+    }
+
+    function shouldCreateAlteredLetterPacket() {
+      return tookPoliceToSchoolShortcut() && isBadRouteLocked() && !knowsZhouFianceFromSuHome();
+    }
+
+    function addAlteredLetterPacket() {
+      if (!shouldCreateAlteredLetterPacket()) return;
       E.setFlag('chen_letter_packet_altered', true);
       if (!E.hasItem('陈明远残信')) {
         E.addItem('陈明远残信', '陈明远留给苏晚亭的信，但信纸下半截缺失，信封边缘像被重新压过。开头仍是“晚亭吾爱”。');
@@ -106,11 +146,11 @@
       const oldText = nodes.ch3_chen_letter.text;
       nodes.ch3_chen_letter.effect = function (state) {
         if (typeof oldEffect === 'function') oldEffect(state);
-        addBadRouteLetters();
+        addAlteredLetterPacket();
       };
       nodes.ch3_chen_letter.text = function (state) {
         const base = typeof oldText === 'function' ? oldText(state) : oldText;
-        if (!isBadRouteLocked()) return base;
+        if (!shouldCreateAlteredLetterPacket()) return base;
         return `${base}<br><br>你把信纸重新折好时，才注意到信封边缘压得很平，像是曾经被人重新封过。信纸下半截也不见了，断口整齐，不像被岁月磨掉。<br><br>信封内层还有一道很浅的夹缝，里面藏着另一张纸。<br><br>纸上的字迹很像苏晚亭，句子却短得像被刻意压住：<br><br><span class="sys">“我自知愧对明远，也无颜再见周先生。此身既已入雾，愿随他而去。”</span><br><br>如果只看这个信封，答案几乎已经替你排好了：陈明远爱过苏晚亭，苏晚亭也像是追着他走进了雾里。<br><br>可你手里的线索太少，还不能判断这个信封究竟保留了什么，又拿走了什么。`;
       };
       nodes.ch3_chen_letter.__suLastLetterPatched = true;
@@ -127,7 +167,7 @@
             ...choice,
             effect: function (s) {
               if (typeof oldEffect === 'function') oldEffect(s);
-              addBadRouteLetters();
+              addAlteredLetterPacket();
             }
           };
         });
@@ -149,7 +189,7 @@
           if (isBadRouteLocked() && (isOldWangShortcut || isFushengEntry)) continue;
 
           if (isConclusion && isPrematureConclusion()) {
-            if (isBadRouteLocked() && hasZhouBadRouteLetters() && !hasZhouChoice) {
+            if (tookPoliceToSchoolShortcut() && isBadRouteLocked() && hasZhouBadRouteLetters() && !hasZhouChoice) {
               out.push({ text: '🏮 回访周怀安——带去残信和那封疑似遗书', goto: 'ch4_revisit_zhou' });
               hasZhouChoice = true;
             }
@@ -193,12 +233,13 @@
       nodes.ch4_pawnshop.text = function (state) {
         const base = typeof oldText === 'function' ? oldText(state) : oldText;
         if (!isBadRouteLocked()) return base;
+        if (!hasZhouBadRouteLetters()) return base;
         return `${base}<br><br>翡翠镯能证明“陆念”这个名字不是空穴来风，却仍然回答不了这个案子最要紧的问题：苏晚亭去了哪里，她是不是还活着。<br><br>你想到陈明远那只被重新压平的信封，也想到信封夹层里那张疑似苏晚亭留下的遗书。它们比这只镯子更应该先给周怀安看；当铺只是旁证，不是这条坏路线的前置。`;
       };
 
       nodes.ch4_pawnshop.choices = function (state) {
         return choicesOf(oldChoices, state).map(choice => {
-          if (isBadRouteLocked() && choice.goto === 'ch4_revisit_zhou') {
+          if (isBadRouteLocked() && hasZhouBadRouteLetters() && choice.goto === 'ch4_revisit_zhou') {
             if (knowsZhouFianceFromSuHome()) {
               return { ...choice, text: '🔙 把翡翠镯收回去，别让那封疑似遗书误导他', goto: 'ch4_conclusion' };
             }
