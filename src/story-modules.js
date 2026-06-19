@@ -92,7 +92,8 @@
     'src/story-modules/wrapup-dock-stage-final-fix.js',
     'src/story-modules/final-visible-text-tone-polish.js',
     'src/story-modules/dev-mode-panel.js',
-    'src/story-modules/dev-diagnostic-export.js'
+    'src/story-modules/dev-diagnostic-export.js',
+    'src/story-modules/player-name-gu.js'
   ];
 
   window.MLT_STORY_MODULES = modules.slice();
