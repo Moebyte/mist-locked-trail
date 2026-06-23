@@ -7,7 +7,7 @@
 
     const DIAGNOSTIC_EXPORT_VERSION = 'dev-diagnostic-v2.1-sanitized';
     const params = new URLSearchParams(window.location?.search || '');
-    const enabled = params.get('dev') === '1' || window.location?.hash === '#dev' || localStorage.getItem('mlt_dev_mode') === '1';
+    const enabled = params.get('dev') === '1';
     if (!enabled) return;
 
     const fallbackDeductions = {
