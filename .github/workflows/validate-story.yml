@@ -17,6 +17,7 @@ jobs:
         with:
           node-version: '20'
 
+      - run: node scripts/check-modules-manifest.mjs
       - run: node scripts/check-story-modules.mjs
       - run: node scripts/check-save-compat.mjs
       - run: node scripts/validate-story.mjs
@@ -82,3 +83,4 @@ jobs:
         with:
           node-version: '20'
       - run: node scripts/${{ matrix.script }}
+

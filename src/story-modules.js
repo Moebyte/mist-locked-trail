@@ -1,6 +1,6 @@
-// ===== 故事模块入口 =====
-// 约定：稳定故事模块按依赖顺序登记在这里，index.html 只加载本文件。
-// 这里是正式模块清单，不再使用版本补丁语义。
+﻿// ===== 鏁呬簨妯″潡鍏ュ彛 =====
+// 绾﹀畾锛氱ǔ瀹氭晠浜嬫ā鍧楁寜渚濊禆椤哄簭鐧昏鍦ㄨ繖閲岋紝index.html 鍙姞杞芥湰鏂囦欢銆?
+// 杩欓噷鏄寮忔ā鍧楁竻鍗曪紝涓嶅啀浣跨敤鐗堟湰琛ヤ竵璇箟銆?
 
 (function loadStoryModules() {
   const modules = [
@@ -92,6 +92,7 @@
     'src/story-modules/final-visible-text-tone-polish.js',
     'src/story-modules/dev-mode-panel.js',
     'src/story-modules/dev-diagnostic-export.js',
+    'src/story-modules/guanghua-perspective-polish.js',
     'src/story-modules/player-name-gu.js'
   ];
 
@@ -101,3 +102,4 @@
     document.write(`<script src="${src}"><\/script>`);
   }
 })();
+
