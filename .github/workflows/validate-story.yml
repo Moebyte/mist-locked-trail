@@ -76,6 +76,8 @@ jobs:
           - smoke-dock-hide-consequence.mjs
           - smoke-dock-escape-choices.mjs
           - smoke-causal-echo.mjs
+          - smoke-status-polish.mjs
+          - smoke-wang-note-prereq.mjs
           - smoke-player-perspective.mjs
     steps:
       - uses: actions/checkout@v4
@@ -83,4 +85,5 @@ jobs:
         with:
           node-version: '20'
       - run: node scripts/${{ matrix.script }}
+
 
