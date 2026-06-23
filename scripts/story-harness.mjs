@@ -307,6 +307,9 @@ export function loadStoryRuntime(options = {}) {
       const choice = this.choicesOf(current).find(c => c.text && c.text.includes(textFragment));
       return this.runChoice(choice, `包含「${textFragment}」的选项`);
     },
+    go(id) {
+      E.state.currentScene = id;
+    },
     present(sceneId, itemName, desc = '') {
       const scene = this.renderNode(sceneId);
       if (typeof scene.onPresent !== 'function') throw new Error(`${sceneId} 没有 onPresent`);

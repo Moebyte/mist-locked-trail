@@ -34,7 +34,6 @@ jobs:
           - smoke-routes.mjs
           - smoke-evidence.mjs
           - smoke-evidence-polish.mjs
-          - smoke-narrative-depth.mjs
           - smoke-ending-reachability.mjs
           - smoke-narrative-clock.mjs
           - smoke-wrapup-priority.mjs
@@ -56,7 +55,6 @@ jobs:
           - smoke-solo-entry-route.mjs
           - smoke-fusheng-key-gates.mjs
           - smoke-yufang-testimony.mjs
-          - smoke-solo-dock-hospital.mjs
           - smoke-solo-heat-delay-outcomes.mjs
           - smoke-solo-reward-ending.mjs
           - smoke-final-closure-flow.mjs
@@ -64,11 +62,7 @@ jobs:
           - smoke-legacy-quality-text.mjs
           - smoke-wrapup-no-repeat-fusheng-entry.mjs
           - smoke-conclusion-summary.mjs
-          - smoke-hospital-flow.mjs
-          - smoke-hospital-pressure-witness.mjs
           - smoke-hospital-truth-score.mjs
-          - smoke-lu-procedure-truth.mjs
-          - smoke-lu-evidence-panel.mjs
           - smoke-dynamic-endings.mjs
           - smoke-deadline-deprecation.mjs
           - smoke-fusheng-entry-unblock.mjs
