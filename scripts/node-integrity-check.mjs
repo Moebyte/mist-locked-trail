@@ -15,6 +15,7 @@ const E = {
   discoverRelation(){},registerRelation(){},setWeather(){},
   renderAtmosphere(){return''},setTime(){},advanceTime(){},spendTime(){},
   timeToMinutes(){return 0},pressureLabel(){return''},
+  minutesUntilDeadline(){return Number.POSITIVE_INFINITY},deadlinePhase(){return'safe'},
   caseStrength(){return{name:'',desc:''}},renderClueWall(){return''},
   canDeduce(){return false},openDeduction(){},
 };

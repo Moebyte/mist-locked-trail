@@ -47,6 +47,8 @@
       return typeof E.fullSupportTradeoffActive === 'function' && E.fullSupportTradeoffActive();
     }
 
+    E.minutesUntilDeadline = rawMinutesUntilDeadline;
+
     E.effectiveMinutesUntilDeadline = function () {
       return Number.POSITIVE_INFINITY;
     };
