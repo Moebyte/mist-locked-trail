@@ -131,16 +131,20 @@
       if (!svg) return;
       const people = discoveredPeople();
       const edges = discoveredEdges(people);
+      const isDay = document.body.classList.contains('theme-day');
+      const C = isDay
+        ? { nodeFill:'#fffcf0', nodeStroke:'#9a7b4f', edge:'#a89060', label:'#3a2e1a', sub:'#6a5a40', empty:'#999', emptySub:'#aaa', footer:'#888' }
+        : { nodeFill:'#171727', nodeStroke:'#b8945f', edge:'#6a5a40', label:'#d8bd8e', sub:'#8f8fa0', empty:'#999', emptySub:'#777', footer:'#777' };
       if (!people.length) {
-        svg.innerHTML = '<text x="200" y="140" text-anchor="middle" fill="#999" font-size="14">暂无人物关系</text><text x="200" y="164" text-anchor="middle" fill="#777" font-size="11">继续调查后，只显示已确认的人和关系</text>';
+        svg.innerHTML = '<text x="200" y="140" text-anchor="middle" fill="' + C.empty + '" font-size="14">暂无人物关系</text><text x="200" y="164" text-anchor="middle" fill="' + C.emptySub + '" font-size="11">继续调查后，只显示已确认的人和关系</text>';
         return;
       }
       const pos = {}, cx = 200, cy = 145, r = people.length <= 2 ? 72 : people.length <= 5 ? 95 : 112;
       people.forEach((n, i) => { const a = Math.PI * 2 * i / Math.max(people.length, 1) - Math.PI / 2; pos[n.id] = { x: cx + Math.cos(a) * r, y: cy + Math.sin(a) * r }; });
       let html = '';
-      edges.forEach(e => { const a = pos[e.from], b = pos[e.to]; if (a && b) html += '<line x1="' + a.x + '" y1="' + a.y + '" x2="' + b.x + '" y2="' + b.y + '" stroke="#6a5a40" stroke-width="1.3" opacity=".72"/>'; });
-      people.forEach(n => { const p = pos[n.id], label = String(n.id || '').slice(0, 4), sub = (n.labels && n.labels[0]) ? String(n.labels[0]).slice(0, 6) : ''; html += '<circle cx="' + p.x + '" cy="' + p.y + '" r="22" fill="#171727" stroke="#b8945f" stroke-width="1.4"/><text x="' + p.x + '" y="' + (p.y + 3) + '" text-anchor="middle" fill="#d8bd8e" font-size="10">' + esc(label) + '</text>'; if (sub) html += '<text x="' + p.x + '" y="' + (p.y + 34) + '" text-anchor="middle" fill="#8f8fa0" font-size="9">' + esc(sub) + '</text>'; });
-      html += '<text x="200" y="288" text-anchor="middle" fill="#777" font-size="10">已发现 ' + people.length + ' 人 · 已确认 ' + edges.length + ' 条关系</text>';
+      edges.forEach(e => { const a = pos[e.from], b = pos[e.to]; if (a && b) html += '<line x1="' + a.x + '" y1="' + a.y + '" x2="' + b.x + '" y2="' + b.y + '" stroke="' + C.edge + '" stroke-width="1.3" opacity=".72"/>'; });
+      people.forEach(n => { const p = pos[n.id], label = String(n.id || '').slice(0, 4), sub = (n.labels && n.labels[0]) ? String(n.labels[0]).slice(0, 6) : ''; html += '<circle cx="' + p.x + '" cy="' + p.y + '" r="22" fill="' + C.nodeFill + '" stroke="' + C.nodeStroke + '" stroke-width="1.4"/><text x="' + p.x + '" y="' + (p.y + 3) + '" text-anchor="middle" fill="' + C.label + '" font-size="10">' + esc(label) + '</text>'; if (sub) html += '<text x="' + p.x + '" y="' + (p.y + 34) + '" text-anchor="middle" fill="' + C.sub + '" font-size="9">' + esc(sub) + '</text>'; });
+      html += '<text x="200" y="288" text-anchor="middle" fill="' + C.footer + '" font-size="10">已发现 ' + people.length + ' 人 · 已确认 ' + edges.length + ' 条关系</text>';
       svg.innerHTML = html;
     };
 
