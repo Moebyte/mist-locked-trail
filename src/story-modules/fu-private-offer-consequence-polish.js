@@ -219,17 +219,8 @@
       E.__fuOfferTruthScorePatched = true;
     }
 
-    if (typeof E.hospitalOutcomeTier === 'function' && !E.__fuOfferHospitalTierPatched) {
-      const oldHospitalTier = E.hospitalOutcomeTier.bind(E);
-      E.hospitalOutcomeTier = function () {
-        const h = oldHospitalTier();
-        if (this.getFlag('hospital_bureau_forced_entry') || this.getFlag('fu_offer_bureau_intervention')) {
-          return { ...h, key: 'unstable', label: '医院失控', fuOffer: this.fuOfferConsequenceTier?.() };
-        }
-        return h;
-      };
-      E.__fuOfferHospitalTierPatched = true;
-    }
+    E.__fuOfferHospitalTierPatched = true;
+    // BAKED into hospital-pressure-witness-polish
 
     if (typeof E.finalPressureProfile === 'function' && !E.__fuOfferFinalPressurePatched) {
       const oldFinalPressure = E.finalPressureProfile.bind(E);

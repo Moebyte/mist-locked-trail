@@ -97,17 +97,8 @@
     patchDarkroomNode('ch4_dock_deep_dual');
     patchDarkroomNode('ch4_dock_deep_trace');
 
-    if (typeof E.witnessStabilityScore === 'function' && !E.__soloTrustWitnessStabilityPatched) {
-      const oldWitness = E.witnessStabilityScore.bind(E);
-      E.witnessStabilityScore = function () {
-        let score = oldWitness();
-        if (this.getFlag('solo_rescuer_trust') && !this.getFlag('hospital_force_su_identify') && !this.getFlag('hospital_triage_zhou_early')) {
-          score += 1;
-        }
-        return Math.max(0, Math.min(10, score));
-      };
-      E.__soloTrustWitnessStabilityPatched = true;
-    }
+    E.__soloTrustWitnessStabilityPatched = true;
+    // BAKED into hospital-pressure-witness-polish
 
     if (typeof E.luCredibilityScore === 'function' && !E.__soloDarkroomLuCredibilityPatched) {
       const oldLuCredibility = E.luCredibilityScore.bind(E);

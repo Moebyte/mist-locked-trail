@@ -19,39 +19,14 @@
       return `<br><br><span class="sys">${lines.join(' ')}</span>`;
     }
 
-    if (typeof E.hospitalPressureScore === 'function' && !E.__hospitalTriagePressurePatched) {
-      const oldPressure = E.hospitalPressureScore.bind(E);
-      E.hospitalPressureScore = function () {
-        let score = oldPressure();
-        if (this.getFlag('hospital_triage_settle_witness')) score -= 1;
-        if (this.getFlag('hospital_triage_backdoor_guard')) score -= 1;
-        if (this.getFlag('hospital_triage_direct_corridor')) score += 1;
-        return Math.max(0, Math.min(10, score));
-      };
-      E.__hospitalTriagePressurePatched = true;
-    }
+    E.__hospitalTriagePressurePatched = true;
+    // BAKED into hospital-pressure-witness-polish
 
-    if (typeof E.hospitalControlScore === 'function' && !E.__hospitalTriageControlPatched) {
-      const oldControl = E.hospitalControlScore.bind(E);
-      E.hospitalControlScore = function () {
-        let score = oldControl();
-        if (this.getFlag('hospital_triage_settle_witness')) score += 1;
-        if (this.getFlag('hospital_triage_backdoor_guard')) score += 1;
-        return Math.max(0, Math.min(10, score));
-      };
-      E.__hospitalTriageControlPatched = true;
-    }
+    E.__hospitalTriageControlPatched = true;
+    // BAKED into hospital-pressure-witness-polish
 
-    if (typeof E.witnessStabilityScore === 'function' && !E.__hospitalTriageWitnessPatched) {
-      const oldWitness = E.witnessStabilityScore.bind(E);
-      E.witnessStabilityScore = function () {
-        let score = oldWitness();
-        if (this.getFlag('hospital_triage_settle_witness')) score += 1;
-        if (this.getFlag('hospital_triage_direct_corridor')) score -= 1;
-        return Math.max(0, Math.min(10, score));
-      };
-      E.__hospitalTriageWitnessPatched = true;
-    }
+    E.__hospitalTriageWitnessPatched = true;
+    // BAKED into hospital-pressure-witness-polish
 
     nodes.ch4_hospital_triage = {
       title: '教会医院 · 后门安置',

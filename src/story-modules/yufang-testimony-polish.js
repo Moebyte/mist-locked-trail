@@ -112,15 +112,8 @@
       nodes.ch4_dock_who_dual.__yufangTestimonyChoicePatched = true;
     }
 
-    if (typeof E.witnessStabilityScore === 'function' && !E.__yufangWitnessPatched) {
-      const oldWitness = E.witnessStabilityScore.bind(E);
-      E.witnessStabilityScore = function () {
-        let score = oldWitness();
-        if (this.hasYufangTestimonyBoost()) score += 1;
-        return Math.max(0, Math.min(10, score));
-      };
-      E.__yufangWitnessPatched = true;
-    }
+    E.__yufangWitnessPatched = true;
+    // BAKED into hospital-pressure-witness-polish
 
     if (typeof E.truthCompletenessTier === 'function' && !E.__yufangTruthPatched) {
       const oldTruth = E.truthCompletenessTier.bind(E);

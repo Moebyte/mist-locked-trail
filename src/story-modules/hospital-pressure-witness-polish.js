@@ -57,6 +57,18 @@
       if (this.getFlag('dock_confront_fu')) score += 1;
       if (this.getFlag('dock_sun_pressed_fu')) score += 1;
       if (this.getFlag('dock_escaped_during_sun_standoff')) score += 2;
+      // hospital triage adjustments (baked from hospital-triage-polish)
+      if (this.getFlag('hospital_triage_settle_witness')) score -= 1;
+      if (this.getFlag('hospital_triage_backdoor_guard')) score -= 1;
+      if (this.getFlag('hospital_triage_direct_corridor')) score += 1;
+      // lu-procedure-truth-polish adjustment (baked)
+      if (this.getFlag('hospital_triage_zhou_early')) score += 1;
+      // solo-dock-hospital-polish adjustments (baked)
+      if (this.getFlag('dock_solo_waterline_escape')) score += 1;
+      if (this.getFlag('dock_solo_crate_screen')) score += 1;
+      if (this.getFlag('dock_solo_decoy_escape')) score += 2;
+      if (this.getFlag('hospital_triage_solo_lock_backdoor')) score -= 1;
+      if (this.getFlag('hospital_triage_solo_no_guard')) score += 1;
       if (this.getFlag('hospital_early_lu')) score += 2;
       if (this.getFlag('hospital_interrogate_yufang')) score += 1;
       if (this.getFlag('hospital_force_su_identify')) score += 3;
@@ -99,6 +111,19 @@
       if (this.getFlag('hospital_interrogate_yufang')) score -= 1;
       if (this.getFlag('hospital_early_lu')) score -= 1;
       if (this.getFlag('hospital_force_su_identify')) score -= 3;
+      // hospital-triage-polish adjustments (baked)
+      if (this.getFlag('hospital_triage_settle_witness')) score += 1;
+      if (this.getFlag('hospital_triage_direct_corridor')) score -= 1;
+      // lu-procedure-truth-polish adjustments (baked)
+      if (this.getFlag('hospital_triage_zhou_early')) score -= 1;
+      if (wp.su && this.getFlag('hospital_protect_witnesses') && this.getFlag('hospital_doctor_record') && !this.getFlag('hospital_triage_zhou_early')) score += 1;
+      // solo-reward-ending-polish adjustment (baked)
+      if (this.getFlag('solo_rescuer_trust') && !this.getFlag('hospital_force_su_identify') && !this.getFlag('hospital_triage_zhou_early')) score += 1;
+      // yufang-testimony-polish adjustment (baked)
+      if (typeof this.hasYufangTestimonyBoost === 'function' && this.hasYufangTestimonyBoost()) score += 1;
+      // solo-dock-hospital-polish adjustments (baked)
+      if (this.getFlag('dock_solo_decoy_escape')) score -= 1;
+      if (this.getFlag('hospital_triage_solo_lock_backdoor')) score += 1;
       return Math.max(0, Math.min(10, score));
     };
 
@@ -109,6 +134,10 @@
     E.hospitalOutcomeTier = function () {
       const crisis = this.hospitalCrisisScore();
       const witness = this.witnessStabilityScore();
+      // fu-private-offer-consequence-polish override (baked)
+      if (this.getFlag('hospital_bureau_forced_entry') || this.getFlag('fu_offer_bureau_intervention')) {
+        return { key: 'unstable', label: '医院失控', crisis, witness };
+      }
       if (crisis <= 0 && witness >= 6) return { key: 'stable', label: '稳定医院线', crisis, witness };
       if (crisis <= 2 && witness >= 4) return { key: 'controlled', label: '可控医院线', crisis, witness };
       if (crisis <= 4 && witness >= 3) return { key: 'tense', label: '紧张医院线', crisis, witness };

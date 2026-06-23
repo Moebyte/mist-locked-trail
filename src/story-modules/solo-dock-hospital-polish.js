@@ -68,40 +68,14 @@
       E.__soloDockExitTensionPatched = true;
     }
 
-    if (typeof E.hospitalPressureScore === 'function' && !E.__soloHospitalPressurePatched) {
-      const oldPressure = E.hospitalPressureScore.bind(E);
-      E.hospitalPressureScore = function () {
-        let score = oldPressure();
-        if (this.getFlag('dock_solo_waterline_escape')) score += 1;
-        if (this.getFlag('dock_solo_crate_screen')) score += 1;
-        if (this.getFlag('dock_solo_decoy_escape')) score += 2;
-        if (this.getFlag('hospital_triage_solo_lock_backdoor')) score -= 1;
-        if (this.getFlag('hospital_triage_solo_no_guard')) score += 1;
-        return Math.max(0, Math.min(10, score));
-      };
-      E.__soloHospitalPressurePatched = true;
-    }
+    E.__soloHospitalPressurePatched = true;
+    // BAKED into hospital-pressure-witness-polish
 
-    if (typeof E.hospitalControlScore === 'function' && !E.__soloHospitalControlPatched) {
-      const oldControl = E.hospitalControlScore.bind(E);
-      E.hospitalControlScore = function () {
-        let score = oldControl();
-        if (this.getFlag('hospital_triage_solo_lock_backdoor')) score += 1;
-        return Math.max(0, Math.min(10, score));
-      };
-      E.__soloHospitalControlPatched = true;
-    }
+    E.__soloHospitalControlPatched = true;
+    // BAKED into hospital-pressure-witness-polish
 
-    if (typeof E.witnessStabilityScore === 'function' && !E.__soloWitnessPatched) {
-      const oldWitness = E.witnessStabilityScore.bind(E);
-      E.witnessStabilityScore = function () {
-        let score = oldWitness();
-        if (this.getFlag('dock_solo_decoy_escape')) score -= 1;
-        if (this.getFlag('hospital_triage_solo_lock_backdoor')) score += 1;
-        return Math.max(0, Math.min(10, score));
-      };
-      E.__soloWitnessPatched = true;
-    }
+    E.__soloWitnessPatched = true;
+    // BAKED into hospital-pressure-witness-polish
 
     if (nodes.ch4_dock_solo_infiltration && !nodes.ch4_dock_solo_infiltration.__soloWindowPatched) {
       nodes.ch4_dock_solo_infiltration.choices = [
