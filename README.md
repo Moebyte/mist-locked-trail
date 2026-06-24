@@ -42,11 +42,22 @@
 ```text
 index.html                 # 页面结构
 src/styles.css             # 界面样式与氛围效果
-src/engine.js              # 游戏引擎、存档、举证、推理、关系图、时间压力
-src/story.js               # 基础剧情节点、分支、结局
-src/story-modules.js       # 剧情模块加载入口
-src/story-modules/         # 路线修正、结局收束、证据面板、诊断工具等模块
-scripts/                   # smoke 测试与可达性检查脚本
+src/engine.js              # 游戏引擎：存档、举证、推理、关系图、时间压力
+src/main.js                # 启动入口（DOMContentLoaded → 引擎初始化）
+src/story.js               # 节点容器声明
+src/story-chapters.js      # 按章节加载 src/story/ 下的剧情文件
+src/story/                 # 分章节剧情节点
+  ch1-opening.js           #   第一章：茶馆接案
+  ch2-investigation.js     #   第二章：圣约翰/巡捕房/苏家
+  ch3-school.js            #   第三章：光华小学
+  ch4-dock.js              #   第四章：福生仓与码头
+  deductions.js            #   三段推理注册
+  endings.js               #   结局节点
+  engine-patches.js        #   引擎方法补丁
+src/story-modules.js       # 剧情补丁模块加载入口
+src/story-modules/         # 路线修正、结局收束、证据面板、诊断工具等（90 个模块）
+scripts/                   # smoke 测试、可达性检查、节点巡检脚本
+.github/workflows/         # CI：核心检查 + smoke 测试矩阵
 ```
 
 ## 本地运行
